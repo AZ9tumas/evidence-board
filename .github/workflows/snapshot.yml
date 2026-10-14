@@ -1,7 +1,7 @@
 # Launches the app on a macOS runner and publishes window screenshots as neutral
 # check runs ("snapshot img<n> part<i>/<total>", base64 JPEG in the output text), so
 # the canvas can be checked visually without a Mac. Runs on demand, or on pushes whose
-# commit message contains [snapshot].
+# commit message contains [snapshot]. Fetch them with Tools/fetch-snapshots.py.
 name: Snapshot
 
 on:
@@ -29,26 +29,17 @@ jobs:
       - name: Launch and capture
         run: |
           app=build/Build/Products/Debug/EvidenceBoard.app
-          cat > /tmp/window.swift <<'SWIFT'
-          import CoreGraphics
-          let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly], kCGNullWindowID) as? [[String: Any]] ?? []
-          let mine = windows.filter { ($0[kCGWindowOwnerName as String] as? String) == "EvidenceBoard" && ($0[kCGWindowLayer as String] as? Int) == 0 }
-          if let id = mine.first?[kCGWindowNumber as String] { print(id) }
-          SWIFT
           capture() {
             sleep 6
-            id=$(swift /tmp/window.swift)
-            echo "window id: ${id:-none}"
-            screencapture -x -o ${id:+-l$id} "/tmp/shot$1.png"
-            sips -Z "$2" -s format jpeg -s formatOptions 55 "/tmp/shot$1.png" --out "/tmp/shot$1.jpg" >/dev/null
-            echo "shot $1: $(sips -g pixelWidth -g pixelHeight /tmp/shot$1.jpg | tail -2 | xargs) $(stat -f%z /tmp/shot$1.jpg) bytes"
+            screencapture -x "/tmp/shot$1.png"
+            sips -Z 900 -s format jpeg -s formatOptions 60 "/tmp/shot$1.png" --out "/tmp/shot$1.jpg" >/dev/null
           }
           printf '{ "format": "evidenceboard", "formatVersion": 1, "title": "Empty" }' > /tmp/Empty.evboard
           cp docs/examples/harbor-case.evboard /tmp/Harbor.evboard
           open -a "$PWD/$app" /tmp/Empty.evboard
-          capture 1 560
+          capture 1
           open -a "$PWD/$app" /tmp/Harbor.evboard
-          capture 2 900
+          capture 2
           pgrep -x EvidenceBoard >/dev/null && echo "app still running" || echo "APP NOT RUNNING"
       - name: Publish images
         env:

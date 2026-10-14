@@ -6,6 +6,8 @@ A native macOS app for building detective-style evidence boards. You place **tex
 - 🧾 **File format schema:** [`docs/schema/evidenceboard.schema.json`](docs/schema/evidenceboard.schema.json)
 - 🗂 **Sample board:** [`docs/examples/harbor-case.evboard`](docs/examples/harbor-case.evboard)
 
+![The sample board in the M0 build](docs/images/m0-harbor.jpg)
+
 ## Highlights
 
 - A free, infinite canvas that stays at 120 fps (Core Animation engine, culling, level of detail)
@@ -35,6 +37,10 @@ swift test --package-path Packages/CanvasKit
 xcodebuild -project EvidenceBoard.xcodeproj -scheme EvidenceBoard build
 ```
 
+### Without a Mac
+
+GitHub Actions builds and tests everything on every push (`.github/workflows/ci.yml`). To see the running app, push a commit whose message contains `[snapshot]` (or run the **Snapshot** workflow by hand). It launches the app on a macOS runner with an empty board and the sample board, and publishes screenshots that `Tools/fetch-snapshots.py <commit-sha> <dir>` downloads.
+
 ## Project layout
 
 ```
@@ -44,6 +50,7 @@ Config/                    Info.plist (document types) and sandbox entitlements
 Packages/BoardKit/         Model, JSON codec, validation, BoardStore. Foundation only
 Packages/CanvasKit/        Camera and the Core Animation canvas (AppKit)
 docs/                      Design document, JSON schema, sample board
+Tools/                     Helper scripts
 ```
 
 ## Status
