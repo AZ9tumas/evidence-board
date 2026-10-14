@@ -2,10 +2,12 @@ import Foundation
 
 /// The live board behind one document window.
 ///
-/// M0 only reads the board and tracks the camera. Undoable edit commands and change sets for
-/// the canvas arrive with M1.
+/// All edits go through ``apply(_:)``. It mutates the board, tells observers exactly which
+/// cards and strings changed, and returns the inverse command for the undo stack.
 @MainActor
 public final class BoardStore {
+    public typealias Observer = @MainActor @Sendable (BoardChanges) -> Void
+
     public private(set) var board: Board
     public let loadReport: LoadReport
 
@@ -13,16 +15,169 @@ public final class BoardStore {
     /// document as edited, and merged back in when the document is saved.
     public var viewport: Viewport
 
+    /// Increases with every change. Saving compares it to stamp `modifiedAt`.
+    public private(set) var revision = 0
+
+    private var cardIndex: [UUID: Int]
+    private var observers: [UUID: Observer] = [:]
+    private var snapshotRevision = 0
+
     nonisolated public init(board: Board, loadReport: LoadReport = LoadReport()) {
         self.board = board
         self.loadReport = loadReport
         self.viewport = board.viewport
+        self.cardIndex = Self.makeIndex(board.cards)
     }
 
     /// The board as it should be written to disk right now.
-    public func snapshot() -> Board {
+    public func snapshot(now: Date = .now) -> Board {
+        if revision != snapshotRevision {
+            board.modifiedAt = now.truncatedToSeconds
+            snapshotRevision = revision
+        }
         var board = board
         board.viewport = viewport
         return board
+    }
+
+    // MARK: Lookup
+
+    public func card(_ id: UUID) -> Card? {
+        cardIndex[id].map { board.cards[$0] }
+    }
+
+    public func contains(card id: UUID) -> Bool {
+        cardIndex[id] != nil
+    }
+
+    /// The highest `z` on the board, or 0 when it's empty.
+    public var maxZ: Int { board.cards.map(\.z).max() ?? 0 }
+    public var minZ: Int { board.cards.map(\.z).min() ?? 0 }
+
+    // MARK: Observing
+
+    @discardableResult
+    public func addObserver(_ observer: @escaping Observer) -> UUID {
+        let token = UUID()
+        observers[token] = observer
+        return token
+    }
+
+    public func removeObserver(_ token: UUID) {
+        observers[token] = nil
+    }
+
+    // MARK: Editing
+
+    /// Applies `command` and returns the command that undoes it, or `nil` if nothing changed.
+    @discardableResult
+    public func apply(_ command: BoardCommand) -> BoardCommand? {
+        var changes = BoardChanges()
+        let inverse = perform(command, changes: &changes)
+        guard !changes.isEmpty else { return nil }
+        revision += 1
+        for observer in observers.values { observer(changes) }
+        return inverse
+    }
+
+    private func perform(_ command: BoardCommand, changes: inout BoardChanges) -> BoardCommand {
+        switch command {
+        case .insertCards(let cards, let positions):
+            var inserted: [UUID] = []
+            var seen = Set<UUID>()
+            for (offset, card) in cards.enumerated() where cardIndex[card.id] == nil && seen.insert(card.id).inserted {
+                let position = positions.flatMap { $0.indices.contains(offset) ? $0[offset] : nil }
+                board.cards.insert(card, at: min(max(position ?? board.cards.count, 0), board.cards.count))
+                inserted.append(card.id)
+            }
+            guard !inserted.isEmpty else { return .batch([]) }
+            cardIndex = Self.makeIndex(board.cards)
+            changes.insertedCards.formUnion(inserted)
+            return .removeCards(Set(inserted))
+
+        case .removeCards(let ids):
+            let removed = board.cards.enumerated().filter { ids.contains($0.element.id) }
+            guard !removed.isEmpty else { return .batch([]) }
+            let removedIDs = Set(removed.map { $0.element.id })
+            let detached = board.strings.enumerated().filter {
+                removedIDs.contains($0.element.from) || removedIDs.contains($0.element.to)
+            }
+            board.cards.removeAll { removedIDs.contains($0.id) }
+            board.strings.removeAll { removedIDs.contains($0.from) || removedIDs.contains($0.to) }
+            cardIndex = Self.makeIndex(board.cards)
+            changes.removedCards.formUnion(removedIDs)
+            changes.removedStrings.formUnion(detached.map { $0.element.id })
+            var inverse: [BoardCommand] = [.insertCards(removed.map { $0.element }, positions: removed.map { $0.offset })]
+            if !detached.isEmpty {
+                inverse.append(.insertStrings(detached.map { $0.element }, positions: detached.map { $0.offset }))
+            }
+            return .batch(inverse)
+
+        case .insertStrings(let strings, let positions):
+            var existing = Set(board.strings.map(\.id))
+            var inserted: [UUID] = []
+            for (offset, string) in strings.enumerated() {
+                guard string.from != string.to,
+                      cardIndex[string.from] != nil, cardIndex[string.to] != nil,
+                      existing.insert(string.id).inserted else { continue }
+                let position = positions.flatMap { $0.indices.contains(offset) ? $0[offset] : nil }
+                board.strings.insert(string, at: min(max(position ?? board.strings.count, 0), board.strings.count))
+                inserted.append(string.id)
+            }
+            guard !inserted.isEmpty else { return .batch([]) }
+            changes.insertedStrings.formUnion(inserted)
+            return .removeStrings(Set(inserted))
+
+        case .removeStrings(let ids):
+            let removed = board.strings.enumerated().filter { ids.contains($0.element.id) }
+            guard !removed.isEmpty else { return .batch([]) }
+            board.strings.removeAll { ids.contains($0.id) }
+            changes.removedStrings.formUnion(removed.map { $0.element.id })
+            return .insertStrings(removed.map { $0.element }, positions: removed.map { $0.offset })
+
+        case .setFrames(let frames):
+            var previous: [UUID: Rect] = [:]
+            for (id, frame) in frames {
+                guard let index = cardIndex[id], board.cards[index].frame != frame else { continue }
+                previous[id] = board.cards[index].frame
+                board.cards[index].frame = frame
+            }
+            guard !previous.isEmpty else { return .batch([]) }
+            changes.updatedCards.formUnion(previous.keys)
+            return .setFrames(previous)
+
+        case .updateCards(let cards):
+            var previous: [Card] = []
+            for card in cards {
+                guard let index = cardIndex[card.id], board.cards[index] != card else { continue }
+                previous.append(board.cards[index])
+                board.cards[index] = card
+            }
+            guard !previous.isEmpty else { return .batch([]) }
+            changes.updatedCards.formUnion(previous.map(\.id))
+            return .updateCards(previous)
+
+        case .addAssets(let assets):
+            let added = assets.filter { board.assets[$0.key] == nil }
+            guard !added.isEmpty else { return .batch([]) }
+            board.assets.merge(added) { current, _ in current }
+            changes.assetsChanged = true
+            return .removeAssets(Set(added.keys))
+
+        case .removeAssets(let ids):
+            let removed = board.assets.filter { ids.contains($0.key) }
+            guard !removed.isEmpty else { return .batch([]) }
+            for id in removed.keys { board.assets[id] = nil }
+            changes.assetsChanged = true
+            return .addAssets(removed)
+
+        case .batch(let commands):
+            let inverses = commands.map { perform($0, changes: &changes) }
+            return .batch(inverses.reversed())
+        }
+    }
+
+    private nonisolated static func makeIndex(_ cards: [Card]) -> [UUID: Int] {
+        Dictionary(cards.enumerated().map { ($0.element.id, $0.offset) }, uniquingKeysWith: { first, _ in first })
     }
 }
