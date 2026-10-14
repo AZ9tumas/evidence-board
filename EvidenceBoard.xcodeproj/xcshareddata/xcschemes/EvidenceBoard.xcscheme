@@ -21,6 +21,34 @@
                ReferencedContainer = "container:EvidenceBoard.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "BoardKitTests"
+               BuildableName = "BoardKitTests"
+               BlueprintName = "BoardKitTests"
+               ReferencedContainer = "container:Packages/BoardKit">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "CanvasKitTests"
+               BuildableName = "CanvasKitTests"
+               BlueprintName = "CanvasKitTests"
+               ReferencedContainer = "container:Packages/CanvasKit">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

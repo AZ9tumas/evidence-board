@@ -31,12 +31,12 @@ public struct TextPayload: Sendable, Equatable, Codable {
 
 public enum TextCardStyle: String, Sendable, CaseIterable, DefaultedEnum {
     case note, headline, typewriter
-    public static let fallback: TextCardStyle = .note
+    public static let unknownValue: TextCardStyle = .note
 }
 
 public enum TextCardAlignment: String, Sendable, CaseIterable, DefaultedEnum {
     case leading, center, trailing
-    public static let fallback: TextCardAlignment = .leading
+    public static let unknownValue: TextCardAlignment = .leading
 }
 
 // MARK: - Image
@@ -66,7 +66,7 @@ public struct ImagePayload: Sendable, Equatable, Codable {
 
 public enum ImageFrameStyle: String, Sendable, CaseIterable, DefaultedEnum {
     case polaroid, borderless, photo
-    public static let fallback: ImageFrameStyle = .polaroid
+    public static let unknownValue: ImageFrameStyle = .polaroid
 }
 
 // MARK: - Web
@@ -131,7 +131,7 @@ public struct LinkSnapshot: Sendable, Equatable, Codable {
 
 public enum LinkVariant: String, Sendable, CaseIterable, DefaultedEnum {
     case hero, portrait, media, social, article, compact, fallback
-    public static let fallback: LinkVariant = .fallback
+    public static let unknownValue: LinkVariant = .fallback
 }
 
 /// Five role-based swatches taken from the page's image, stored as `#RRGGBB`.

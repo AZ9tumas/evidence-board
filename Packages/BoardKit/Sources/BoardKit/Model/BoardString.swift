@@ -52,19 +52,19 @@ public struct BoardString: Sendable, Equatable, Identifiable, Codable {
         thickness = try c.decodeIfPresent(Double.self, forKey: .thickness) ?? 2
         sag = try c.decodeIfPresent(Double.self, forKey: .sag) ?? 0.5
         stroke = try c.decodeIfPresent(StringStroke.self, forKey: .stroke) ?? .solid
-        arrow = try c.decodeIfPresent(StringArrow.self, forKey: .arrow) ?? .none
+        arrow = try c.decodeIfPresent(StringArrow.self, forKey: .arrow) ?? StringArrow.none
         label = try c.decodeIfPresent(String.self, forKey: .label)
     }
 }
 
 public enum StringStroke: String, Sendable, CaseIterable, DefaultedEnum {
     case solid, dashed, dotted
-    public static let fallback: StringStroke = .solid
+    public static let unknownValue: StringStroke = .solid
 }
 
 public enum StringArrow: String, Sendable, CaseIterable, DefaultedEnum {
     case none, forward, both
-    public static let fallback: StringArrow = .none
+    public static let unknownValue: StringArrow = .none
 }
 
 /// The eight theme accent colors, each drawn as a two-stop gradient.

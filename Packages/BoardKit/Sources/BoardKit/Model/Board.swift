@@ -87,7 +87,7 @@ public struct Viewport: Sendable, Equatable, Codable {
 
 public enum ThemeID: String, Sendable, CaseIterable, DefaultedEnum {
     case system, noir, cork, blueprint, daylight
-    public static let fallback: ThemeID = .system
+    public static let unknownValue: ThemeID = .system
 }
 
 extension Date {
