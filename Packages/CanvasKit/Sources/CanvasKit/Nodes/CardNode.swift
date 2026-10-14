@@ -2,11 +2,24 @@ import Foundation
 import QuartzCore
 import BoardKit
 
-/// The layers for one card.
+/// How much of a card to draw, chosen from the zoom level (DESIGN.md §10.4).
+enum DetailLevel: Comparable, Sendable {
+    /// Below 15%: flat body only.
+    case minimal
+    /// 15–40%: one shadow, plain border, low-resolution text.
+    case reduced
+    /// 40% and up: everything.
+    case full
+
+    init(zoom: CGFloat) {
+        self = zoom < 0.15 ? .minimal : zoom < 0.4 ? .reduced : .full
+    }
+}
+
+/// The layers for one card: layered shadows, gradient body and stroke, content and pin.
 ///
-/// In M0 a card is drawn as a styled skeleton: the real card body with its layered shadows,
-/// gradient fill and stroke, plus placeholder bars shaped like its content. Rendered text,
-/// images and link previews replace the bars in M1–M4.
+/// Text cards show a bitmap of their text, rendered per zoom tier by the canvas. Image and
+/// web cards still show placeholder bars until M2 and M4.
 @MainActor
 final class CardNode {
     private struct Shadow {
@@ -23,19 +36,28 @@ final class CardNode {
     ]
 
     let id: UUID
-    /// Positioned and rotated in world space. Holds everything except the pin.
+    private(set) var card: Card
+    /// Positioned and rotated in world space.
     let root = CALayer()
-    let pin = PinNode()
 
     private let shadowLayers = CardNode.shadows.map { _ in CALayer() }
     private let body = CAGradientLayer()
     private let tintBand = CAGradientLayer()
     private let skeleton = CALayer()
+    private let content = CALayer()
     private let stroke = CAGradientLayer()
     private let strokeMask = CAShapeLayer()
+    private let pin = PinNode()
+
+    /// Zoom tier of the current text bitmap, or `nil` when there is none or it is stale.
+    private(set) var renderedTier: CGFloat?
+    private var detail = DetailLevel.full
+    private var isLifted = false
+    private var isEditing = false
 
     init(card: Card, appearance: CanvasAppearance, scale: CGFloat) {
         id = card.id
+        self.card = card
         for layer in shadowLayers {
             layer.shadowColor = RGBA.black.cgColor
             root.addSublayer(layer)
@@ -48,6 +70,7 @@ final class CardNode {
         root.addSublayer(body)
         body.addSublayer(tintBand)
         body.addSublayer(skeleton)
+        root.addSublayer(content)
 
         strokeMask.fillColor = nil
         strokeMask.strokeColor = RGBA.black.cgColor
@@ -56,42 +79,60 @@ final class CardNode {
         stroke.startPoint = CGPoint(x: 0.5, y: 0)
         stroke.endPoint = CGPoint(x: 0.5, y: 1)
         root.addSublayer(stroke)
+        root.addSublayer(pin.root)
 
         update(card: card, appearance: appearance)
         setContentsScale(scale)
     }
 
+    var isTextCard: Bool {
+        if case .text = card.content { return true }
+        return false
+    }
+
     func setContentsScale(_ scale: CGFloat) {
-        var stack: [CALayer] = [root, pin.root]
+        var stack: [CALayer] = [root]
         while let layer = stack.popLast() {
-            layer.contentsScale = scale
+            if layer !== content { layer.contentsScale = scale }
             stack.append(contentsOf: layer.sublayers ?? [])
             if let mask = layer.mask { stack.append(mask) }
         }
     }
 
-    func update(card: Card, appearance: CanvasAppearance) {
-        let bounds = CGRect(x: 0, y: 0, width: card.frame.width, height: card.frame.height)
+    // MARK: Updating
+
+    /// Applies a new version of the card. Returns whether the text bitmap must be redrawn.
+    @discardableResult
+    func update(card newCard: Card, appearance: CanvasAppearance) -> Bool {
+        let old = card
+        card = newCard
+        let sizeChanged = old.frame.width != newCard.frame.width || old.frame.height != newCard.frame.height
+        let contentChanged = old.content != newCard.content
+        let needsRender = sizeChanged || contentChanged || renderedTier == nil
+
+        let bounds = CGRect(x: 0, y: 0, width: newCard.frame.width, height: newCard.frame.height)
         let radius = CanvasGeometry.cardCornerRadius
         let outline = CGPath(roundedRect: bounds, cornerWidth: radius, cornerHeight: radius, transform: nil)
 
         root.bounds = bounds
-        root.position = CGPoint(x: card.frame.midX, y: card.frame.midY)
-        root.setAffineTransform(CGAffineTransform(rotationAngle: CanvasGeometry.radians(card.rotation)))
+        root.position = CGPoint(x: newCard.frame.midX, y: newCard.frame.midY)
+        root.zPosition = CGFloat(newCard.z)
+        applyTransform()
 
         // Explicit shadow paths keep Core Animation from rendering shadows off screen every frame.
-        for (layer, shadow) in zip(shadowLayers, Self.shadows) {
+        for layer in shadowLayers {
             layer.frame = bounds
             layer.shadowPath = outline
-            layer.shadowOffset = CGSize(width: 0, height: shadow.offset)
-            layer.shadowRadius = shadow.blur / 2
-            layer.shadowOpacity = shadow.opacity
         }
+        applyShadows()
 
         body.frame = bounds
-        body.colors = appearance.cardFill.cgColors
+        let isPaper: Bool
+        if case .text(let text) = newCard.content, text.style == .typewriter { isPaper = true } else { isPaper = false }
+        body.colors = (isPaper ? appearance.paperFill : appearance.cardFill).cgColors
+        body.borderColor = appearance.cardStroke.from.cgColor
 
-        if let tint = card.tint {
+        if let tint = newCard.tint {
             let color = appearance.gradient(for: tint).from
             tintBand.isHidden = false
             tintBand.frame = CGRect(x: 0, y: 0, width: bounds.width, height: min(64, bounds.height))
@@ -108,10 +149,106 @@ final class CardNode {
             cornerWidth: radius - 0.5, cornerHeight: radius - 0.5, transform: nil
         )
 
-        skeleton.frame = bounds
-        skeleton.sublayers = Self.placeholders(for: card, in: bounds.size, appearance: appearance)
+        content.frame = bounds
+        if needsRender && sizeChanged {
+            // A resized bitmap would look stretched; better blank for a frame than distorted.
+            content.contents = nil
+            renderedTier = nil
+        } else if contentChanged {
+            renderedTier = nil
+        }
 
-        pin.update(position: CanvasGeometry.pinPoint(of: card), locked: card.locked, appearance: appearance)
+        skeleton.frame = bounds
+        if sizeChanged || contentChanged || skeleton.sublayers == nil {
+            skeleton.sublayers = Self.placeholders(for: newCard, in: bounds.size, appearance: appearance)
+        }
+
+        pin.root.position = CGPoint(x: bounds.midX, y: CanvasGeometry.pinInset)
+        pin.update(locked: newCard.locked, appearance: appearance)
+        applyVisibility()
+        return needsRender
+    }
+
+    /// Moves the card without touching anything else, for live dragging.
+    func setPosition(_ frame: Rect) {
+        root.position = CGPoint(x: frame.midX, y: frame.midY)
+    }
+
+    // MARK: Text bitmap
+
+    func setRenderedText(_ image: CGImage?, tier: CGFloat, scale: CGFloat) {
+        content.contents = image
+        content.contentsScale = scale
+        renderedTier = image == nil ? nil : tier
+        applyVisibility()
+    }
+
+    /// Frees the bitmap of a card that scrolled far out of view.
+    func discardRenderedText() {
+        guard renderedTier != nil || content.contents != nil else { return }
+        content.contents = nil
+        renderedTier = nil
+        applyVisibility()
+    }
+
+    var hasRenderedText: Bool { content.contents != nil }
+
+    // MARK: States
+
+    func setDetail(_ level: DetailLevel) {
+        guard level != detail else { return }
+        detail = level
+        applyShadows()
+        applyVisibility()
+    }
+
+    /// Picked up for dragging: slightly larger, with deeper shadows, and above everything.
+    func setLifted(_ lifted: Bool) {
+        guard lifted != isLifted else { return }
+        isLifted = lifted
+        CATransaction.begin()
+        CATransaction.setAnimationDuration(0.14)
+        root.zPosition = lifted ? 1_000_000 : CGFloat(card.z)
+        applyTransform()
+        applyShadows()
+        CATransaction.commit()
+    }
+
+    /// While the live editor is open, its own text replaces the bitmap.
+    func setEditing(_ editing: Bool) {
+        isEditing = editing
+        applyVisibility()
+    }
+
+    private func applyTransform() {
+        var transform = CATransform3DMakeRotation(CanvasGeometry.radians(card.rotation), 0, 0, 1)
+        if isLifted { transform = CATransform3DScale(transform, 1.02, 1.02, 1) }
+        root.transform = transform
+    }
+
+    private func applyShadows() {
+        let lift: (offset: CGFloat, blur: CGFloat) = isLifted ? (1.8, 1.6) : (1, 1)
+        for (index, (layer, shadow)) in zip(shadowLayers, Self.shadows).enumerated() {
+            let visible = switch detail {
+            case .full: true
+            case .reduced: index == 1
+            case .minimal: false
+            }
+            layer.isHidden = !visible
+            layer.shadowOffset = CGSize(width: 0, height: shadow.offset * lift.offset)
+            layer.shadowRadius = shadow.blur * lift.blur / 2
+            layer.shadowOpacity = shadow.opacity
+        }
+    }
+
+    private func applyVisibility() {
+        let showsDetail = detail != .minimal
+        stroke.isHidden = detail != .full
+        body.borderWidth = detail == .full ? 0 : 1
+        pin.root.isHidden = !showsDetail
+        content.isHidden = !showsDetail || isEditing || !isTextCard
+        // Text cards show placeholder bars only until their first bitmap arrives.
+        skeleton.isHidden = !showsDetail || isEditing || (isTextCard && content.contents != nil)
     }
 
     // MARK: Placeholders
@@ -125,11 +262,11 @@ final class CardNode {
             case .note: 8
             case .typewriter: 7
             }
-            return lines(from: 34, height: height, in: size, color: bar)
+            return lines(from: TextCardTypography.insets.top + 4, height: height, in: size, color: bar)
 
         case .image(let image):
             let well: CGRect = switch image.frameStyle {
-            case .polaroid: CGRect(x: 12, y: 12, width: size.width - 24, height: size.height - 56)
+            case .polaroid: CGRect(x: 12, y: 12, width: size.width - 24, height: max(size.height - 56, 0))
             case .borderless: CGRect(origin: .zero, size: size)
             case .photo: CGRect(x: 8, y: 8, width: size.width - 16, height: size.height - 16)
             }
@@ -217,8 +354,7 @@ final class PinNode {
         root.addSublayer(glint)
     }
 
-    func update(position: CGPoint, locked: Bool, appearance: CanvasAppearance) {
-        root.position = position
+    func update(locked: Bool, appearance: CanvasAppearance) {
         head.colors = (locked ? appearance.lockedPin : appearance.pin).cgColors
     }
 }

@@ -68,6 +68,15 @@ public struct CanvasAppearance: Sendable, Hashable {
     public var pin: GradientPair
     public var lockedPin: GradientPair
     public var tints: [Tint: GradientPair]
+    /// Text on note and headline cards.
+    public var text: RGBA
+    /// Inline `code` in card text.
+    public var codeText: RGBA
+    /// Body and text of typewriter cards, which sit on tinted paper.
+    public var paperFill: GradientPair
+    public var paperText: RGBA
+    /// Selection rings, resize handles and the marquee.
+    public var selection: GradientPair
 
     public init(
         background: GradientPair,
@@ -78,7 +87,12 @@ public struct CanvasAppearance: Sendable, Hashable {
         skeleton: RGBA,
         pin: GradientPair,
         lockedPin: GradientPair,
-        tints: [Tint: GradientPair]
+        tints: [Tint: GradientPair],
+        text: RGBA,
+        codeText: RGBA,
+        paperFill: GradientPair,
+        paperText: RGBA,
+        selection: GradientPair
     ) {
         self.background = background
         self.vignette = vignette
@@ -89,6 +103,11 @@ public struct CanvasAppearance: Sendable, Hashable {
         self.pin = pin
         self.lockedPin = lockedPin
         self.tints = tints
+        self.text = text
+        self.codeText = codeText
+        self.paperFill = paperFill
+        self.paperText = paperText
+        self.selection = selection
     }
 
     func gradient(for tint: Tint) -> GradientPair {

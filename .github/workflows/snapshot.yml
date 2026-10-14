@@ -1,4 +1,5 @@
-# Launches the app on a macOS runner and publishes window screenshots as neutral
+# Launches the app on a macOS runner in a few states (empty board, sample board, a selected
+# card, a card being edited, 500 extra cards zoomed out) and publishes screenshots as neutral
 # check runs ("snapshot img<n> part<i>/<total>", base64 JPEG in the output text), so
 # the canvas can be checked visually without a Mac. Runs on demand, or on pushes whose
 # commit message contains [snapshot]. Fetch them with Tools/fetch-snapshots.py.
@@ -28,24 +29,32 @@ jobs:
             CODE_SIGNING_ALLOWED=NO -quiet
       - name: Launch and capture
         run: |
-          app=build/Build/Products/Debug/EvidenceBoard.app
-          capture() {
-            sleep 6
-            screencapture -x "/tmp/shot$1.png"
-            sips -Z 900 -s format jpeg -s formatOptions 60 "/tmp/shot$1.png" --out "/tmp/shot$1.jpg" >/dev/null
-          }
+          app="$PWD/build/Build/Products/Debug/EvidenceBoard.app"
           printf '{ "format": "evidenceboard", "formatVersion": 1, "title": "Empty" }' > /tmp/Empty.evboard
           cp docs/examples/harbor-case.evboard /tmp/Harbor.evboard
-          open -a "$PWD/$app" /tmp/Empty.evboard
-          capture 1
-          open -a "$PWD/$app" /tmp/Harbor.evboard
-          capture 2
-          pgrep -x EvidenceBoard >/dev/null && echo "app still running" || echo "APP NOT RUNNING"
+          shot=0
+          # capture <file> [scenario]: launches a fresh app instance, waits, screenshots, quits it.
+          capture() {
+            shot=$((shot + 1))
+            open -n --env "EB_SNAPSHOT_SCENARIO=${2:-none}" -a "$app" "$1" --args -ApplePersistenceIgnoreState YES
+            sleep 7
+            pgrep -x EvidenceBoard >/dev/null && echo "shot $shot: running" || echo "shot $shot: APP NOT RUNNING"
+            screencapture -x "/tmp/shot$shot.png"
+            sips -Z 900 -s format jpeg -s formatOptions 60 "/tmp/shot$shot.png" --out "/tmp/shot$shot.jpg" >/dev/null
+            pkill -x EvidenceBoard || true
+            sleep 1
+          }
+          capture /tmp/Empty.evboard
+          capture /tmp/Harbor.evboard
+          capture /tmp/Harbor.evboard select
+          capture /tmp/Harbor.evboard edit
+          capture /tmp/Harbor.evboard stress
+          echo "$shot" > /tmp/shot-count
       - name: Publish images
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          for n in 1 2; do
+          for n in $(seq 1 "$(cat /tmp/shot-count)"); do
             b64=$(base64 -i "/tmp/shot$n.jpg" | tr -d '\n')
             total=$(( (${#b64} + 59999) / 60000 ))
             for ((i = 0; i < total; i++)); do

@@ -21,6 +21,52 @@ enum CanvasGeometry {
         return CGPoint(x: center.x - offset * sin(angle), y: center.y + offset * cos(angle))
     }
 
+    /// `point` in the card's own unrotated space, with the origin at the card's center.
+    static func localPoint(_ point: CGPoint, in card: Card) -> CGPoint {
+        let dx = point.x - CGFloat(card.frame.midX)
+        let dy = point.y - CGFloat(card.frame.midY)
+        let angle = -radians(card.rotation)
+        return CGPoint(x: dx * cos(angle) - dy * sin(angle), y: dx * sin(angle) + dy * cos(angle))
+    }
+
+    /// The inverse of ``localPoint(_:in:)``.
+    static func worldPoint(_ local: CGPoint, in card: Card) -> CGPoint {
+        let angle = radians(card.rotation)
+        return CGPoint(
+            x: CGFloat(card.frame.midX) + local.x * cos(angle) - local.y * sin(angle),
+            y: CGFloat(card.frame.midY) + local.x * sin(angle) + local.y * cos(angle)
+        )
+    }
+
+    /// Whether `point` (world space) lies on the card, following its rotation.
+    static func contains(_ card: Card, point: CGPoint, tolerance: CGFloat = 0) -> Bool {
+        let local = localPoint(point, in: card)
+        return abs(local.x) <= CGFloat(card.frame.width) / 2 + tolerance
+            && abs(local.y) <= CGFloat(card.frame.height) / 2 + tolerance
+    }
+
+    /// The card's frame after dragging `handle` to `point` (world space). The opposite corner
+    /// stays put, even on a rotated card.
+    static func resizedFrame(
+        of card: Card, dragging handle: ResizeHandle, to point: CGPoint,
+        minimumSize: CGSize, keepAspectRatio: Bool = false
+    ) -> Rect {
+        let width = CGFloat(card.frame.width)
+        let height = CGFloat(card.frame.height)
+        let (sx, sy) = handle.signs
+        let fixed = CGPoint(x: -sx * width / 2, y: -sy * height / 2)
+        let dragged = localPoint(point, in: card)
+        var newWidth = max(minimumSize.width, (dragged.x - fixed.x) * sx)
+        var newHeight = max(minimumSize.height, (dragged.y - fixed.y) * sy)
+        if keepAspectRatio {
+            let factor = max(newWidth / width, newHeight / height)
+            newWidth = max(width * factor, minimumSize.width)
+            newHeight = max(height * factor, minimumSize.height)
+        }
+        let center = worldPoint(CGPoint(x: fixed.x + sx * newWidth / 2, y: fixed.y + sy * newHeight / 2), in: card)
+        return Rect(x: center.x - newWidth / 2, y: center.y - newHeight / 2, width: newWidth, height: newHeight)
+    }
+
     /// The axis-aligned box around a card after rotation.
     static func boundingBox(of card: Card) -> CGRect {
         let rect = card.frame.cgRect
@@ -75,5 +121,20 @@ enum CanvasGeometry {
             }
         }
         return offsets
+    }
+}
+
+/// The corner a resize drag starts from.
+enum ResizeHandle: CaseIterable, Sendable {
+    case topLeft, topRight, bottomLeft, bottomRight
+
+    /// Which way the corner sits from the card's center: -1 is left or up, 1 is right or down.
+    var signs: (CGFloat, CGFloat) {
+        switch self {
+        case .topLeft: (-1, -1)
+        case .topRight: (1, -1)
+        case .bottomLeft: (-1, 1)
+        case .bottomRight: (1, 1)
+        }
     }
 }

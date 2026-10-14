@@ -19,7 +19,7 @@ struct BoardWindow: View {
         BoardCanvas(controller: canvas, appearance: theme.canvas)
             .ignoresSafeArea()
             .overlay {
-                if store.board.cards.isEmpty {
+                if canvas.isBoardEmpty {
                     EmptyBoardHint(theme: theme)
                         .allowsHitTesting(false)
                 }
@@ -37,6 +37,9 @@ struct BoardWindow: View {
             }
             .animation(.spring(response: 0.35, dampingFraction: 0.8), value: showsLoadBanner)
             .focusedSceneValue(\.canvasController, canvas)
+            #if DEBUG
+            .task { await SnapshotScenario.run(on: canvas) }
+            #endif
             .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
             .preferredColorScheme(.dark)
             .frame(minWidth: 640, minHeight: 420)
@@ -58,6 +61,9 @@ private struct EmptyBoardHint: View {
                 .font(.system(size: 22, weight: .semibold))
                 .kerning(-0.3)
                 .foregroundStyle(theme.textPrimary.color)
+            Text("Double-click or press T to add a text card")
+                .font(.system(size: 13))
+                .foregroundStyle(theme.textSecondary.color)
             Text("Pinch or ⌘-scroll to zoom · Scroll to pan · Hold Space and drag to move around")
                 .font(.system(size: 12))
                 .foregroundStyle(theme.textTertiary.color)
@@ -96,3 +102,27 @@ private struct LoadBanner: View {
         .glassCapsule()
     }
 }
+
+#if DEBUG
+/// Puts the window into a known state for the snapshot workflow, chosen with the
+/// `EB_SNAPSHOT_SCENARIO` environment variable. Debug builds only.
+@MainActor
+private enum SnapshotScenario {
+    static func run(on canvas: CanvasController) async {
+        guard let scenario = ProcessInfo.processInfo.environment["EB_SNAPSHOT_SCENARIO"] else { return }
+        try? await Task.sleep(for: .seconds(1))
+        switch scenario {
+        case "select":
+            canvas.debugSelectCard(at: 1, edit: false)
+        case "edit":
+            canvas.debugSelectCard(at: 1, edit: true)
+        case "stress":
+            canvas.addTestCards(count: 500)
+            try? await Task.sleep(for: .milliseconds(300))
+            canvas.zoomToFit()
+        default:
+            break
+        }
+    }
+}
+#endif

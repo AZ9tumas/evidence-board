@@ -41,7 +41,12 @@ extension Theme {
             skeleton: RGBA.white.opacity(0.06),
             pin: GradientPair(RGBA(0xFF4757), RGBA(0xB3121F)),
             lockedPin: GradientPair(RGBA(0xE9C46A), RGBA(0xA6802B)),
-            tints: Theme.tints
+            tints: Theme.tints,
+            text: RGBA(0xF2F4FA),
+            codeText: RGBA(0x7FE7D3),
+            paperFill: GradientPair(RGBA(0x2B2822), RGBA(0x211E1A)),
+            paperText: RGBA(0xEDE4D3),
+            selection: GradientPair(RGBA(0x5B8CFF), RGBA(0x9B6BFF))
         ),
         textPrimary: RGBA(0xF2F4FA),
         textSecondary: RGBA(0xA7AEC2),
