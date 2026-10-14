@@ -15,6 +15,8 @@
 		E0B0A0000000000000000010 /* EvidenceBoard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EvidenceBoard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E0B0A0000000000000000012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E0B0A0000000000000000013 /* EvidenceBoard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EvidenceBoard.entitlements; sourceTree = "<group>"; };
+		E0B0A0000000000000000014 /* BoardKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = BoardKit; sourceTree = "<group>"; };
+		E0B0A0000000000000000015 /* CanvasKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = CanvasKit; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -42,6 +44,7 @@
 			isa = PBXGroup;
 			children = (
 				E0B0A0000000000000000011 /* EvidenceBoard */,
+				E0B0A0000000000000000005 /* Packages */,
 				E0B0A0000000000000000004 /* Config */,
 				E0B0A0000000000000000003 /* Products */,
 			);
@@ -62,6 +65,15 @@
 				E0B0A0000000000000000013 /* EvidenceBoard.entitlements */,
 			);
 			path = Config;
+			sourceTree = "<group>";
+		};
+		E0B0A0000000000000000005 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				E0B0A0000000000000000014 /* BoardKit */,
+				E0B0A0000000000000000015 /* CanvasKit */,
+			);
+			path = Packages;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

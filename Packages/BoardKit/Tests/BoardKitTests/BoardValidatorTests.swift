@@ -90,7 +90,7 @@ struct BoardValidatorTests {
                 textCard(id: b),
             ],
             strings: [
-                #"{ "id": "10000000-0000-0000-0000-000000000001", "from": "\#(a)", "to": "\#(b)", "color": "#00ff88", "style": "wavy" }"#,
+                ##"{ "id": "10000000-0000-0000-0000-000000000001", "from": "\##(a)", "to": "\##(b)", "color": "#00ff88", "style": "wavy" }"##,
             ],
             theme: "neon"
         )
