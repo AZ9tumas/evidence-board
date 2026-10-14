@@ -26,7 +26,7 @@ extension BoardCanvasView: NSMenuItemValidation {
         deleteSelection()
     }
 
-    @IBAction func selectAll(_ sender: Any?) {
+    @IBAction public override func selectAll(_ sender: Any?) {
         select(Set(store.board.cards.map(\.id)))
     }
 
