@@ -1,6 +1,7 @@
-# Launches the app on a macOS runner and prints window screenshots into the log
-# (base64 JPEG lines prefixed with IMG<n>:), so the canvas can be checked visually
-# without a Mac. Runs on demand, or on pushes whose commit message contains [snapshot].
+# Launches the app on a macOS runner and publishes window screenshots as neutral
+# check runs ("snapshot img<n> part<i>/<total>", base64 JPEG in the output text), so
+# the canvas can be checked visually without a Mac. Runs on demand, or on pushes whose
+# commit message contains [snapshot].
 name: Snapshot
 
 on:
@@ -12,6 +13,9 @@ jobs:
   snapshot:
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[snapshot]')
     runs-on: macos-15
+    permissions:
+      contents: read
+      checks: write
     steps:
       - uses: actions/checkout@v4
       - uses: maxim-lobanov/setup-xcode@v1
@@ -46,5 +50,18 @@ jobs:
           open -a "$PWD/$app" /tmp/Harbor.evboard
           capture 2 900
           pgrep -x EvidenceBoard >/dev/null && echo "app still running" || echo "APP NOT RUNNING"
-      - name: Print images
-        run: for n in 1 2; do base64 -i "/tmp/shot$n.jpg" | fold -w 6000 | sed "s/^/IMG$n:/"; done
+      - name: Publish images
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in 1 2; do
+            b64=$(base64 -i "/tmp/shot$n.jpg" | tr -d '\n')
+            total=$(( (${#b64} + 59999) / 60000 ))
+            for ((i = 0; i < total; i++)); do
+              name="snapshot img$n part$((i + 1))/$total"
+              jq -n --arg name "$name" --arg sha "$GITHUB_SHA" --arg text "${b64:$((i * 60000)):60000}" \
+                '{name: $name, head_sha: $sha, status: "completed", conclusion: "neutral",
+                  output: {title: $name, summary: "Base64 JPEG chunk", text: $text}}' \
+                | gh api "repos/$GITHUB_REPOSITORY/check-runs" --input - --silent
+            done
+          done
