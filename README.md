@@ -57,7 +57,7 @@ Tools/                     Helper scripts
 
 **M0 (skeleton)** is in place:
 
-- Document-based app. New, Open, Save, autosave and Versions all work with `.evboard` files.
+- Document-based app (SwiftUI `DocumentGroup`) for `.evboard` files, with New, Open, Save, autosave and Versions. Opening is checked on a macOS runner. Saving uses the same codec, which is round-trip tested, but the save flow hasn't been clicked through yet.
 - JSON codec v1. Loading is forgiving: bad cards and strings are skipped with a banner, and out-of-range values are clamped. Saving writes pretty-printed, sorted JSON and drops unused images.
 - Noir canvas: background gradient, vignette and adaptive dot grid.
 - Camera: trackpad pan, pinch zoom around the cursor, ⌘-scroll zoom, Space-drag and middle-drag panning, smart zoom, and animated zoom commands (⌘= ⌘− ⌘0 ⌘1) with a glass zoom HUD.
