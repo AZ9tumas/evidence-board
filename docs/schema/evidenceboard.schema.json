@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evidenceboard.app/schema/v1/evidenceboard.schema.json",
+  "title": "Evidence Board file (.evboard)",
+  "type": "object",
+  "required": ["format", "formatVersion", "id", "title", "cards", "strings", "assets"],
+  "properties": {
+    "format": { "const": "evidenceboard" },
+    "formatVersion": { "type": "integer", "minimum": 1 },
+    "id": { "$ref": "#/$defs/uuid" },
+    "title": { "type": "string", "maxLength": 512 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "modifiedAt": { "type": "string", "format": "date-time" },
+    "theme": { "enum": ["system", "noir", "cork", "blueprint", "daylight"], "default": "system" },
+    "viewport": {
+      "type": "object",
+      "required": ["x", "y", "zoom"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "zoom": { "type": "number", "minimum": 0.05, "maximum": 8 }
+      }
+    },
+    "cards": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/card" } },
+    "strings": { "type": "array", "items": { "$ref": "#/$defs/string" } },
+    "assets": {
+      "type": "object",
+      "propertyNames": { "pattern": "^sha256-[0-9a-f]{64}$" },
+      "additionalProperties": { "$ref": "#/$defs/asset" }
+    }
+  },
+
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$"
+    },
+    "assetRef": { "type": "string", "pattern": "^sha256-[0-9a-f]{64}$" },
+    "hexColor": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+    "tint": { "enum": ["red", "amber", "lime", "teal", "azure", "violet", "rose", "graphite"] },
+    "rect": {
+      "type": "object",
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "unitRect": {
+      "type": "object",
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y": { "type": "number", "minimum": 0, "maximum": 1 },
+        "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "height": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+      }
+    },
+
+    "card": {
+      "type": "object",
+      "required": ["id", "type", "frame"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "type": { "enum": ["text", "image", "web"] },
+        "frame": { "$ref": "#/$defs/rect" },
+        "rotation": { "type": "number", "minimum": -15, "maximum": 15, "default": 0 },
+        "z": { "type": "integer", "default": 0 },
+        "tint": { "$ref": "#/$defs/tint" },
+        "locked": { "type": "boolean", "default": false },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "modifiedAt": { "type": "string", "format": "date-time" },
+        "text": { "$ref": "#/$defs/textPayload" },
+        "image": { "$ref": "#/$defs/imagePayload" },
+        "web": { "$ref": "#/$defs/webPayload" }
+      },
+      "oneOf": [
+        { "properties": { "type": { "const": "text" } },  "required": ["text"],  "not": { "anyOf": [{ "required": ["image"] }, { "required": ["web"] }] } },
+        { "properties": { "type": { "const": "image" } }, "required": ["image"], "not": { "anyOf": [{ "required": ["text"] },  { "required": ["web"] }] } },
+        { "properties": { "type": { "const": "web" } },   "required": ["web"],   "not": { "anyOf": [{ "required": ["text"] },  { "required": ["image"] }] } }
+      ]
+    },
+
+    "textPayload": {
+      "type": "object",
+      "required": ["content"],
+      "properties": {
+        "content": { "type": "string", "maxLength": 100000 },
+        "style": { "enum": ["note", "headline", "typewriter"], "default": "note" },
+        "alignment": { "enum": ["leading", "center", "trailing"], "default": "leading" },
+        "autoHeight": { "type": "boolean", "default": true }
+      }
+    },
+
+    "imagePayload": {
+      "type": "object",
+      "required": ["asset"],
+      "properties": {
+        "asset": { "$ref": "#/$defs/assetRef" },
+        "caption": { "type": "string", "maxLength": 500 },
+        "frameStyle": { "enum": ["polaroid", "borderless", "photo"], "default": "polaroid" },
+        "crop": { "$ref": "#/$defs/unitRect" }
+      }
+    },
+
+    "webPayload": {
+      "type": "object",
+      "required": ["url"],
+      "properties": {
+        "url": { "type": "string", "format": "uri", "pattern": "^https?://" },
+        "snapshot": { "$ref": "#/$defs/linkSnapshot" }
+      }
+    },
+
+    "linkSnapshot": {
+      "type": "object",
+      "required": ["fetchedAt", "variant"],
+      "properties": {
+        "fetchedAt": { "type": "string", "format": "date-time" },
+        "variant": { "enum": ["hero", "portrait", "media", "social", "article", "compact", "fallback"] },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "siteName": { "type": "string" },
+        "author": { "type": "string" },
+        "publishedAt": { "type": "string", "format": "date-time" },
+        "mediaDuration": { "type": ["number", "null"], "minimum": 0 },
+        "image": { "$ref": "#/$defs/assetRef" },
+        "icon": { "$ref": "#/$defs/assetRef" },
+        "palette": {
+          "type": "object",
+          "required": ["vibrant", "muted", "darkVibrant", "darkMuted", "light"],
+          "properties": {
+            "vibrant": { "$ref": "#/$defs/hexColor" },
+            "muted": { "$ref": "#/$defs/hexColor" },
+            "darkVibrant": { "$ref": "#/$defs/hexColor" },
+            "darkMuted": { "$ref": "#/$defs/hexColor" },
+            "light": { "$ref": "#/$defs/hexColor" }
+          }
+        }
+      }
+    },
+
+    "string": {
+      "type": "object",
+      "required": ["id", "from", "to"],
+      "properties": {
+        "id": { "$ref": "#/$defs/uuid" },
+        "from": { "$ref": "#/$defs/uuid" },
+        "to": { "$ref": "#/$defs/uuid" },
+        "color": { "anyOf": [{ "$ref": "#/$defs/tint" }, { "$ref": "#/$defs/hexColor" }], "default": "red" },
+        "thickness": { "type": "number", "minimum": 1, "maximum": 4, "default": 2 },
+        "sag": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.5 },
+        "style": { "enum": ["solid", "dashed", "dotted"], "default": "solid" },
+        "arrow": { "enum": ["none", "forward", "both"], "default": "none" },
+        "label": { "type": "string", "maxLength": 120 }
+      }
+    },
+
+    "asset": {
+      "type": "object",
+      "required": ["mime", "data"],
+      "properties": {
+        "mime": { "enum": ["image/png", "image/jpeg", "image/gif", "image/webp", "image/tiff", "image/x-icon"] },
+        "pixelWidth": { "type": "integer", "minimum": 1 },
+        "pixelHeight": { "type": "integer", "minimum": 1 },
+        "byteCount": { "type": "integer", "minimum": 0 },
+        "data": { "type": "string", "contentEncoding": "base64" }
+      }
+    }
+  }
+}

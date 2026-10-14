@@ -1,0 +1,194 @@
+{
+  "assets": {
+    "sha256-909360c3d95f15569e0dc1a3efaa966ece69869e29e1be4ca99ec4d999b286b8": {
+      "byteCount": 130,
+      "data": "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAASUlEQVR42m3JKwJAUBRF0TMvQREUj+vzfIqgCIqgmPxmAKeuJYpEmaha6o4miCD3bIOsso+yyjHJKucfTrmyrHLPssqzyCrv+gE+MGsSDuguPAAAAABJRU5ErkJggg==",
+      "mime": "image/png",
+      "pixelHeight": 8,
+      "pixelWidth": 8
+    },
+    "sha256-e480bad050f61f45e15c7a8e02a1d2715ae3f0572a25fed8b206c4fe7ac77c1c": {
+      "byteCount": 167,
+      "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAJCAIAAAC0SDtlAAAAbklEQVR42mPgkoviUUrkU88Q0MkXMiwTMa0Vt2qVtO+Rdpks6zlL3nehYtAKlfANajHbNRL2aaUeZSBJtU7WGQaSVOvlX2YgSbVhyW0GklQbVzxiIEm1ae1LBpJUmzd9YCBJtWX7dwaSVNv0/AcAnfmjtPSENE4AAAAASUVORK5CYII=",
+      "mime": "image/png",
+      "pixelHeight": 9,
+      "pixelWidth": 16
+    },
+    "sha256-eba41025d42d8b6776dadf168c333f4f0b7a39315229eb521c5c78da1591c106": {
+      "byteCount": 185,
+      "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAMCAIAAADkharWAAAAgElEQVR42mMQ0QiQ0fZX0fPTMfQ1MfGxMfdxsfL2sfUKcfCMcfZMcfPI8XQv8XGrDXBrDXbtDXNhIEn11EhnBpJUz41xYiBJ9dJ4JwaSVK9NcmQgSfXWVAcGklTvzbBnIEn10Wx7BpJUn82zYyBJ9dVCWwaSVN8tsWEgSfWzChsAORrNNhX/8yYAAAAASUVORK5CYII=",
+      "mime": "image/png",
+      "pixelHeight": 12,
+      "pixelWidth": 16
+    }
+  },
+  "cards": [
+    {
+      "createdAt": "2026-10-14T09:12:44Z",
+      "frame": {
+        "height": 80,
+        "width": 420,
+        "x": -520,
+        "y": -300
+      },
+      "id": "7C1E4A52-0B1D-4C55-9E0A-2F6B1D3A9C01",
+      "locked": true,
+      "modifiedAt": "2026-10-14T09:12:44Z",
+      "rotation": 0,
+      "text": {
+        "alignment": "leading",
+        "autoHeight": true,
+        "content": "THE HARBOR FILES",
+        "style": "headline"
+      },
+      "type": "text",
+      "z": 1
+    },
+    {
+      "createdAt": "2026-10-14T09:12:44Z",
+      "frame": {
+        "height": 120,
+        "width": 260,
+        "x": -480,
+        "y": -120
+      },
+      "id": "7C1E4A52-0B1D-4C55-9E0A-2F6B1D3A9C02",
+      "locked": false,
+      "modifiedAt": "2026-10-14T09:12:44Z",
+      "rotation": -1.5,
+      "text": {
+        "alignment": "leading",
+        "autoHeight": true,
+        "content": "Ferry left **11 minutes early** on the 3rd.\nWho changed the schedule?",
+        "style": "note"
+      },
+      "tint": "amber",
+      "type": "text",
+      "z": 2
+    },
+    {
+      "createdAt": "2026-10-14T09:12:44Z",
+      "frame": {
+        "height": 220,
+        "width": 240,
+        "x": -80,
+        "y": 40
+      },
+      "id": "7C1E4A52-0B1D-4C55-9E0A-2F6B1D3A9C03",
+      "image": {
+        "asset": "sha256-eba41025d42d8b6776dadf168c333f4f0b7a39315229eb521c5c78da1591c106",
+        "caption": "Dock camera, 23:41",
+        "frameStyle": "polaroid"
+      },
+      "locked": false,
+      "modifiedAt": "2026-10-14T09:12:44Z",
+      "rotation": 2.0,
+      "type": "image",
+      "z": 3
+    },
+    {
+      "createdAt": "2026-10-14T09:12:44Z",
+      "frame": {
+        "height": 340,
+        "width": 360,
+        "x": 260,
+        "y": -200
+      },
+      "id": "7C1E4A52-0B1D-4C55-9E0A-2F6B1D3A9C04",
+      "locked": false,
+      "modifiedAt": "2026-10-14T09:12:44Z",
+      "rotation": 0,
+      "type": "web",
+      "web": {
+        "snapshot": {
+          "author": "J. Rivera",
+          "description": "The logs show three unscheduled departures in the week before the storm.",
+          "fetchedAt": "2026-10-14T09:20:00Z",
+          "icon": "sha256-909360c3d95f15569e0dc1a3efaa966ece69869e29e1be4ca99ec4d999b286b8",
+          "image": "sha256-e480bad050f61f45e15c7a8e02a1d2715ae3f0572a25fed8b206c4fe7ac77c1c",
+          "mediaDuration": null,
+          "palette": {
+            "darkMuted": "#1B2235",
+            "darkVibrant": "#12306E",
+            "light": "#E8EEFF",
+            "muted": "#5C6A88",
+            "vibrant": "#3A7BFF"
+          },
+          "publishedAt": "2026-10-12T00:00:00Z",
+          "siteName": "Example News",
+          "title": "Harbor authority releases night logs",
+          "variant": "article"
+        },
+        "url": "https://example.com/harbor-report"
+      },
+      "z": 4
+    },
+    {
+      "createdAt": "2026-10-14T09:12:44Z",
+      "frame": {
+        "height": 110,
+        "width": 280,
+        "x": 300,
+        "y": 220
+      },
+      "id": "7C1E4A52-0B1D-4C55-9E0A-2F6B1D3A9C05",
+      "locked": false,
+      "modifiedAt": "2026-10-14T09:12:44Z",
+      "rotation": 1.0,
+      "text": {
+        "alignment": "leading",
+        "autoHeight": true,
+        "content": "\"I never saw the second boat.\"\n— night guard, interview #2",
+        "style": "typewriter"
+      },
+      "type": "text",
+      "z": 5
+    }
+  ],
+  "createdAt": "2026-10-14T09:12:44Z",
+  "format": "evidenceboard",
+  "formatVersion": 1,
+  "id": "0D3F9B7E-5A21-4E8C-A1B4-6C2D8E9F0A11",
+  "modifiedAt": "2026-10-14T11:40:02Z",
+  "strings": [
+    {
+      "arrow": "none",
+      "color": "red",
+      "from": "7C1E4A52-0B1D-4C55-9E0A-2F6B1D3A9C02",
+      "id": "B2A0C7D1-3E4F-4A5B-8C6D-7E8F9A0B1C01",
+      "label": "same night",
+      "sag": 0.5,
+      "style": "solid",
+      "thickness": 2,
+      "to": "7C1E4A52-0B1D-4C55-9E0A-2F6B1D3A9C03"
+    },
+    {
+      "arrow": "forward",
+      "color": "red",
+      "from": "7C1E4A52-0B1D-4C55-9E0A-2F6B1D3A9C03",
+      "id": "B2A0C7D1-3E4F-4A5B-8C6D-7E8F9A0B1C02",
+      "sag": 0.4,
+      "style": "solid",
+      "thickness": 2,
+      "to": "7C1E4A52-0B1D-4C55-9E0A-2F6B1D3A9C04"
+    },
+    {
+      "arrow": "none",
+      "color": "azure",
+      "from": "7C1E4A52-0B1D-4C55-9E0A-2F6B1D3A9C04",
+      "id": "B2A0C7D1-3E4F-4A5B-8C6D-7E8F9A0B1C03",
+      "label": "contradicts?",
+      "sag": 0.6,
+      "style": "dashed",
+      "thickness": 1.5,
+      "to": "7C1E4A52-0B1D-4C55-9E0A-2F6B1D3A9C05"
+    }
+  ],
+  "theme": "noir",
+  "title": "Case 042 — The Harbor Files",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1.0
+  }
+}
