@@ -25,17 +25,26 @@ jobs:
       - name: Launch and capture
         run: |
           app=build/Build/Products/Debug/EvidenceBoard.app
+          cat > /tmp/window.swift <<'SWIFT'
+          import CoreGraphics
+          let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly], kCGNullWindowID) as? [[String: Any]] ?? []
+          let mine = windows.filter { ($0[kCGWindowOwnerName as String] as? String) == "EvidenceBoard" && ($0[kCGWindowLayer as String] as? Int) == 0 }
+          if let id = mine.first?[kCGWindowNumber as String] { print(id) }
+          SWIFT
           capture() {
             sleep 6
-            screencapture -x "/tmp/shot$1.png"
-            sips -Z 1400 -s format jpeg -s formatOptions 70 "/tmp/shot$1.png" --out "/tmp/shot$1.jpg" >/dev/null
-            echo "shot $1: $(stat -f%z /tmp/shot$1.jpg) bytes"
+            id=$(swift /tmp/window.swift)
+            echo "window id: ${id:-none}"
+            screencapture -x -o ${id:+-l$id} "/tmp/shot$1.png"
+            sips -Z "$2" -s format jpeg -s formatOptions 55 "/tmp/shot$1.png" --out "/tmp/shot$1.jpg" >/dev/null
+            echo "shot $1: $(sips -g pixelWidth -g pixelHeight /tmp/shot$1.jpg | tail -2 | xargs) $(stat -f%z /tmp/shot$1.jpg) bytes"
           }
           printf '{ "format": "evidenceboard", "formatVersion": 1, "title": "Empty" }' > /tmp/Empty.evboard
           cp docs/examples/harbor-case.evboard /tmp/Harbor.evboard
           open -a "$PWD/$app" /tmp/Empty.evboard
-          capture 1
+          capture 1 560
           open -a "$PWD/$app" /tmp/Harbor.evboard
-          capture 2
+          capture 2 900
           pgrep -x EvidenceBoard >/dev/null && echo "app still running" || echo "APP NOT RUNNING"
-          for n in 1 2; do base64 -i "/tmp/shot$n.jpg" | fold -w 4000 | sed "s/^/IMG$n:/"; done
+      - name: Print images
+        run: for n in 1 2; do base64 -i "/tmp/shot$n.jpg" | fold -w 6000 | sed "s/^/IMG$n:/"; done
