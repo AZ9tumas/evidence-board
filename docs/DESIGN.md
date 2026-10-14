@@ -236,7 +236,7 @@ The default theme is **Noir**: a night-time detective office, deep ink-blue dark
 | `bg.top` | `#0B0E17` | Board gradient, top-left |
 | `bg.bottom` | `#151A2C` | Board gradient, bottom-right |
 | `bg.vignette` | `#000000` at 45% | Radial edge darkening |
-| `bg.grid` | `#FFFFFF` at 4% | Dot grid (1.2 pt dots, 24 pt pitch, fades out below 40% zoom) |
+| `bg.grid` | `#FFFFFF` at 6% | Dot grid (1.4 pt dots, 24 pt pitch, fades out below 40% zoom) |
 | `card.fill` | `#1B2133` → `#141927` | Card body gradient (top → bottom) |
 | `card.stroke` | `#FFFFFF` 14% → 3% | 1 pt inner border gradient (light from above) |
 | `card.highlight` | `#FFFFFF` 8% | 1 pt top inner highlight line |
@@ -776,13 +776,13 @@ BoardCanvasView.layer (root)
 ├── backgroundLayer      CAGradientLayer + procedural texture layer (screen-space, never transformed)
 ├── gridLayer            CAReplicatorLayer dots, re-pitched at zoom tiers
 ├── worldLayer           ◀── sublayerTransform = camera (scale + translate) — the ONLY thing pan/zoom changes
-│   ├── stringsBelow     CAShapeLayer per string (+ CAGradientLayer masked by it)
 │   ├── cardsLayer       one CardLayer per *visible* card (pooled)
 │   │     CardLayer
-│   │       ├── shadowLayer   (3 shadows, explicit shadowPath)
+│   │       ├── shadowLayers  (3 shadows, explicit shadowPath)
 │   │       ├── contentLayer  (rendered SwiftUI card → bitmap, or live NSHostingView while editing)
-│   │       └── pinLayer
-│   └── stringsAbove     strings attached to the dragged card (so they render on top during drag)
+│   │       └── strokeLayer   (gradient border)
+│   ├── stringsLayer     CAShapeLayer per string (+ CAGradientLayer masked by it), above every card
+│   └── pinsLayer        one pin per card, above the strings so each string looks tied around its pin
 ├── overlayLayer         selection rings, guides, marquee, live connect string (screen-space)
 └── HUD (SwiftUI)        toolbar, minimap, zoom HUD, inspector, which are separate NSHostingViews
 ```
@@ -960,7 +960,7 @@ docs/
 | `SWIFT_VERSION` | 6 |
 | `SWIFT_STRICT_CONCURRENCY` | complete |
 | `ENABLE_HARDENED_RUNTIME` | YES |
-| `ENABLE_APP_SANDBOX` | YES |
+| Sandbox | On, through `Config/EvidenceBoard.entitlements` |
 | `SWIFT_OPTIMIZATION_LEVEL` (Release) | `-O`, plus whole-module optimization |
 | `DEAD_CODE_STRIPPING` | YES |
 | Architectures | Apple silicon + Intel (universal) |
@@ -975,7 +975,6 @@ docs/
     <key>CFBundleTypeRole</key>            <string>Editor</string>
     <key>LSHandlerRank</key>               <string>Owner</string>
     <key>LSItemContentTypes</key>          <array><string>com.evidenceboard.board</string></array>
-    <key>NSDocumentClass</key>             <string>$(PRODUCT_MODULE_NAME).BoardDocument</string>
   </dict>
   <dict>
     <key>CFBundleTypeName</key>            <string>JSON</string>

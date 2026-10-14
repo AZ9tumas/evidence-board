@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  boardkit-linux:
+    name: BoardKit (Linux)
+    runs-on: ubuntu-latest
+    container: swift:6.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test BoardKit
+        run: swift test --package-path Packages/BoardKit
+
+  macos:
+    name: App (macOS)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - name: Toolchain
+        run: xcodebuild -version && swift --version
+      - name: Test BoardKit
+        run: swift test --package-path Packages/BoardKit
+      - name: Test CanvasKit
+        if: ${{ !cancelled() }}
+        run: swift test --package-path Packages/CanvasKit
+      - name: Build app
+        if: ${{ !cancelled() }}
+        run: |
+          xcodebuild build \
+            -project EvidenceBoard.xcodeproj \
+            -scheme EvidenceBoard \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            > xcodebuild.log 2>&1 && status=0 || status=$?
+          grep -E "(error|warning):|BUILD (SUCCEEDED|FAILED)" xcodebuild.log | sort -u || true
+          [ "$status" -eq 0 ] || tail -n 60 xcodebuild.log
+          exit $status
+      - name: Test scheme (Cmd-U)
+        if: ${{ !cancelled() }}
+        run: |
+          xcodebuild test \
+            -project EvidenceBoard.xcodeproj \
+            -scheme EvidenceBoard \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            > xcodetest.log 2>&1 && status=0 || status=$?
+          grep -E "error:|✘|Test run|TEST (SUCCEEDED|FAILED)|Executed" xcodetest.log | sort -u || true
+          [ "$status" -eq 0 ] || tail -n 60 xcodetest.log
+          exit $status

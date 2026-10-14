@@ -16,3 +16,44 @@ A native macOS app for building detective-style evidence boards. You place **tex
 - `.evboard` is plain JSON. Images and link snapshots are embedded, so a board opens offline exactly as you saved it
 
 Built with Swift 6, SwiftUI, AppKit and Core Animation in Xcode, targeting macOS 15 and later.
+
+## Build and run
+
+Requires **Xcode 16 or later** on **macOS 15 or later**.
+
+1. Open `EvidenceBoard.xcodeproj`.
+2. Pick the **EvidenceBoard** scheme and press **⌘R**. It signs to run locally, so no developer team is needed.
+3. Press **⌘U** to run the BoardKit and CanvasKit tests.
+
+To try a full board, open `docs/examples/harbor-case.evboard` with **File ▸ Open**.
+
+From the command line:
+
+```sh
+swift test --package-path Packages/BoardKit     # also runs on Linux
+swift test --package-path Packages/CanvasKit
+xcodebuild -project EvidenceBoard.xcodeproj -scheme EvidenceBoard build
+```
+
+## Project layout
+
+```
+EvidenceBoard.xcodeproj    App project (the EvidenceBoard folder is synced, so new files are picked up automatically)
+EvidenceBoard/             App target: SwiftUI app, document, window, HUD, theme, assets
+Config/                    Info.plist (document types) and sandbox entitlements
+Packages/BoardKit/         Model, JSON codec, validation, BoardStore. Foundation only
+Packages/CanvasKit/        Camera and the Core Animation canvas (AppKit)
+docs/                      Design document, JSON schema, sample board
+```
+
+## Status
+
+**M0 (skeleton)** is in place:
+
+- Document-based app. New, Open, Save, autosave and Versions all work with `.evboard` files.
+- JSON codec v1. Loading is forgiving: bad cards and strings are skipped with a banner, and out-of-range values are clamped. Saving writes pretty-printed, sorted JSON and drops unused images.
+- Noir canvas: background gradient, vignette and adaptive dot grid.
+- Camera: trackpad pan, pinch zoom around the cursor, ⌘-scroll zoom, Space-drag and middle-drag panning, smart zoom, and animated zoom commands (⌘= ⌘− ⌘0 ⌘1) with a glass zoom HUD.
+- Cards and strings from a loaded file are drawn as styled skeletons (real body, shadows, pins and sagging string). Real text, image and link rendering arrives with M1–M4.
+
+See the roadmap in [`docs/DESIGN.md` §16](docs/DESIGN.md#16-roadmap).
