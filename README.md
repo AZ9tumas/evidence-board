@@ -6,7 +6,7 @@ A native macOS app for building detective-style evidence boards. You place **tex
 - 🧾 **File format schema:** [`docs/schema/evidenceboard.schema.json`](docs/schema/evidenceboard.schema.json)
 - 🗂 **Sample board:** [`docs/examples/harbor-case.evboard`](docs/examples/harbor-case.evboard)
 
-![The sample board in the M0 build](docs/images/m0-harbor.jpg)
+![The sample board in the M1 build, with the note card selected](docs/images/m1-harbor.jpg)
 
 ## Highlights
 
@@ -55,12 +55,18 @@ Tools/                     Helper scripts
 
 ## Status
 
-**M0 (skeleton)** is in place:
+**M0 (skeleton)** and **M1 (text cards)** are done. The board is a working text board:
 
-- Document-based app (SwiftUI `DocumentGroup`) for `.evboard` files, with New, Open, Save, autosave and Versions. Opening is checked on a macOS runner. Saving uses the same codec, which is round-trip tested, but the save flow hasn't been clicked through yet.
-- JSON codec v1. Loading is forgiving: bad cards and strings are skipped with a banner, and out-of-range values are clamped. Saving writes pretty-printed, sorted JSON and drops unused images.
-- Noir canvas: background gradient, vignette and adaptive dot grid.
-- Camera: trackpad pan, pinch zoom around the cursor, ⌘-scroll zoom, Space-drag and middle-drag panning, smart zoom, and animated zoom commands (⌘= ⌘− ⌘0 ⌘1) with a glass zoom HUD.
-- Cards and strings from a loaded file are drawn as styled skeletons (real body, shadows, pins and sagging string). Real text, image and link rendering arrives with M1–M4.
+- **Create:** double-click empty canvas, press **T**, use **Insert ▸ Text Card** (⌘⇧T), or paste plain text.
+- **Edit:** double-click a card or press **↩**. The editor sits exactly over the card and shows the raw text, `**markdown**` included. Press **Esc** or **⌘↩** to finish. A new card left empty disappears.
+- **Select:** click, ⇧/⌘-click, drag a marquee, or **⌘A**. One card gets a turning gradient ring and resize handles.
+- **Move and resize:** drag cards (they lift while you drag), nudge with the arrow keys (⇧ for 10 pt), or drag a corner handle. Height follows the text until you change it by hand.
+- **Arrange:** Bring to Front / Send to Back, Lock, Duplicate (⌘D), Delete, Cut, Copy and Paste between boards. Right-click a card for Style (Note, Headline, Typewriter) and Color.
+- **Undo:** every change is one undo step and marks the document as edited.
+- **Rendering:** text is drawn by TextKit into bitmaps per zoom tier, only for cards near the view and only a few per frame. Zoomed out, cards drop to simpler detail levels. **Debug ▸ Add 500 Test Cards** fills a board for performance checks.
+
+From M0: the document app (New, Open, Save, autosave, Versions), the forgiving JSON codec, the Noir canvas, and the camera (trackpad pan, pinch and ⌘-scroll zoom, Space-drag, ⌘= ⌘− ⌘0 ⌘1).
+
+Not verified yet: frame rate on real hardware (the 120 fps target for 500 cards needs a Mac and Instruments). Image and web cards still show placeholders until M2 and M4. Strings are drawn but can't be created until M3.
 
 See the roadmap in [`docs/DESIGN.md` §16](docs/DESIGN.md#16-roadmap).

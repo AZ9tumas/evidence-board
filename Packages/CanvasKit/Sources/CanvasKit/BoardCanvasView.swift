@@ -104,6 +104,7 @@ public final class BoardCanvasView: NSView {
         detailLevel = DetailLevel(zoom: camera.zoom)
         applyAppearance()
         observerToken = store.addObserver { [weak self] changes in self?.storeDidChange(changes) }
+        fitAutoHeightTextCards()
     }
 
     @available(*, unavailable)
@@ -207,6 +208,23 @@ public final class BoardCanvasView: NSView {
         visibleIDs = []
         selectionDidChange()
         updateVisibility()
+    }
+
+    /// Text cards whose height follows their text get the height this Mac's fonts need. A
+    /// board written elsewhere (or by hand) may have saved a different one. This isn't an edit,
+    /// so it's not undoable and doesn't mark the document as changed.
+    private func fitAutoHeightTextCards() {
+        let fitted = store.board.cards.compactMap { card -> Card? in
+            guard case .text(let text) = card.content, text.autoHeight else { return nil }
+            let height = TextCardTypography.fittingHeight(
+                for: text, width: CGFloat(card.frame.width), appearance: canvasAppearance
+            )
+            guard abs(height - CGFloat(card.frame.height)) > 0.5 else { return nil }
+            var card = card
+            card.frame.height = Double(height)
+            return card
+        }
+        if !fitted.isEmpty { store.apply(.updateCards(fitted)) }
     }
 
     // MARK: - Nodes
