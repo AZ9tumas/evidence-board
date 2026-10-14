@@ -630,8 +630,8 @@ Base64 adds about 33%. A board with 200 phone photos (downsampled to 4096 px, ro
 │ (AppKit + CA)        Camera · NodeLayerPool · StringRenderer · HitTester
 │                      Gesture/Tool state machine · LOD manager
 ├──────────────────────────────────────────────────────────────┤
-│ Domain               BoardStore (@Observable, @MainActor) · Commands (undoable)
-│                      SpatialIndex (R-tree) · GraphQueries (focus/trace)
+│ Domain               BoardStore (@MainActor) · BoardCommand (undoable) · BoardClip
+│                      SpatialGrid · GraphQueries (focus/trace)
 ├──────────────────────────────────────────────────────────────┤
 │ Services (actors)    LinkPreviewService · ImagePipeline · PaletteExtractor
 │                      AssetStore · BoardCodec (JSON) · Migrations
@@ -687,32 +687,39 @@ struct BoardString: Codable, Identifiable, Sendable {
     var label: String?
 }
 
-// MARK: Store
+// MARK: Store (BoardKit, Foundation only, so it's tested on Linux too)
 
-@MainActor @Observable
+@MainActor
 final class BoardStore {
     private(set) var board: Board
-    private(set) var selection: Set<UUID> = []
-    let spatialIndex = SpatialIndex()          // R-tree over card frames (rotated AABBs)
-    let undoManager: UndoManager
+    var viewport: Viewport                     // camera; never marks the document as edited
 
-    func apply(_ command: BoardCommand)        // single mutation entry point
+    /// The single mutation entry point. Returns the inverse command, or nil if nothing changed.
+    func apply(_ command: BoardCommand) -> BoardCommand?
+    func addObserver(_ observer: @escaping @MainActor (BoardChanges) -> Void) -> UUID
 }
 
 // MARK: Commands (every mutation is one, so undo is free)
 
-enum BoardCommand {
-    case addCards([Card])
-    case removeCards(Set<UUID>)                // also removes their strings
-    case moveCards([UUID: CGPoint])            // id → new origin
-    case updateCard(UUID, (inout Card) -> Void)
-    case addString(BoardString)
+enum BoardCommand: Sendable, Equatable {
+    case insertCards([Card], positions: [Int]? = nil)    // positions restore file order on undo
+    case removeCards(Set<UUID>)                          // also removes their strings
+    case insertStrings([BoardString], positions: [Int]? = nil)
     case removeStrings(Set<UUID>)
-    case updateString(UUID, (inout BoardString) -> Void)
+    case setFrames([UUID: Rect])                         // move and resize
+    case updateCards([Card])                             // text, style, tint, z, lock
+    case addAssets([AssetID: Asset])
+    case removeAssets(Set<AssetID>)
+    case batch([BoardCommand])
+}
+
+struct BoardChanges {                                    // exactly what changed
+    var insertedCards, updatedCards, removedCards: Set<UUID>
+    var insertedStrings, removedStrings: Set<UUID>
 }
 ```
 
-`apply(_:)` computes the inverse command, registers it with `UndoManager`, mutates `board`, updates the `spatialIndex` incrementally and posts a fine-grained change set (`ChangeSet(inserted:updated:removed:)`) to the canvas. The canvas **never** diffs the whole board.
+`apply(_:)` mutates `board`, computes the inverse command and notifies observers with a `BoardChanges`. The canvas updates only those cards and strings and **never** diffs the whole board. Undo lives one level up, in CanvasKit's `BoardEditor`: it registers each inverse with the document's `UndoManager` (from the SwiftUI environment), which is also how a SwiftUI document learns it has unsaved changes. Selection is canvas state, not document state, so it's never undone.
 
 ### 9.3 Document integration
 
@@ -776,16 +783,20 @@ BoardCanvasView.layer (root)
 ├── backgroundLayer      CAGradientLayer + procedural texture layer (screen-space, never transformed)
 ├── gridLayer            CAReplicatorLayer dots, re-pitched at zoom tiers
 ├── worldLayer           ◀── sublayerTransform = camera (scale + translate) — the ONLY thing pan/zoom changes
-│   ├── cardsLayer       one CardLayer per *visible* card (pooled)
+│   ├── cardsLayer       one CardLayer per card, stacked by zPosition = z
 │   │     CardLayer
 │   │       ├── shadowLayers  (3 shadows, explicit shadowPath)
-│   │       ├── contentLayer  (rendered SwiftUI card → bitmap, or live NSHostingView while editing)
-│   │       └── strokeLayer   (gradient border)
-│   ├── stringsLayer     CAShapeLayer per string (+ CAGradientLayer masked by it), above every card
-│   └── pinsLayer        one pin per card, above the strings so each string looks tied around its pin
-├── overlayLayer         selection rings, guides, marquee, live connect string (screen-space)
+│   │       ├── bodyLayer     (gradient fill, tint band, placeholder bars)
+│   │       ├── contentLayer  (card content as a bitmap for the current zoom tier)
+│   │       ├── strokeLayer   (gradient border)
+│   │       └── pinLayer      (inside the card, so a card on top covers the pins below it)
+│   ├── stringsLayer     one string per layer above every card, with a knot over each pin
+│   └── selectionLayer   selection rings (world space, re-thickened when the zoom settles)
+├── overlayLayer         resize handles, marquee, guides, live connect string (screen-space)
 └── HUD (SwiftUI)        toolbar, minimap, zoom HUD, inspector, which are separate NSHostingViews
 ```
+
+The canvas sits in a plain host view. A layer-hosting view can't have subviews, so things that must be real views, like the text editor, are siblings above it in the host.
 
 ### 10.2 Camera
 
@@ -795,12 +806,13 @@ BoardCanvasView.layer (root)
 
 ### 10.3 Card content: snapshot-at-rest
 
-SwiftUI is used to *design* cards (fast iteration, gradients, `MeshGradient`, typography), and Core Animation *displays* them:
+Card chrome (body, shadows, stroke, pin) is plain Core Animation, so it stays sharp at any zoom for free. Only the content is a bitmap:
 
-1. Every card view is rendered with `ImageRenderer` (on the main actor, about 0.5 ms) into a `CGImage` at `frameSize × zoomTier × backingScale` and set as `contentLayer.contents`.
-2. Zoom tiers are **0.25, 0.5, 1, 2 and 4**. When the camera crosses a tier boundary, visible cards re-render at the new tier in the background (each card lazily, in order of distance from the center). Until then the old bitmap is scaled, which is imperceptible during motion.
-3. While a text card is **being edited**, its `contentLayer` is swapped for a live `NSHostingView` with an editable `TextField` / `NSTextView`. When editing ends, it's snapshotted again.
-4. A card re-renders only when its content, size, theme or tier changes. Moving it never re-renders anything.
+1. **Text cards** are drawn with TextKit (`NSAttributedString` into a bitmap context, about 0.2–0.5 ms per card) at `frameSize × zoomTier × backingScale`, capped at 4096 px on the long side, and set as `contentLayer.contents`. Rich cards (web, M4) will use SwiftUI's `ImageRenderer` the same way.
+2. Zoom tiers are **0.25, 0.5, 1, 2 and 4**. The tier follows the zoom once the zoom has been still for 160 ms, so a pinch never redraws every card per frame. Until then the old bitmap is scaled.
+3. Bitmaps are drawn by a **render queue** that spends at most 5 ms of each frame, nearest cards first, and only for cards within 25% of the viewport. Bitmaps of cards more than a screen away are freed.
+4. While a text card is **being edited**, its bitmap is hidden and a live `NSTextView` (inside an `NSScrollView` whose magnification equals the zoom) sits over the card, using exactly the same attributes, so no line moves when editing starts or ends.
+5. A card re-renders only when its content, size, theme or tier changes. Moving it never re-renders anything.
 
 ### 10.4 Level of detail (LOD)
 
@@ -808,7 +820,7 @@ SwiftUI is used to *design* cards (fast iteration, gradients, `MeshGradient`, ty
 |---|---|---|---|---|
 | ≥ 40% | Full snapshot | Gradient + texture + labels | 3-layer | Full |
 | 15–40% | Snapshot at tier 0.25 | Solid color, no labels | 1 layer | Simple dot |
-| < 15% | Flat rounded rect in the card's dominant color | Hairline | None | None |
+| < 15% | Flat rounded rect (body only) | Hairline | None | None |
 
 Other rules:
 
@@ -824,10 +836,10 @@ Other rules:
 
 ### 10.6 Culling and hit testing
 
-- **SpatialIndex**: an R-tree over each card's *rotated* bounding box. Updated incrementally on move or resize.
-- **Visible set** = query(viewport rect expanded by 25%). Cards that enter get a `CardLayer` from the **pool**. Cards that leave return theirs to the pool (up to 64 pooled). Layers for off-screen cards don't exist.
+- **SpatialGrid**: a uniform grid (512 pt cells) over each card's *rotated* bounding box, updated on every change. It's simpler than an R-tree and just as fast at these sizes. Huge cards go in an overflow list, and very large queries scan occupied cells instead of empty ones.
+- **Visible set** = query(viewport rect expanded by 25%). Only visible cards get content bitmaps. Card chrome layers exist for every card: Core Animation skips off-screen layers when compositing, and 500 cards of chrome is cheap. Layer pooling is kept in reserve for M6 if profiling asks for it.
 - Strings are visible if their Bézier bounding box intersects the viewport.
-- **Hit testing**: R-tree point query, then exact test in card-local (unrotated) space, topmost by `z`. For strings: a coarse bounding-box check, then distance to a pre-flattened polyline (16 segments), within 6 pt screen distance.
+- **Hit testing**: grid point query, then exact test in card-local (unrotated) space, topmost by `z`. For strings: a coarse bounding-box check, then distance to a pre-flattened polyline (16 segments), within 6 pt screen distance.
 
 ### 10.7 String geometry
 
@@ -946,7 +958,7 @@ EvidenceBoard/
     └── EvidenceBoard.entitlements
 Packages/
 ├── BoardKit/      Sources/BoardKit/{Model, Codec, Migrations, Graph, Commands}
-├── CanvasKit/     Sources/CanvasKit/{Canvas, Camera, Layers, Strings, Input, LOD, SpatialIndex, ImagePipeline}
+├── CanvasKit/     Sources/CanvasKit/{Canvas, Camera, Nodes, Text, Editing, Interaction, Spatial, ImagePipeline}
 └── LinkPreviewKit/Sources/LinkPreviewKit/{Fetch, HeadParser, Merge, Palette, Cache}
 Tools/Instruments/
 docs/
@@ -1039,7 +1051,7 @@ docs/
 | **BoardKit** | Codec round-trip, migrations, validation, unknown-field preservation, graph queries (focus N hops, shortest-path trace) | Swift Testing (`@Test`), golden JSON fixtures in `Tests/Fixtures/` |
 | **Commands / undo** | Every command's inverse restores an identical board | Property-based tests: random command sequences, then undo all, then compare to the original |
 | **LinkPreviewKit** | Head parser against 60 saved real-world HTML heads; merger priority; palette roles | Fixtures + `URLProtocol` stubs, no live network in CI |
-| **CanvasKit** | Camera math, hit testing on rotated cards, R-tree correctness, string path bounds | Unit tests |
+| **CanvasKit** | Camera math, hit testing and resizing on rotated cards, spatial grid against brute force, text measuring and rendering, string path bounds | Unit tests |
 | **Rendering** | Card visuals per theme and variant | Snapshot tests of `ImageRenderer` output, with a 0.5% pixel tolerance |
 | **Performance** | Pan/zoom FPS on a synthetic 500 / 3,000-card board, open/save timings | `XCTOSSignpostMetric`, `XCTMemoryMetric`, `XCTClockMetric` with baselines |
 | **UI** | Create, paste, connect, save, reopen flows | XCUITest |
@@ -1069,7 +1081,10 @@ docs/
 | Shortcut | Action |
 |---|---|
 | V / T / C / H | Select / Text / Connect / Hand tool |
-| Double-click canvas | New text card |
+| Double-click canvas, or T | New text card (at the pointer) |
+| ⌘⇧T | Insert ▸ Text Card |
+| Double-click card, or ↩ | Edit text |
+| ⌘↩ or Esc (while editing) | Finish editing |
 | ⌘L | Insert link… |
 | ⌘⇧I | Insert image… |
 | ⌘V / ⌘⇧V | Paste / paste as plain text |
