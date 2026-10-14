@@ -140,6 +140,15 @@ struct BoardStoreTests {
         #expect(store.snapshot(now: later.addingTimeInterval(60)).modifiedAt == later)
     }
 
+    @Test func snapshotWorksOffTheMainThread() async throws {
+        let (store, cards) = Self.sampleStore()
+        store.apply(.removeCards([cards[0].id]))
+        store.viewport = Viewport(x: 12, y: 34, zoom: 2)
+        let snapshot = await Task.detached { store.snapshot() }.value
+        #expect(snapshot.cards.count == 3)
+        #expect(snapshot.viewport == Viewport(x: 12, y: 34, zoom: 2))
+    }
+
     // MARK: - Helpers
 
     static func randomCommand(for board: Board, using rng: inout SeededGenerator) -> BoardCommand {

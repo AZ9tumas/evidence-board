@@ -1,9 +1,15 @@
 import Foundation
+import Synchronization
 
 /// The live board behind one document window.
 ///
 /// All edits go through ``apply(_:)``. It mutates the board, tells observers exactly which
 /// cards and strings changed, and returns the inverse command for the undo stack.
+///
+/// The store lives on the main actor, but saving doesn't: SwiftUI asks for document
+/// snapshots on a background thread. So every change is also copied into a lock-protected
+/// mirror that ``snapshot(now:)`` reads from any thread. Copying a `Board` is cheap because
+/// its arrays are copy-on-write.
 @MainActor
 public final class BoardStore {
     public typealias Observer = @MainActor @Sendable (BoardChanges) -> Void
@@ -13,31 +19,47 @@ public final class BoardStore {
 
     /// The current camera position. Kept apart from ``board`` so panning never marks the
     /// document as edited, and merged back in when the document is saved.
-    public var viewport: Viewport
+    public var viewport: Viewport {
+        didSet { mirror.withLock { $0.viewport = viewport } }
+    }
 
     /// Increases with every change. Saving compares it to stamp `modifiedAt`.
     public private(set) var revision = 0
 
     private var cardIndex: [UUID: Int]
     private var observers: [UUID: Observer] = [:]
-    private var snapshotRevision = 0
+
+    private struct Mirror {
+        var board: Board
+        var viewport: Viewport
+        var revision = 0
+        var stampedRevision = 0
+        var modifiedAt: Date
+    }
+
+    private let mirror: Mutex<Mirror>
 
     nonisolated public init(board: Board, loadReport: LoadReport = LoadReport()) {
         self.board = board
         self.loadReport = loadReport
         self.viewport = board.viewport
         self.cardIndex = Self.makeIndex(board.cards)
+        self.mirror = Mutex(Mirror(board: board, viewport: board.viewport, modifiedAt: board.modifiedAt))
     }
 
-    /// The board as it should be written to disk right now.
-    public func snapshot(now: Date = .now) -> Board {
-        if revision != snapshotRevision {
-            board.modifiedAt = now.truncatedToSeconds
-            snapshotRevision = revision
+    /// The board as it should be written to disk right now. Safe to call from any thread.
+    /// `modifiedAt` is stamped with `now` the first time a snapshot follows a change.
+    nonisolated public func snapshot(now: Date = .now) -> Board {
+        mirror.withLock { mirror in
+            if mirror.revision != mirror.stampedRevision {
+                mirror.modifiedAt = now.truncatedToSeconds
+                mirror.stampedRevision = mirror.revision
+            }
+            var board = mirror.board
+            board.viewport = mirror.viewport
+            board.modifiedAt = mirror.modifiedAt
+            return board
         }
-        var board = board
-        board.viewport = viewport
-        return board
     }
 
     // MARK: Lookup
@@ -76,6 +98,12 @@ public final class BoardStore {
         let inverse = perform(command, changes: &changes)
         guard !changes.isEmpty else { return nil }
         revision += 1
+        let board = board
+        let revision = revision
+        mirror.withLock {
+            $0.board = board
+            $0.revision = revision
+        }
         for observer in observers.values { observer(changes) }
         return inverse
     }

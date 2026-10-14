@@ -30,8 +30,8 @@ final class BoardDocument: ReferenceFileDocument, Sendable {
     }
 
     nonisolated func snapshot(contentType: UTType) throws -> Board {
-        // SwiftUI asks for snapshots on the main thread.
-        MainActor.assumeIsolated { store.snapshot() }
+        // SwiftUI may ask from a background thread; the store's snapshot is thread-safe.
+        store.snapshot()
     }
 
     nonisolated func fileWrapper(snapshot: Board, configuration: WriteConfiguration) throws -> FileWrapper {
