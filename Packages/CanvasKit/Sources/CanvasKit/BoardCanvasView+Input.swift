@@ -85,7 +85,7 @@ extension BoardCanvasView {
         }
         commitPendingEdits()
         window?.makeFirstResponder(self)
-        if isSpaceHeld {
+        if isSpaceHeld || tool == .hand {
             beginPan(at: point)
             return
         }
@@ -395,7 +395,7 @@ extension BoardCanvasView {
     private func endPan() {
         guard case .panning = interaction else { return }
         interaction = .idle
-        (isSpaceHeld ? NSCursor.openHand : NSCursor.arrow).set()
+        (isSpaceHeld || tool == .hand ? NSCursor.openHand : NSCursor.arrow).set()
     }
 
     // MARK: - Cursor
@@ -411,9 +411,10 @@ extension BoardCanvasView {
     public override func mouseMoved(with event: NSEvent) {
         guard case .idle = interaction else { return }
         let point = location(of: event)
-        let hovered = isSpaceHeld || framing != nil || detailLevel == .minimal ? nil : card(at: point)
+        let panning = isSpaceHeld || tool == .hand
+        let hovered = panning || framing != nil || detailLevel == .minimal ? nil : card(at: point)
         setHoveredCard(hovered)
-        if isSpaceHeld || isFraming(at: point) {
+        if panning || isFraming(at: point) {
             NSCursor.openHand.set()
         } else if let handle = overlay.handle(at: point) {
             NSCursor.frameResize(position: handle.cursorPosition, directions: .all).set()
@@ -469,6 +470,7 @@ extension BoardCanvasView {
             case "t": createTextCard(at: pointerWorldLocation() ?? camera.center)
             case "c": setTool(tool == .connect ? .select : .connect)
             case "v": setTool(.select)
+            case "h": setTool(.hand)
             case "f": focusSelection()
             default: super.keyDown(with: event)
             }

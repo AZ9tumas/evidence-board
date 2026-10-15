@@ -44,6 +44,8 @@ final class CardNode {
 
     /// The whole image, faded, shown around the card while it's being reframed.
     private let ghost = CALayer()
+    /// A colored halo around search matches.
+    private let glow = CALayer()
     private let shadowLayers = CardNode.shadows.map { _ in CALayer() }
     private let body = CAGradientLayer()
     private let tintBand = CAGradientLayer()
@@ -83,6 +85,9 @@ final class CardNode {
         ghost.opacity = 0.35
         ghost.isHidden = true
         root.addSublayer(ghost)
+        glow.isHidden = true
+        glow.shadowOffset = .zero
+        root.addSublayer(glow)
         for layer in shadowLayers {
             layer.shadowColor = RGBA.black.cgColor
             root.addSublayer(layer)
@@ -187,6 +192,8 @@ final class CardNode {
         }
         shadowStrength = Float(appearance.shadow.alpha)
         applyShadows()
+        glow.frame = bounds
+        glow.shadowPath = outline
 
         body.frame = bounds
         body.cornerRadius = radius
@@ -443,6 +450,15 @@ final class CardNode {
         guard raised != isRaised else { return }
         isRaised = raised
         applyZ()
+    }
+
+    /// Surrounds the card with a halo of `color`, stronger for the match being shown.
+    func setGlow(_ color: RGBA?, strong: Bool) {
+        glow.isHidden = color == nil
+        guard let color else { return }
+        glow.shadowColor = color.cgColor
+        glow.shadowRadius = strong ? 16 : 9
+        glow.shadowOpacity = strong ? 1 : 0.7
     }
 
     func setPinState(_ state: PinState) {

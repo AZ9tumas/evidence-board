@@ -8,7 +8,7 @@ import QuartzCore
 /// pixelates.
 @MainActor
 final class GrainTexture {
-    static let tileSize: CGFloat = 256
+    nonisolated static let tileSize: CGFloat = 256
 
     let layer = CALayer()
     private let rows = CAReplicatorLayer()

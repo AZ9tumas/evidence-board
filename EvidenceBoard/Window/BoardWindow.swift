@@ -7,6 +7,7 @@ struct BoardWindow: View {
     private let store: BoardStore
     @State private var canvas: CanvasController
     @State private var showsLoadBanner = true
+    @AppStorage("alwaysShowMinimap") private var alwaysShowMinimap = false
     private let system = SystemAppearance.shared
 
     init(store: BoardStore) {
@@ -29,8 +30,16 @@ struct BoardWindow: View {
                 ZoomHUD(controller: canvas, theme: theme)
                     .padding(16)
             }
+            .overlay(alignment: .bottomTrailing) {
+                Minimap(controller: canvas, theme: theme, alwaysVisible: alwaysShowMinimap)
+                    .padding(16)
+            }
             .overlay(alignment: .top) {
                 VStack(spacing: 8) {
+                    if canvas.isSearching {
+                        SearchBar(controller: canvas, theme: theme)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
                     if showsLoadBanner, let summary = store.loadReport.summary {
                         LoadBanner(message: summary, theme: theme) { showsLoadBanner = false }
                             .transition(.move(edge: .top).combined(with: .opacity))
@@ -48,6 +57,8 @@ struct BoardWindow: View {
             }
             .animation(.spring(response: 0.35, dampingFraction: 0.8), value: showsLoadBanner)
             .animation(.spring(response: 0.35, dampingFraction: 0.8), value: canvas.modeStatus)
+            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: canvas.isSearching)
+            .toolbar { BoardToolbar(controller: canvas) }
             .animation(.easeInOut(duration: 0.2), value: canvas.notice)
             .focusedSceneValue(\.canvasController, canvas)
             #if DEBUG
@@ -215,6 +226,14 @@ private enum SnapshotScenario {
             canvas.addTestWebCards()
             try? await Task.sleep(for: .seconds(2))
             canvas.debugLookAtCards(at: [0, 1], zoom: 1.5)
+        case "search":
+            canvas.beginSearch()
+            canvas.searchQuery = "night"
+        case "minimap":
+            UserDefaults.standard.set(true, forKey: "alwaysShowMinimap")
+            canvas.zoom(to: 1.6)
+        case "hand":
+            canvas.setTool(.hand)
         case "cork", "blueprint", "daylight", "noir":
             canvas.setTheme(ThemeID(rawValue: scenario) ?? .system)
         case "webdaylight", "webcork", "webblueprint":

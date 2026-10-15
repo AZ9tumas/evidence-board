@@ -81,7 +81,14 @@ public final class BoardCanvasView: NSView {
     var spaceTapPending = false
     /// The color, thickness and style of the last string changed, used for new strings.
     var newStringStyle = BoardString(from: UUID(), to: UUID())
-    var highlight: Highlight?
+    var highlight: Highlight? {
+        didSet {
+            // Focus, Trace or Esc on the board ends a search; tell the search field.
+            if case .search = oldValue {
+                if case .search = highlight {} else { controller?.searchDidEnd() }
+            }
+        }
+    }
     var highlightedCards: Set<UUID> = []
     var highlightedStrings: Set<UUID> = []
     var tracePath: GraphPath?
@@ -643,7 +650,7 @@ public final class BoardCanvasView: NSView {
         layoutLabelEditor()
         updateVisibility()
         settleTierIfNeeded()
-        controller?.cameraDidChange(camera)
+        controller?.cameraDidChange(camera, visible: camera.visibleWorldRect(in: size))
     }
 
     /// Text bitmaps and ring widths follow the zoom once it has been still for a moment, so a

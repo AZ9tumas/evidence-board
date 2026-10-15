@@ -23,6 +23,29 @@ public final class CanvasController {
     /// The board's theme, as saved in the file. `.system` follows the Mac's appearance.
     public private(set) var theme: ThemeID
 
+    /// The part of the board in view, in world coordinates.
+    public private(set) var visibleWorldRect: CGRect = .zero
+    /// True while the view is being panned or zoomed, and for 1.5 s after (the minimap).
+    public private(set) var isNavigating = false
+    /// Goes up with every edit, so views drawn from the board know to redraw.
+    public private(set) var boardRevision = 0
+
+    /// The search field is open.
+    public private(set) var isSearching = false
+    /// What the search field holds. Setting it searches the board.
+    public var searchQuery = "" {
+        didSet {
+            guard searchQuery != oldValue, isSearching else { return }
+            view?.search(searchQuery)
+        }
+    }
+    public private(set) var searchMatchCount = 0
+    /// Which match is shown, from 0.
+    public private(set) var searchMatchIndex: Int?
+
+    @ObservationIgnored private var lastCameraChange = Date.distantPast
+    @ObservationIgnored private var navigationTask: Task<Void, Never>?
+
     @ObservationIgnored
     private var noticeTask: Task<Void, Never>?
 
@@ -71,6 +94,43 @@ public final class CanvasController {
     /// Insert ▸ Image…: picks image or PDF files and pins them to the board.
     public func insertImage() { view?.presentImagePicker() }
 
+    // MARK: Navigation
+
+    /// Centers the view on `point` (world coordinates), keeping the zoom.
+    public func centerView(on point: CGPoint, animated: Bool) {
+        guard let view else { return }
+        let target = Camera(center: point, zoom: view.camera.zoom)
+        if animated {
+            view.animateCamera(to: target, anchor: nil)
+        } else {
+            view.stopCameraAnimation()
+            view.setCamera(target)
+        }
+    }
+
+    // MARK: Search
+
+    /// ⌘F: opens the search field. Typing searches text, captions, link titles and addresses.
+    public func beginSearch() {
+        guard !isSearching else { return }
+        isSearching = true
+        if !searchQuery.isEmpty { view?.search(searchQuery) }
+    }
+
+    /// Esc: closes the search and brings the board back.
+    public func endSearch() {
+        guard isSearching else { return }
+        isSearching = false
+        view?.endSearch()
+        searchMatchCount = 0
+        searchMatchIndex = nil
+    }
+
+    /// ↩ or ⌘G.
+    public func nextMatch() { view?.stepSearch(1) }
+    /// ⇧⌘G.
+    public func previousMatch() { view?.stepSearch(-1) }
+
     // MARK: Theme
 
     /// Switches the board to `theme`, as one undoable step.
@@ -104,6 +164,8 @@ public final class CanvasController {
     /// Highlights the selection and its neighbors; again to widen by one hop.
     public func focusSelection() { view?.focusSelection() }
     public func toggleConnectTool() { view?.setTool(tool == .connect ? .select : .connect) }
+    /// V, C or H.
+    public func setTool(_ newTool: CanvasTool) { view?.setTool(newTool) }
 
     /// Leaves Focus, Trace and the Connect tool.
     public func exitMode() {
@@ -172,13 +234,16 @@ public final class CanvasController {
         view.controller = self
     }
 
-    func cameraDidChange(_ camera: Camera) {
+    func cameraDidChange(_ camera: Camera, visible: CGRect) {
         store.viewport = camera.viewport
+        visibleWorldRect = visible
+        noteNavigation()
         let percent = Self.percent(camera.zoom)
         if percent != zoomPercent { zoomPercent = percent }
     }
 
     func boardDidChange(isEmpty: Bool) {
+        boardRevision += 1
         if isEmpty != isBoardEmpty { isBoardEmpty = isEmpty }
     }
 
@@ -186,6 +251,33 @@ public final class CanvasController {
         if count != selectionCount { selectionCount = count }
         if strings != stringSelectionCount { stringSelectionCount = strings }
         if links != linkSelectionCount { linkSelectionCount = links }
+    }
+
+    func searchDidUpdate(count: Int, index: Int?) {
+        if count != searchMatchCount { searchMatchCount = count }
+        if index != searchMatchIndex { searchMatchIndex = index }
+    }
+
+    /// The board left search mode by itself (Esc on the board, Focus or Trace).
+    func searchDidEnd() {
+        guard isSearching else { return }
+        isSearching = false
+        searchMatchCount = 0
+        searchMatchIndex = nil
+    }
+
+    /// Shows the minimap while the camera moves and hides it 1.5 s after it stops.
+    private func noteNavigation() {
+        lastCameraChange = .now
+        if !isNavigating { isNavigating = true }
+        guard navigationTask == nil else { return }
+        navigationTask = Task { @MainActor [weak self] in
+            while let wait = self.map({ $0.lastCameraChange.addingTimeInterval(1.5).timeIntervalSinceNow }), wait > 0 {
+                try? await Task.sleep(for: .seconds(wait))
+            }
+            self?.isNavigating = false
+            self?.navigationTask = nil
+        }
     }
 
     func themeDidChange(_ newTheme: ThemeID) {

@@ -6,6 +6,7 @@ import CanvasKit
 /// come from the standard Edit menu and reach the canvas through the responder chain.
 struct BoardCommands: Commands {
     @FocusedValue(\.canvasController) private var canvas
+    @AppStorage("alwaysShowMinimap") private var alwaysShowMinimap = false
 
     private var hasSelection: Bool { canvas?.hasSelection ?? false }
     private var hasLinkSelection: Bool { canvas?.hasLinkSelection ?? false }
@@ -15,6 +16,18 @@ struct BoardCommands: Commands {
             Button("Duplicate") { canvas?.duplicateSelection() }
                 .keyboardShortcut("d", modifiers: .command)
                 .disabled(!hasSelection)
+        }
+
+        CommandGroup(after: .textEditing) {
+            Button("Find…") { canvas?.beginSearch() }
+                .keyboardShortcut("f", modifiers: .command)
+                .disabled(canvas == nil)
+            Button("Find Next") { canvas?.nextMatch() }
+                .keyboardShortcut("g", modifiers: .command)
+                .disabled(!(canvas?.isSearching ?? false))
+            Button("Find Previous") { canvas?.previousMatch() }
+                .keyboardShortcut("g", modifiers: [.command, .shift])
+                .disabled(!(canvas?.isSearching ?? false))
         }
 
         CommandMenu("Insert") {
@@ -97,6 +110,8 @@ struct BoardCommands: Commands {
                 .keyboardShortcut("0", modifiers: .command)
             Button("Actual Size") { canvas?.zoom(to: 1) }
                 .keyboardShortcut("1", modifiers: .command)
+            Divider()
+            Toggle("Always Show Minimap", isOn: $alwaysShowMinimap)
             Divider()
         }
 

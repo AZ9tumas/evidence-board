@@ -2,16 +2,29 @@ import AppKit
 import BoardKit
 
 /// The sticky canvas tools (DESIGN.md §5.1). Text is a one-shot key (T), so it isn't one.
-public enum CanvasTool: Sendable {
+public enum CanvasTool: Sendable, CaseIterable {
     case select
     /// Drag from anywhere on a card, not only its pin, to connect it.
     case connect
+    /// Drag anywhere to move around the board.
+    case hand
 }
 
 /// What Focus or Trace is showing.
 enum Highlight: Equatable {
     case focus(seeds: Set<UUID>, hops: Int)
     case trace(from: UUID, to: UUID)
+    /// Cards matching a search, in order, and which one is shown.
+    case search(query: String, matches: [UUID], current: Int?)
+
+    /// Whether everything outside the highlight is dimmed. A search with nothing typed yet
+    /// leaves the board as it is.
+    var dimsBoard: Bool {
+        if case .search(let query, _, _) = self {
+            return !query.allSatisfy(\.isWhitespace)
+        }
+        return true
+    }
 }
 
 /// A string being pulled out of a pin. Its loose end follows the pointer on a spring, and
@@ -392,7 +405,7 @@ extension BoardCanvasView {
         if newTool == .select, connection != nil { cancelConnecting(animated: true) }
         updateModeStatus()
         controller?.toolDidChange(newTool)
-        if case .idle = interaction { NSCursor.arrow.set() }
+        if case .idle = interaction { (newTool == .hand ? NSCursor.openHand : NSCursor.arrow).set() }
     }
 
     /// Esc lets go of a string, then leaves Focus or Trace, then the Connect tool, then
@@ -501,6 +514,8 @@ extension BoardCanvasView {
                 highlight = nil
                 controller?.showNotice("The traced cards are no longer connected")
             }
+        case .search(_, let matches, _):
+            cards = Set(matches.filter { store.contains(card: $0) })
         case nil:
             break
         }
@@ -513,9 +528,18 @@ extension BoardCanvasView {
     }
 
     private func applyHighlight(animated: Bool) {
-        let active = highlight != nil
+        let active = highlight?.dimsBoard ?? false
+        var current: UUID?
+        if case .search(_, let matches, let index?) = highlight, matches.indices.contains(index) {
+            current = matches[index]
+        }
+        let searching = if case .search = highlight { true } else { false }
         withoutAnimation {
-            for (id, node) in cardNodes { node.setRaised(active && highlightedCards.contains(id)) }
+            for (id, node) in cardNodes {
+                let raised = active && highlightedCards.contains(id)
+                node.setRaised(raised)
+                node.setGlow(searching && raised ? canvasAppearance.selection.from : nil, strong: id == current)
+            }
             if active, dimLayer.isHidden {
                 dimLayer.opacity = 0
                 dimLayer.isHidden = false
@@ -540,7 +564,7 @@ extension BoardCanvasView {
         if !active {
             Task { @MainActor [weak self] in
                 try? await Task.sleep(for: .milliseconds(300))
-                guard let self, self.highlight == nil else { return }
+                guard let self, !(self.highlight?.dimsBoard ?? false) else { return }
                 withoutAnimation { self.dimLayer.isHidden = true }
             }
         }
