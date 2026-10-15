@@ -65,8 +65,7 @@ struct BoardWindow: View {
             .task { await SnapshotScenario.run(on: canvas) }
             #endif
             .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
-            .background(WindowAppearance(isDark: theme.isDark))
-            .environment(\.colorScheme, theme.colorScheme)
+            .preferredColorScheme(theme.colorScheme)
             .animation(.easeInOut(duration: 0.4), value: theme.id)
             .frame(minWidth: 640, minHeight: 420)
     }
