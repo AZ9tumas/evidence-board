@@ -19,6 +19,9 @@ struct BoardCommands: Commands {
             Button("Text Card") { canvas?.newTextCard() }
                 .keyboardShortcut("t", modifiers: [.command, .shift])
                 .disabled(canvas == nil)
+            Button("Image…") { canvas?.insertImage() }
+                .keyboardShortcut("i", modifiers: [.command, .shift])
+                .disabled(canvas == nil)
         }
 
         CommandMenu("Arrange") {
@@ -50,6 +53,9 @@ struct BoardCommands: Commands {
         CommandMenu("Debug") {
             Button("Add 100 Test Cards") { canvas?.addTestCards(count: 100) }
             Button("Add 500 Test Cards") { canvas?.addTestCards(count: 500) }
+            Divider()
+            Button("Add 50 Test Photos") { canvas?.addTestPhotos(count: 50) }
+            Button("Add 200 Test Photos") { canvas?.addTestPhotos(count: 200) }
         }
         #endif
     }

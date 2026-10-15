@@ -44,7 +44,8 @@ struct BoardCodecTests {
         for asset in board.assets.values {
             let data = try #require(asset.decodedData())
             #expect(data.count == asset.byteCount)
-            #expect(data.starts(with: [0x89, 0x50, 0x4E, 0x47])) // PNG signature
+            let signature: [UInt8] = asset.mime == "image/png" ? [0x89, 0x50, 0x4E, 0x47] : [0xFF, 0xD8, 0xFF]
+            #expect(data.starts(with: signature))
         }
     }
 

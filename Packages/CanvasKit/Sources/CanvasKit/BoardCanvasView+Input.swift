@@ -12,6 +12,8 @@ extension BoardCanvasView {
         case draggingCards(startWorld: CGPoint, origins: [UUID: Rect], current: [UUID: Rect])
         case marquee(start: CGPoint, base: Set<UUID>)
         case resizing(id: UUID, handle: ResizeHandle, original: Card, latest: Card)
+        /// Panning a photo inside its frame while reframing.
+        case framing(last: CGPoint)
     }
 
     func location(of event: NSEvent) -> CGPoint {
@@ -46,7 +48,7 @@ extension BoardCanvasView {
     }
 
     func updateHandles() {
-        var showsHandles = selection.count == 1 && textEditor == nil
+        var showsHandles = selection.count == 1 && textEditor == nil && captionEditor == nil && framing == nil
         switch interaction {
         case .draggingCards, .marquee, .panning: showsHandles = false
         default: break
@@ -62,7 +64,13 @@ extension BoardCanvasView {
 
     public override func mouseDown(with event: NSEvent) {
         let point = location(of: event)
-        if textEditor != nil { finishEditing() }
+        let world = camera.viewToWorld(point, in: bounds.size)
+        if framing != nil, !isSpaceHeld, isFraming(at: point) {
+            interaction = .framing(last: world)
+            NSCursor.closedHand.set()
+            return
+        }
+        commitPendingEdits()
         window?.makeFirstResponder(self)
         if isSpaceHeld {
             beginPan(at: point)
@@ -70,11 +78,10 @@ extension BoardCanvasView {
         }
         let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
         let additive = modifiers.contains(.shift) || modifiers.contains(.command)
-        let world = camera.viewToWorld(point, in: bounds.size)
 
         if event.clickCount == 2 {
             if let id = card(at: point) {
-                beginEditing(id, isNewCard: false, selectAll: false)
+                activate(id, at: world)
             } else {
                 createTextCard(at: world)
             }
@@ -128,8 +135,12 @@ extension BoardCanvasView {
         case .marquee(let start, let base):
             updateMarquee(from: start, to: point, base: base)
         case .resizing(let id, let handle, let original, _):
-            let keepAspect = event.modifierFlags.contains(.shift)
-            resize(id, handle: handle, original: original, to: world, keepAspectRatio: keepAspect)
+            // Photos keep their shape unless ⇧ is held; everything else is the other way round.
+            let shift = event.modifierFlags.contains(.shift)
+            resize(id, handle: handle, original: original, to: world, keepAspectRatio: original.kind == .image ? !shift : shift)
+        case .framing(let last):
+            panFraming(dx: world.x - last.x, dy: world.y - last.y)
+            interaction = .framing(last: world)
         }
     }
 
@@ -158,6 +169,8 @@ extension BoardCanvasView {
             }
         case .marquee:
             withoutAnimation { overlay.showMarquee(nil) }
+        case .framing:
+            NSCursor.openHand.set()
         case .resizing(let id, _, let original, let latest):
             if latest != original {
                 boardEditor.perform(.updateCards([latest]), actionName: "Resize")
@@ -211,7 +224,7 @@ extension BoardCanvasView {
     }
 
     private func resize(_ id: UUID, handle: ResizeHandle, original: Card, to world: CGPoint, keepAspectRatio: Bool) {
-        let minimum = original.kind == .text ? TextCardTypography.minimumSize : CGSize(width: 60, height: 40)
+        let minimum = original.kind == .text ? TextCardTypography.minimumSize : ImageCardLayout.minimumSize
         var frame = CanvasGeometry.resizedFrame(
             of: original, dragging: handle, to: world, minimumSize: minimum, keepAspectRatio: keepAspectRatio
         )
@@ -240,6 +253,13 @@ extension BoardCanvasView {
 
     public override func scrollWheel(with event: NSEvent) {
         stopCameraAnimation()
+        let point = location(of: event)
+        if isFraming(at: point) {
+            // Scrolling over a photo being reframed zooms the photo, not the board.
+            let step: CGFloat = event.hasPreciseScrollingDeltas ? 0.01 : 0.1
+            zoomFraming(by: exp(event.scrollingDeltaY * step), around: camera.viewToWorld(point, in: bounds.size))
+            return
+        }
         if event.modifierFlags.contains(.command) {
             let step: CGFloat = event.hasPreciseScrollingDeltas ? 0.01 : 0.1
             let factor = exp(event.scrollingDeltaY * step)
@@ -255,6 +275,11 @@ extension BoardCanvasView {
 
     public override func magnify(with event: NSEvent) {
         stopCameraAnimation()
+        let point = location(of: event)
+        if isFraming(at: point) {
+            zoomFraming(by: 1 + event.magnification, around: camera.viewToWorld(point, in: bounds.size))
+            return
+        }
         setCamera(camera.zoomed(to: camera.zoom * (1 + event.magnification), anchor: location(of: event), in: bounds.size))
     }
 
@@ -312,7 +337,7 @@ extension BoardCanvasView {
 
     public override func mouseMoved(with event: NSEvent) {
         guard case .idle = interaction else { return }
-        if isSpaceHeld {
+        if isSpaceHeld || isFraming(at: location(of: event)) {
             NSCursor.openHand.set()
         } else if let handle = overlay.handle(at: location(of: event)) {
             NSCursor.frameResize(position: handle.cursorPosition, directions: .all).set()
@@ -328,6 +353,10 @@ extension BoardCanvasView {
     public override func keyDown(with event: NSEvent) {
         let modifiers = event.modifierFlags.intersection([.command, .option, .control, .shift])
         let step: Double = modifiers.contains(.shift) ? 10 : 1
+        if framing != nil, [36, 76, 53].contains(event.keyCode) {
+            finishFraming(commit: event.keyCode != 53)
+            return
+        }
         switch event.keyCode {
         case Self.spaceKey:
             if !isSpaceHeld {
@@ -338,7 +367,7 @@ extension BoardCanvasView {
             deleteSelection()
         case 36, 76: // return, enter
             if selection.count == 1, let id = selection.first {
-                beginEditing(id, isNewCard: false, selectAll: false)
+                activate(id, at: nil)
             }
         case 53: // escape
             select([])

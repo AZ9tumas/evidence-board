@@ -109,7 +109,7 @@ struct TextCardTests {
         cardFill: GradientPair(.black, .black), cardStroke: GradientPair(.white, .white), skeleton: .white,
         pin: GradientPair(.white, .black), lockedPin: GradientPair(.white, .black), tints: [:],
         text: .white, codeText: .white, paperFill: GradientPair(.black, .black), paperText: .white,
-        selection: GradientPair(.white, .white)
+        selection: GradientPair(.white, .white), photoPaper: GradientPair(.white, .white), captionInk: .black
     )
 
     @Test func longerTextIsTaller() {

@@ -77,6 +77,9 @@ public struct CanvasAppearance: Sendable, Hashable {
     public var paperText: RGBA
     /// Selection rings, resize handles and the marquee.
     public var selection: GradientPair
+    /// Paper of polaroid and photo frames, and the ink of captions written on it.
+    public var photoPaper: GradientPair
+    public var captionInk: RGBA
 
     public init(
         background: GradientPair,
@@ -92,7 +95,9 @@ public struct CanvasAppearance: Sendable, Hashable {
         codeText: RGBA,
         paperFill: GradientPair,
         paperText: RGBA,
-        selection: GradientPair
+        selection: GradientPair,
+        photoPaper: GradientPair,
+        captionInk: RGBA
     ) {
         self.background = background
         self.vignette = vignette
@@ -108,6 +113,8 @@ public struct CanvasAppearance: Sendable, Hashable {
         self.paperFill = paperFill
         self.paperText = paperText
         self.selection = selection
+        self.photoPaper = photoPaper
+        self.captionInk = captionInk
     }
 
     func gradient(for tint: Tint) -> GradientPair {

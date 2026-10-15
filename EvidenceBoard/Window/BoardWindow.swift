@@ -120,6 +120,18 @@ private enum SnapshotScenario {
             canvas.addTestCards(count: 500)
             try? await Task.sleep(for: .milliseconds(300))
             canvas.zoomToFit()
+        case "photos":
+            canvas.addTestPhotos(count: 12)
+            try? await Task.sleep(for: .seconds(2))
+            canvas.zoomToFit()
+        case "photos200":
+            canvas.addTestPhotos(count: 200)
+            try? await Task.sleep(for: .seconds(4))
+            canvas.zoomToFit()
+        case "caption":
+            canvas.debugSelectCard(at: 2, edit: true)
+        case "reframe":
+            canvas.debugReframeCard(at: 2, zoom: 1.8)
         default:
             break
         }

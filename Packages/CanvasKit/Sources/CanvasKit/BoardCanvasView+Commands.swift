@@ -1,4 +1,5 @@
 import AppKit
+import UniformTypeIdentifiers
 import BoardKit
 
 extension NSPasteboard.PasteboardType {
@@ -46,7 +47,7 @@ extension BoardCanvasView: NSMenuItemValidation {
     // MARK: - Clipboard
 
     var canPaste: Bool {
-        NSPasteboard.general.availableType(from: [.boardClip, .string]) != nil
+        NSPasteboard.general.availableType(from: Self.acceptedPasteboardTypes) != nil
     }
 
     func writeSelectionToPasteboard() {
@@ -68,21 +69,20 @@ extension BoardCanvasView: NSMenuItemValidation {
             }
             .joined(separator: "\n\n")
         if !text.isEmpty { item.setString(text, forType: .string) }
+        // A single photo also goes on the clipboard as an image, for pasting into other apps.
+        if clip.cards.count == 1, case .image(let photo) = clip.cards[0].content,
+           let asset = clip.assets[photo.asset], let data = asset.decodedData(),
+           let type = UTType(mimeType: asset.mime) {
+            item.setData(data, forType: NSPasteboard.PasteboardType(type.identifier))
+        }
         NSPasteboard.general.clearContents()
         NSPasteboard.general.writeObjects([item])
     }
 
     func pasteFromPasteboard() {
-        let pasteboard = NSPasteboard.general
-        let target = pointerWorldLocation() ?? camera.center
-        if let data = pasteboard.data(forType: .boardClip),
-           let clip = try? BoardCodec.decodeClip(data), let bounds = clip.bounds {
-            let copy = clip.instantiated(dx: Double(target.x) - bounds.midX, dy: Double(target.y) - bounds.midY, baseZ: store.maxZ + 1)
-            boardEditor.perform(copy.insertCommand, actionName: "Paste")
-            select(Set(copy.cards.map(\.id)))
-        } else if let text = pasteboard.string(forType: .string),
-                  !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            insertTextCard(text, at: target, actionName: "Paste")
+        commitPendingEdits()
+        if !ingest(.general, at: pointerWorldLocation() ?? camera.center, actionName: "Paste") {
+            NSSound.beep()
         }
     }
 
@@ -217,12 +217,13 @@ extension BoardCanvasView: NSMenuItemValidation {
     // MARK: - Context menu
 
     public override func menu(for event: NSEvent) -> NSMenu? {
-        finishEditing()
+        commitPendingEdits()
         let point = location(of: event)
         let menu = NSMenu()
         guard let id = card(at: point) else {
             let world = camera.viewToWorld(point, in: bounds.size)
             menu.addItem(item("New Text Card Here", #selector(newTextCardFromMenu(_:)), value: NSValue(point: world)))
+            menu.addItem(item("Insert Image…", #selector(insertImageFromMenu(_:))))
             menu.addItem(item("Paste", #selector(paste(_:))))
             menu.addItem(.separator())
             menu.addItem(item("Zoom to Fit", #selector(zoomToFitFromMenu(_:))))
@@ -236,9 +237,27 @@ extension BoardCanvasView: NSMenuItemValidation {
             return nil
         }
 
+        let photos = cards.compactMap(\.content.imagePayload)
         if cards.count == 1, texts.count == 1 {
             menu.addItem(item("Edit Text", #selector(editFromMenu(_:))))
             menu.addItem(.separator())
+        }
+        if cards.count == 1, photos.count == 1 {
+            menu.addItem(item("Edit Caption", #selector(captionFromMenu(_:))))
+            menu.addItem(item("Reframe Photo", #selector(reframeFromMenu(_:))))
+            menu.addItem(.separator())
+        }
+        if !photos.isEmpty {
+            let frames = NSMenu()
+            for style in ImageFrameStyle.allCases {
+                let entry = item(style.title, #selector(frameFromMenu(_:)), value: style.rawValue)
+                entry.state = photos.allSatisfy { $0.frameStyle == style } ? .on : .off
+                frames.addItem(entry)
+            }
+            menu.addItem(submenu("Frame", frames))
+            if photos.contains(where: { $0.crop != nil }) {
+                menu.addItem(item("Reset Framing", #selector(resetFramingFromMenu(_:))))
+            }
         }
         if !texts.isEmpty {
             let styles = NSMenu()
@@ -305,6 +324,24 @@ extension BoardCanvasView: NSMenuItemValidation {
     }
 
     @objc private func zoomToFitFromMenu(_ sender: NSMenuItem) { zoomToFit() }
+    @objc private func insertImageFromMenu(_ sender: NSMenuItem) { presentImagePicker() }
+
+    @objc private func captionFromMenu(_ sender: NSMenuItem) {
+        guard let id = selection.first else { return }
+        beginCaptionEditing(id)
+    }
+
+    @objc private func reframeFromMenu(_ sender: NSMenuItem) {
+        guard let id = selection.first else { return }
+        beginFraming(id)
+    }
+
+    @objc private func frameFromMenu(_ sender: NSMenuItem) {
+        guard let raw = sender.representedObject as? String, let style = ImageFrameStyle(rawValue: raw) else { return }
+        setFrameStyleOnSelection(style)
+    }
+
+    @objc private func resetFramingFromMenu(_ sender: NSMenuItem) { resetFramingOnSelection() }
 
     @objc private func editFromMenu(_ sender: NSMenuItem) {
         guard let id = selection.first else { return }
@@ -334,6 +371,16 @@ extension TextCardStyle {
         case .note: "Note"
         case .headline: "Headline"
         case .typewriter: "Typewriter"
+        }
+    }
+}
+
+extension ImageFrameStyle {
+    var title: String {
+        switch self {
+        case .polaroid: "Polaroid"
+        case .photo: "Photo"
+        case .borderless: "Borderless"
         }
     }
 }

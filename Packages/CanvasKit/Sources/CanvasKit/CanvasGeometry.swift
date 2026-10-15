@@ -9,6 +9,12 @@ enum CanvasGeometry {
     static let pinInset: CGFloat = 10
     static let pinDiameter: CGFloat = 14
 
+    /// Text and web cards share one radius; photo frames each have their own.
+    static func cornerRadius(of card: Card) -> CGFloat {
+        if case .image(let image) = card.content { return ImageCardLayout.cardCornerRadius(for: image.frameStyle) }
+        return cardCornerRadius
+    }
+
     static func radians(_ degrees: Double) -> CGFloat {
         CGFloat(degrees) * .pi / 180
     }

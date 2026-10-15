@@ -37,7 +37,7 @@ jobs:
           capture() {
             shot=$((shot + 1))
             open -n --env "EB_SNAPSHOT_SCENARIO=${2:-none}" -a "$app" "$1" --args -ApplePersistenceIgnoreState YES
-            sleep 7
+            sleep 9
             pgrep -x EvidenceBoard >/dev/null && echo "shot $shot: running" || echo "shot $shot: APP NOT RUNNING"
             screencapture -x "/tmp/shot$shot.png"
             sips -Z 900 -s format jpeg -s formatOptions 60 "/tmp/shot$shot.png" --out "/tmp/shot$shot.jpg" >/dev/null
@@ -49,6 +49,10 @@ jobs:
           capture /tmp/Harbor.evboard select
           capture /tmp/Harbor.evboard edit
           capture /tmp/Harbor.evboard stress
+          capture /tmp/Empty.evboard photos
+          capture /tmp/Empty.evboard photos200
+          capture /tmp/Harbor.evboard caption
+          capture /tmp/Harbor.evboard reframe
           echo "$shot" > /tmp/shot-count
       - name: Publish images
         env:

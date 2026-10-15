@@ -52,6 +52,10 @@ public final class BoardCanvasView: NSView {
     var tierSettleTask: Task<Void, Never>?
     var visibleIDs: Set<UUID> = []
     lazy var renderQueue = RenderQueue(view: self) { [weak self] id in self?.renderText(of: id) }
+    let imageStore = ImageStore()
+    var captionEditor: CaptionEditor?
+    /// The photo being reframed, if any.
+    var framing: FramingSession?
 
     struct CameraAnimation {
         let from: Camera
@@ -105,6 +109,7 @@ public final class BoardCanvasView: NSView {
         applyAppearance()
         observerToken = store.addObserver { [weak self] changes in self?.storeDidChange(changes) }
         fitAutoHeightTextCards()
+        registerForDraggedTypes(Self.acceptedPasteboardTypes)
     }
 
     @available(*, unavailable)
@@ -150,8 +155,11 @@ public final class BoardCanvasView: NSView {
     public override func viewDidChangeBackingProperties() {
         super.viewDidChangeBackingProperties()
         updateContentsScale()
-        for node in cardNodes.values { node.discardRenderedText() }
-        updateVisibility()
+        for node in cardNodes.values {
+            node.discardRenderedText()
+            node.discardImage()
+        }
+        updateVisibility(force: true)
     }
 
     var backingScale: CGFloat { window?.backingScaleFactor ?? 2 }
@@ -243,6 +251,8 @@ public final class BoardCanvasView: NSView {
         spatialIndex.remove(id)
         visibleIDs.remove(id)
         if textEditor?.cardID == id { tearDownEditor() }
+        if captionEditor?.cardID == id { finishCaptionEditing(commit: false) }
+        if framing?.cardID == id { framing = nil }
     }
 
     func addStringNode(_ string: BoardString) {
@@ -353,35 +363,88 @@ public final class BoardCanvasView: NSView {
             let keep = visibleRect.insetBy(dx: -visibleRect.width, dy: -visibleRect.height)
             for id in left where spatialIndex.rects[id]?.intersects(keep) != true {
                 cardNodes[id]?.discardRenderedText()
+                cardNodes[id]?.discardImage()
             }
         }
         scheduleRenders()
     }
 
     func scheduleRenders() {
+        let center = camera.center
+        let byDistance = visibleIDs.compactMap { id -> (UUID, CGFloat)? in
+            guard let frame = cardNodes[id]?.card.frame else { return nil }
+            return (id, hypot(CGFloat(frame.midX) - center.x, CGFloat(frame.midY) - center.y))
+        }
+        .sorted { $0.1 < $1.1 }
+        .map { $0.0 }
+
+        // Photos stay visible at every detail level, so they load even when zoomed far out.
+        for id in byDistance { requestImageIfNeeded(id) }
+
         guard detailLevel != .minimal else {
             renderQueue.schedule([])
             return
         }
-        let center = camera.center
-        let needed = visibleIDs.compactMap { id -> (UUID, CGFloat)? in
-            guard let node = cardNodes[id], node.isTextCard, node.renderedTier != renderTier,
-                  textEditor?.cardID != id else { return nil }
-            let frame = node.card.frame
-            return (id, hypot(CGFloat(frame.midX) - center.x, CGFloat(frame.midY) - center.y))
-        }
-        renderQueue.schedule(needed.sorted { $0.1 < $1.1 }.map { $0.0 })
+        renderQueue.schedule(byDistance.filter { id in
+            guard let node = cardNodes[id] else { return false }
+            return node.hasTextContent && node.renderedTier != renderTier && editingCardID != id
+        })
     }
 
-    /// Draws the text of one card for the current tier.
+    /// The card whose text or caption is open in an editor.
+    var editingCardID: UUID? {
+        textEditor?.cardID ?? captionEditor?.cardID
+    }
+
+    /// Draws the text (or caption) of one card for the current tier.
     func renderText(of id: UUID) {
         guard let node = cardNodes[id], node.renderedTier != renderTier, visibleIDs.contains(id),
-              let card = liveCard(id), case .text(let text) = card.content else { return }
-        let size = CGSize(width: card.frame.width, height: card.frame.height)
-        // Cap bitmaps at 4096 px on the long side, however far in you zoom.
-        let scale = min(renderTier * backingScale, 4096 / max(size.width, size.height, 1))
-        let image = TextCardTypography.render(text, size: size, scale: scale, appearance: canvasAppearance)
+              let card = liveCard(id) else { return }
+        let image: CGImage?
+        let scale: CGFloat
+        switch card.content {
+        case .text(let text):
+            let size = CGSize(width: card.frame.width, height: card.frame.height)
+            // Cap bitmaps at 4096 px on the long side, however far in you zoom.
+            scale = min(renderTier * backingScale, 4096 / max(size.width, size.height, 1))
+            image = TextCardTypography.render(text, size: size, scale: scale, appearance: canvasAppearance)
+        case .image(let photo):
+            guard let caption = photo.caption, !caption.isEmpty else { return }
+            let size = ImageCardLayout.captionRect(
+                for: photo.frameStyle, in: CGSize(width: card.frame.width, height: card.frame.height)
+            ).size
+            scale = min(renderTier * backingScale, 4096 / max(size.width, size.height, 1))
+            image = TextCardTypography.renderCaption(
+                caption, overlay: ImageCardLayout.captionIsOverlaid(for: photo.frameStyle),
+                size: size, scale: scale, appearance: canvasAppearance
+            )
+        case .web:
+            return
+        }
         withoutAnimation { node.setRenderedText(image, tier: renderTier, scale: scale) }
+    }
+
+    /// Starts decoding a photo if the card needs more pixels than it has asked for.
+    func requestImageIfNeeded(_ id: UUID) {
+        guard let node = cardNodes[id], let card = liveCard(id), case .image(let photo) = card.content,
+              let asset = store.board.assets[photo.asset] else { return }
+        let photoSize = ImageCardLayout.photoRect(
+            for: photo.frameStyle, in: CGSize(width: card.frame.width, height: card.frame.height)
+        ).size
+        let knownAspect = node.imageAspect
+            ?? asset.pixelWidth.flatMap { width in asset.pixelHeight.map { CGFloat(width) / CGFloat(max($0, 1)) } }
+            ?? photoSize.width / max(photoSize.height, 1)
+        // While reframing, ask for enough pixels for the zoomed-in crop.
+        let crop = framing?.cardID == id ? framing.map { Rect($0.crop) } : photo.crop
+        let needed = ImageCardLayout.bucket(ImageCardLayout.neededLongSide(
+            crop: crop, imageAspect: knownAspect, photoSize: photoSize, scale: renderTier * backingScale
+        ))
+        if let requested = node.requestedLongSide, requested >= needed { return }
+        node.requestedLongSide = needed
+        imageStore.load(asset: photo.asset, base64: asset.base64, longSide: needed) { [weak self, weak node] image in
+            guard let self, let node, self.cardNodes[node.id] === node else { return }
+            withoutAnimation { node.setImage(image) }
+        }
     }
 
     /// Redraws one card right away, for live resizing and typing.
@@ -411,6 +474,7 @@ public final class BoardCanvasView: NSView {
             updateHandles()
         }
         layoutEditor()
+        layoutCaptionEditor()
         updateVisibility()
         settleTierIfNeeded()
         controller?.cameraDidChange(camera)

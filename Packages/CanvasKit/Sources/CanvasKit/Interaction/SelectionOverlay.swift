@@ -55,7 +55,7 @@ final class SelectionRings {
         let outset = Self.outset / zoom
         let size = CGSize(width: CGFloat(frame.width) + outset * 2, height: CGFloat(frame.height) + outset * 2)
         let bounds = CGRect(origin: .zero, size: size)
-        let radius = CanvasGeometry.cardCornerRadius + outset
+        let radius = CanvasGeometry.cornerRadius(of: card) + outset
         let path = CGPath(roundedRect: bounds.insetBy(dx: 0.5 / zoom, dy: 0.5 / zoom), cornerWidth: radius, cornerHeight: radius, transform: nil)
 
         ring.bounds = bounds

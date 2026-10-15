@@ -18,8 +18,9 @@ enum DetailLevel: Comparable, Sendable {
 
 /// The layers for one card: layered shadows, gradient body and stroke, content and pin.
 ///
-/// Text cards show a bitmap of their text, rendered per zoom tier by the canvas. Image and
-/// web cards still show placeholder bars until M2 and M4.
+/// Text cards show a bitmap of their text, rendered per zoom tier by the canvas. Image cards
+/// show a photo in a polaroid, photo or borderless frame, with an optional caption (also a
+/// text bitmap). Web cards still show placeholder bars until M4.
 @MainActor
 final class CardNode {
     private struct Shadow {
@@ -40,10 +41,15 @@ final class CardNode {
     /// Positioned and rotated in world space.
     let root = CALayer()
 
+    /// The whole image, faded, shown around the card while it's being reframed.
+    private let ghost = CALayer()
     private let shadowLayers = CardNode.shadows.map { _ in CALayer() }
     private let body = CAGradientLayer()
     private let tintBand = CAGradientLayer()
     private let skeleton = CALayer()
+    private let photo = CALayer()
+    private let scrim = CAGradientLayer()
+    /// Text of a text card, or the caption of an image card.
     private let content = CALayer()
     private let stroke = CAGradientLayer()
     private let strokeMask = CAShapeLayer()
@@ -55,14 +61,22 @@ final class CardNode {
     private var isLifted = false
     private var isEditing = false
 
+    /// The decoded image (uncropped), how big a decode was asked for, and the crop shown
+    /// while reframing.
+    private(set) var fullImage: CGImage?
+    var requestedLongSide: Int?
+    private var framingCrop: CGRect?
+
     init(card: Card, appearance: CanvasAppearance, scale: CGFloat) {
         id = card.id
         self.card = card
+        ghost.opacity = 0.35
+        ghost.isHidden = true
+        root.addSublayer(ghost)
         for layer in shadowLayers {
             layer.shadowColor = RGBA.black.cgColor
             root.addSublayer(layer)
         }
-        body.cornerRadius = CanvasGeometry.cardCornerRadius
         body.cornerCurve = .continuous
         body.masksToBounds = true
         body.startPoint = CGPoint(x: 0.5, y: 0)
@@ -70,6 +84,14 @@ final class CardNode {
         root.addSublayer(body)
         body.addSublayer(tintBand)
         body.addSublayer(skeleton)
+
+        photo.masksToBounds = true
+        photo.cornerCurve = .continuous
+        root.addSublayer(photo)
+        scrim.startPoint = CGPoint(x: 0.5, y: 0)
+        scrim.endPoint = CGPoint(x: 0.5, y: 1)
+        scrim.colors = [RGBA.black.opacity(0).cgColor, RGBA.black.opacity(0.55).cgColor]
+        photo.addSublayer(scrim)
         root.addSublayer(content)
 
         strokeMask.fillColor = nil
@@ -88,6 +110,20 @@ final class CardNode {
     var isTextCard: Bool {
         if case .text = card.content { return true }
         return false
+    }
+
+    var imagePayload: ImagePayload? {
+        if case .image(let image) = card.content { return image }
+        return nil
+    }
+
+    /// Whether the card shows text drawn by the text renderer: a text card, or a captioned photo.
+    var hasTextContent: Bool {
+        switch card.content {
+        case .text: true
+        case .image(let image): !(image.caption ?? "").isEmpty
+        case .web: false
+        }
     }
 
     func setContentsScale(_ scale: CGFloat) {
@@ -111,7 +147,7 @@ final class CardNode {
         let needsRender = sizeChanged || contentChanged || renderedTier == nil
 
         let bounds = CGRect(x: 0, y: 0, width: newCard.frame.width, height: newCard.frame.height)
-        let radius = CanvasGeometry.cardCornerRadius
+        let radius = CanvasGeometry.cornerRadius(of: newCard)
         let outline = CGPath(roundedRect: bounds, cornerWidth: radius, cornerHeight: radius, transform: nil)
 
         root.bounds = bounds
@@ -127,9 +163,8 @@ final class CardNode {
         applyShadows()
 
         body.frame = bounds
-        let isPaper: Bool
-        if case .text(let text) = newCard.content, text.style == .typewriter { isPaper = true } else { isPaper = false }
-        body.colors = (isPaper ? appearance.paperFill : appearance.cardFill).cgColors
+        body.cornerRadius = radius
+        body.colors = bodyFill(for: newCard, appearance: appearance).cgColors
         body.borderColor = appearance.cardStroke.from.cgColor
 
         if let tint = newCard.tint {
@@ -146,10 +181,28 @@ final class CardNode {
         strokeMask.frame = bounds
         strokeMask.path = CGPath(
             roundedRect: bounds.insetBy(dx: 0.5, dy: 0.5),
-            cornerWidth: radius - 0.5, cornerHeight: radius - 0.5, transform: nil
+            cornerWidth: max(radius - 0.5, 0), cornerHeight: max(radius - 0.5, 0), transform: nil
         )
 
-        content.frame = bounds
+        if let image = imagePayload {
+            if image.asset != (old.content.imagePayload?.asset) {
+                fullImage = nil
+                requestedLongSide = nil
+            } else if sizeChanged || image.crop != old.content.imagePayload?.crop {
+                // A larger photo area or a tighter crop may need a bigger decode.
+                requestedLongSide = nil
+            }
+            let photoRect = ImageCardLayout.photoRect(for: image.frameStyle, in: bounds.size)
+            photo.frame = photoRect
+            photo.cornerRadius = ImageCardLayout.photoCornerRadius(for: image.frameStyle)
+            photo.backgroundColor = appearance.skeleton.opacity(min(appearance.skeleton.alpha * 3, 1)).cgColor
+            scrim.frame = CGRect(x: 0, y: photoRect.height * 0.55, width: photoRect.width, height: photoRect.height * 0.45)
+            content.frame = ImageCardLayout.captionRect(for: image.frameStyle, in: bounds.size)
+            applyImage()
+        } else {
+            content.frame = bounds
+        }
+
         if needsRender && sizeChanged {
             // A resized bitmap would look stretched; better blank for a frame than distorted.
             content.contents = nil
@@ -167,6 +220,76 @@ final class CardNode {
         pin.update(locked: newCard.locked, appearance: appearance)
         applyVisibility()
         return needsRender
+    }
+
+    private func bodyFill(for card: Card, appearance: CanvasAppearance) -> GradientPair {
+        switch card.content {
+        case .text(let text): text.style == .typewriter ? appearance.paperFill : appearance.cardFill
+        case .image(let image): image.frameStyle == .borderless ? appearance.cardFill : appearance.photoPaper
+        case .web: appearance.cardFill
+        }
+    }
+
+    // MARK: Photo
+
+    /// Shows a decode of the card's image. The node keeps the whole image and crops it itself,
+    /// so reframing and resizing never need a new decode unless more pixels are required.
+    func setImage(_ image: CGImage) {
+        fullImage = image
+        applyImage()
+        applyVisibility()
+    }
+
+    func discardImage() {
+        guard fullImage != nil || requestedLongSide != nil else { return }
+        fullImage = nil
+        requestedLongSide = nil
+        photo.contents = nil
+        applyVisibility()
+    }
+
+    /// The image's aspect ratio, once known.
+    var imageAspect: CGFloat? {
+        fullImage.map { CGFloat($0.width) / CGFloat(max($0.height, 1)) }
+    }
+
+    /// While reframing, shows `crop` (normalized, already matching the photo's aspect ratio)
+    /// and the whole image faded around the card. `nil` ends reframing.
+    func setFraming(_ crop: CGRect?) {
+        framingCrop = crop
+        applyImage()
+    }
+
+    /// The normalized part of the image the photo area shows right now.
+    var visibleCrop: CGRect? {
+        guard let image = imagePayload, let aspect = imageAspect else { return nil }
+        return framingCrop ?? ImageCardLayout.visibleCrop(crop: image.crop, imageAspect: aspect, photoSize: photo.bounds.size)
+    }
+
+    var photoFrame: CGRect { photo.frame }
+
+    private func applyImage() {
+        guard let full = fullImage, let crop = visibleCrop else {
+            photo.contents = nil
+            ghost.isHidden = true
+            return
+        }
+        let imageSize = CGSize(width: full.width, height: full.height)
+        photo.contents = full.cropping(to: ImageCardLayout.pixelRect(for: crop, imageSize: imageSize)) ?? full
+        if let framing = framingCrop {
+            let photoRect = photo.frame
+            let size = CGSize(width: photoRect.width / framing.width, height: photoRect.height / framing.height)
+            ghost.contents = full
+            ghost.frame = CGRect(
+                x: photoRect.minX - framing.minX * size.width,
+                y: photoRect.minY - framing.minY * size.height,
+                width: size.width, height: size.height
+            )
+            ghost.isHidden = false
+        } else {
+            ghost.contents = nil
+            ghost.isHidden = true
+        }
     }
 
     /// Moves the card without touching anything else, for live dragging.
@@ -243,12 +366,16 @@ final class CardNode {
 
     private func applyVisibility() {
         let showsDetail = detail != .minimal
-        stroke.isHidden = detail != .full
-        body.borderWidth = detail == .full ? 0 : 1
+        let image = imagePayload
+        stroke.isHidden = detail != .full || (image != nil && image?.frameStyle != .borderless)
+        body.borderWidth = detail == .full || image != nil ? 0 : 1
         pin.root.isHidden = !showsDetail
-        content.isHidden = !showsDetail || isEditing || !isTextCard
+        photo.isHidden = image == nil
+        let captioned = !(image?.caption ?? "").isEmpty
+        scrim.isHidden = !showsDetail || !captioned || !ImageCardLayout.captionIsOverlaid(for: image?.frameStyle ?? .polaroid)
+        content.isHidden = !showsDetail || isEditing || !hasTextContent
         // Text cards show placeholder bars only until their first bitmap arrives.
-        skeleton.isHidden = !showsDetail || isEditing || (isTextCard && content.contents != nil)
+        skeleton.isHidden = !showsDetail || isEditing || image != nil || (isTextCard && content.contents != nil)
     }
 
     // MARK: Placeholders
@@ -264,20 +391,8 @@ final class CardNode {
             }
             return lines(from: TextCardTypography.insets.top + 4, height: height, in: size, color: bar)
 
-        case .image(let image):
-            let well: CGRect = switch image.frameStyle {
-            case .polaroid: CGRect(x: 12, y: 12, width: size.width - 24, height: max(size.height - 56, 0))
-            case .borderless: CGRect(origin: .zero, size: size)
-            case .photo: CGRect(x: 8, y: 8, width: size.width - 16, height: size.height - 16)
-            }
-            var layers = [block(well, colors: [bar.opacity(bar.alpha * 2.2), bar.opacity(bar.alpha * 1.2)], radius: 6)]
-            if image.caption != nil, image.frameStyle == .polaroid {
-                layers.append(block(
-                    CGRect(x: 18, y: size.height - 28, width: size.width * 0.5, height: 8),
-                    colors: [bar, bar], radius: 4
-                ))
-            }
-            return layers
+        case .image:
+            return []
 
         case .web(let web):
             let heroHeight = min(size.width * 9 / 16, size.height * 0.55)
@@ -356,5 +471,12 @@ final class PinNode {
 
     func update(locked: Bool, appearance: CanvasAppearance) {
         head.colors = (locked ? appearance.lockedPin : appearance.pin).cgColors
+    }
+}
+
+extension CardContent {
+    var imagePayload: ImagePayload? {
+        if case .image(let image) = self { return image }
+        return nil
     }
 }

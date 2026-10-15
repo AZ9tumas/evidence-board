@@ -5,7 +5,7 @@ extension BoardCanvasView {
     /// Adds an empty text card centered on `world` and starts typing into it. The card only
     /// becomes an undoable edit once it has text; left empty, it disappears.
     func createTextCard(at world: CGPoint) {
-        finishEditing()
+        commitPendingEdits()
         let now = Date.now
         let payload = TextPayload(content: "")
         let width = TextCardTypography.defaultWidth

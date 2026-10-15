@@ -98,6 +98,63 @@ enum TextCardTypography {
 
     /// Draws the card's text, transparent everywhere else, at `scale` pixels per point.
     static func render(_ text: TextPayload, size: CGSize, scale: CGFloat, appearance: CanvasAppearance) -> CGImage? {
+        let textRect = CGRect(
+            x: insets.left, y: insets.top,
+            width: max(size.width - insets.left - insets.right, 1),
+            height: max(size.height - insets.top - insets.bottom, 1)
+        )
+        let attributed = attributedText(for: text, appearance: appearance)
+        return drawBitmap(size: size, scale: scale) {
+            attributed.draw(with: textRect, options: [.usesLineFragmentOrigin, .usesFontLeading, .truncatesLastVisibleLine])
+        }
+    }
+
+    // MARK: Captions
+
+    /// New York italic, as in DESIGN.md §6.3.
+    static func captionFont(size: CGFloat = 13) -> NSFont {
+        let base = NSFont.systemFont(ofSize: size)
+        let serif = base.fontDescriptor.withDesign(.serif) ?? base.fontDescriptor
+        return NSFont(descriptor: serif.withSymbolicTraits(.italic), size: size) ?? base
+    }
+
+    /// Ink on paper for polaroids; white with a soft shadow when laid over the photo.
+    static func captionAttributes(overlay: Bool, appearance: CanvasAppearance, size: CGFloat = 13) -> [NSAttributedString.Key: Any] {
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = overlay ? .left : .center
+        paragraph.lineBreakMode = .byTruncatingTail
+        var attributes: [NSAttributedString.Key: Any] = [
+            .font: captionFont(size: size),
+            .foregroundColor: overlay ? NSColor.white.withAlphaComponent(0.95) : appearance.captionInk.nsColor,
+            .paragraphStyle: paragraph,
+        ]
+        if overlay {
+            let shadow = NSShadow()
+            shadow.shadowColor = NSColor.black.withAlphaComponent(0.55)
+            shadow.shadowBlurRadius = 3
+            shadow.shadowOffset = NSSize(width: 0, height: -1)
+            attributes[.shadow] = shadow
+        }
+        return attributes
+    }
+
+    /// One line of caption, vertically centered in `size`.
+    static func renderCaption(
+        _ caption: String, overlay: Bool, size: CGSize, scale: CGFloat, appearance: CanvasAppearance
+    ) -> CGImage? {
+        let attributed = NSAttributedString(string: caption, attributes: captionAttributes(overlay: overlay, appearance: appearance))
+        let lineHeight = ceil(attributed.size().height)
+        let rect = CGRect(x: 0, y: max((size.height - lineHeight) / 2, 0), width: size.width, height: lineHeight)
+        return drawBitmap(size: size, scale: scale) {
+            attributed.draw(with: rect, options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine])
+        }
+    }
+
+    // MARK: Drawing
+
+    /// A transparent bitmap of `size` points at `scale`, with AppKit drawing set up top-down so
+    /// row 0 of the bitmap is the top.
+    private static func drawBitmap(size: CGSize, scale: CGFloat, _ draw: () -> Void) -> CGImage? {
         let pixelWidth = Int((size.width * scale).rounded(.up))
         let pixelHeight = Int((size.height * scale).rounded(.up))
         guard pixelWidth > 0, pixelHeight > 0, pixelWidth * pixelHeight <= 32_000_000,
@@ -107,22 +164,11 @@ enum TextCardTypography {
                 bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
               )
         else { return nil }
-
-        // Flip so AppKit lays text out top-down and row 0 of the bitmap is the top of the card.
         context.translateBy(x: 0, y: CGFloat(pixelHeight))
         context.scaleBy(x: scale, y: -scale)
-
-        let textRect = CGRect(
-            x: insets.left, y: insets.top,
-            width: max(size.width - insets.left - insets.right, 1),
-            height: max(size.height - insets.top - insets.bottom, 1)
-        )
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = NSGraphicsContext(cgContext: context, flipped: true)
-        attributedText(for: text, appearance: appearance).draw(
-            with: textRect,
-            options: [.usesLineFragmentOrigin, .usesFontLeading, .truncatesLastVisibleLine]
-        )
+        draw()
         NSGraphicsContext.restoreGraphicsState()
         return context.makeImage()
     }

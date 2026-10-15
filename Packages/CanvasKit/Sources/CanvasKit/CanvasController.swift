@@ -45,6 +45,10 @@ public final class CanvasController {
     public func sendSelectionToBack() { view?.reorderSelection(toFront: false) }
     public func toggleLockOnSelection() { view?.toggleLockOnSelection() }
     public func addTestCards(count: Int) { view?.addTestCards(count: count) }
+    public func addTestPhotos(count: Int) { view?.addTestPhotos(count: count) }
+
+    /// Insert ▸ Image…: picks image or PDF files and pins them to the board.
+    public func insertImage() { view?.presentImagePicker() }
 
     #if DEBUG
     /// Selects (or starts editing) the card at `index` in file order. Used by the snapshot
@@ -53,10 +57,19 @@ public final class CanvasController {
         guard let view, store.board.cards.indices.contains(index) else { return }
         let id = store.board.cards[index].id
         if edit {
-            view.beginEditing(id, isNewCard: false, selectAll: false)
+            view.activate(id, at: nil)
         } else {
             view.select([id])
         }
+    }
+
+    /// Starts reframing the photo at `index` and zooms into it, so the faded rest of the image
+    /// shows around the card.
+    public func debugReframeCard(at index: Int, zoom: CGFloat) {
+        guard let view, store.board.cards.indices.contains(index) else { return }
+        let card = store.board.cards[index]
+        view.beginFraming(card.id)
+        view.zoomFraming(by: zoom, around: CGPoint(x: card.frame.midX, y: card.frame.midY))
     }
     #endif
 
