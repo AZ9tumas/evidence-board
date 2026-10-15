@@ -932,23 +932,27 @@ Reference hardware: base M1 MacBook Air. Targets must also hold on a 120 Hz ProM
 
 Instruments templates are checked into `Tools/Instruments/` (Time Profiler, Core Animation FPS, Allocations, Hangs). CI runs `XCTMetric` performance tests (§15) with regression thresholds.
 
-**As built (M6).** CI checks the budgets on every push, on a GitHub macOS 15 arm64 runner (a virtual Mac, slower than an M1 Air), in a release build. A Swift Testing suite (`PerformanceTests`, `CodecPerformanceTests`, run with `EB_PERF=1`) drives a real canvas in an offscreen window and measures **main-thread time per frame**: what the app controls. Core Animation's render server and the display aren't measured, so frame rate itself still needs Instruments on a real Mac. Results from the run that closed M6:
+**As built (M6).** CI checks the budgets on every push, on a GitHub macOS 15 arm64 runner (a virtual Mac with three cores, slower than an M1 Air and noisy: the same commit can measure twice as slow on another runner), in a release build. A Swift Testing suite (`PerformanceTests`, `CodecPerformanceTests`, run with `EB_PERF=1`) drives a real canvas in an offscreen window and measures **main-thread time per frame**: what the app controls. Core Animation's render server and the display aren't measured, so frame rate itself still needs Instruments on a real Mac. Like a user's, each measurement starts once the board has finished opening. Ranges over the CI runs that closed M6:
 
 | Scenario | Budget | Measured in CI |
 |---|---|---|
-| Pan, 500 cards (200 photos, 150 web), p95 frame | < 4 ms | 0.1–0.5 ms |
-| Zoom, 500 cards, p95 frame | < 4 ms | 2.2–3.3 ms |
-| Pan or zoom, 3,000 cards, p95 frame (whole board in view, 30%, zoom sweep) | < 16.7 ms | 1.8–3.7 ms |
-| Drag 50 cards with 200 strings, p95 frame | < 8.3 ms (one 120 Hz frame) | 7.3 ms |
-| Open a 52 MB, 300-card board: decode and validate | < 500 ms | 60–115 ms |
-| Open that board: first frame | < 800 ms | 183 ms |
-| Open that board: visible photos decoded | < 1.5 s | 327 ms |
-| Save a 50 MB board | < 300 ms | 42–65 ms |
-| Memory, 500-card board at rest | < 450 MB | 269 MB |
+| Pan, 500 cards (200 photos, 150 web), p95 frame | < 4 ms | 0.3–0.9 ms |
+| Zoom, 500 cards, p95 frame | < 4 ms | 1.3–2.9 ms |
+| Pan or zoom, 3,000 cards, p95 frame (whole board in view, 30%, zoom sweep) | < 16.7 ms | 0.3–3.7 ms |
+| Drag 50 cards with 200 strings, p95 frame | < 8.3 ms (one 120 Hz frame) | 2.2–3.0 ms |
+| Open a 52 MB, 300-card board: decode and validate | < 500 ms | 58–352 ms |
+| Open that board: first frame | < 800 ms | 137–377 ms |
+| Open that board: visible photos decoded | < 1.5 s | 281–596 ms |
+| Save a 50 MB board | < 300 ms | 42–79 ms |
+| Memory, 500-card board at rest | < 450 MB | 258–270 MB |
 | Work scheduled at rest (display links, physics, pulses, fetches) | none | none |
-| Launch to first board frame (Debug build, snapshot workflow) | < 400 ms | see the snapshot run summary |
+| Launch to an empty board, release build (median of 5) | < 400 ms | 345–694 ms: **not met on CI** |
+| Launch to the sample board | < 400 ms | 411–909 ms: **not met on CI** |
+| Cold launch, file cache purged | < 400 ms | 1.8–3.6 s: **not met on CI** |
 
-Two changes got these numbers: strings re-route geometry-only while cards are dragged (their shadow, a stroked copy of the curve, comes back when the drag ends; drag went from 7–10 ms to about 2 ms), and text bitmaps moved off the main thread (§10.6; pan and zoom frames were up to 3.8 ms, mostly one bitmap being drawn).
+Two changes got the frame numbers. Text bitmaps moved off the main thread (§10.6); pan and zoom frames had been up to 3.8 ms, mostly one bitmap being drawn. And while cards are dragged, strings move only the layers you can see (the hidden halo, plain thread, fibers and shadow are routed when they show again), with knots moved by position instead of new paths; drag went from 7–10 ms to 2–3 ms.
+
+**Launch** is measured by the snapshot workflow on a release build: from process start (the kernel's start time) to the first board frame, with marks along the way (`LaunchTiming`, active only when `EB_LAUNCH_LOG` is set). A typical warm launch on the runner: the system reaches the app's code at about 30 ms, SwiftUI and AppKit reach the document at about 270 ms, decoding and building the canvas take 2–55 ms, then SwiftUI puts the window up (about 120–180 ms) and draws it (about 100–170 ms). The app's own share is small. The rest is framework and runner speed, so whether a real M1 Air makes 400 ms has to be measured on one (Instruments ▸ App Launch). The "cold" row empties the file cache with `purge`, which on a virtual Mac with network storage is far slower than an SSD; the first launch of a fresh unsigned build (about 0.8–1 s) also pays for the system's first look at it.
 
 The link-preview budget needs the network and isn't measured in CI. Saving got its speed from writing image data straight into the JSON (it's plain base64, so it needs no escaping) instead of passing megabytes of text through the encoder.
 
@@ -1108,7 +1112,7 @@ docs/
 | **LinkPreviewKit** | Head parser against 62 saved page heads modeled on real sites; merger priority; variants; palette roles; cache | Fixtures with expectations in a leading comment, no live network in CI |
 | **CanvasKit** | Camera math, hit testing and resizing on rotated cards, spatial grid against brute force, text measuring and rendering, string path bounds | Unit tests |
 | **Rendering** | Card visuals per theme and variant | Web card layouts for all 62 fixtures at four widths are checked for overlaps, overflow and line limits. Screenshots of every variant come from the snapshot workflow |
-| **Performance** | Pan/zoom FPS on a synthetic 500 / 3,000-card board, open/save timings | `XCTOSSignpostMetric`, `XCTMemoryMetric`, `XCTClockMetric` with baselines. *As built:* a release-build Swift Testing suite measures main-thread frame time, open/save, memory and idle work against the §11 budgets, and CI prints a budget table |
+| **Performance** | Pan/zoom FPS on a synthetic 500 / 3,000-card board, open/save timings | `XCTOSSignpostMetric`, `XCTMemoryMetric`, `XCTClockMetric` with baselines. *As built:* a release-build Swift Testing suite measures main-thread frame time, open/save, memory and idle work against the §11 budgets, and CI prints a budget table; the snapshot workflow times a release build's launch, step by step |
 | **UI** | Create, paste, connect, save, reopen flows | XCUITest |
 | **Fuzzing** | Board loader against malformed and huge JSON | libFuzzer harness on `BoardCodec.decode` (`Tools/Fuzz`, 60 s per CI run, about 2,000 inputs a second), plus a seeded test of 5,500 byte-level and structural mutations that runs with the unit tests |
 | **Accessibility** | VoiceOver labels, actions and rotor; keyboard focus; WCAG AA contrast of every theme | Unit tests on the accessibility tree and key handling; a contrast test over all four themes, also with Increase Contrast |
@@ -1125,7 +1129,7 @@ docs/
 | **M3 — Strings** | Pins, connect gesture, sag geometry, gradients, labels, Focus and Trace modes | "Connect the dots" feels physical. Trace works on 1,000-edge graphs in < 5 ms |
 | **M4 — Web cards** | Metadata pipeline, palette, all 7 layout variants, skeletons, snapshots, Peek | 60-site fixture suite renders with no layout bugs |
 | **M5 — Design polish** | All 4 themes, motion specs, Liquid Glass, app icon, minimap, search | Design review sign-off |
-| **M6 — Hardening** | LOD, culling, performance budgets, accessibility, fuzzing, Quick Look extensions | All §11 budgets green in CI *(done; see the table in §11)* |
+| **M6 — Hardening** | LOD, culling, performance budgets, accessibility, fuzzing, Quick Look extensions | All §11 budgets green in CI *(done, except launch: every frame, open, save, memory and idle budget is green; launch is measured but not met on CI's virtual Macs, see §11)* |
 | **1.0** | Notarized, Developer ID and Mac App Store builds | — |
 
 **Post‑1.0 ideas** (they keep the three-card-type rule): the `.evboardpkg` package format for huge boards, iCloud Drive sync of board files, an iPad companion app (shared `BoardKit` + `LinkPreviewKit`), a timeline arrangement (auto-layout cards by `publishedAt`) and Shortcuts / App Intents ("Add link to board").
