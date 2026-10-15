@@ -29,12 +29,16 @@ def note_height(text, width, style):
     return math.ceil(top + lines * line)
 
 
+CLUSTER = ["fixed"]
+
+
 def add(card, name, x, y, w, h):
     card.update({
         "id": uid(name), "createdAt": NOW, "modifiedAt": NOW, "locked": card.get("locked", False),
         "frame": {"x": x, "y": y, "width": w, "height": h}, "z": len(cards) + 1,
     })
     card.setdefault("rotation", round(random.uniform(-1.4, 1.4), 1))
+    card["_name"], card["_cluster"] = name, CLUSTER[0]
     cards.append(card)
     boxes[name] = (x, y, w, h)
     return y + h
@@ -125,6 +129,7 @@ text("legend", 330, -2340, 360,
      "dotted ........... debunked", "typewriter", rotation=0.8)
 
 # ---------------------------------------------------------------- People
+CLUSTER[0] = "people"
 text("trump", -330, -1960, 300,
      "**DONALD TRUMP**\n47th U.S. President (since 20 Jan 2025). Father-in-law of Jared Kushner. "
      "Created the Gaza **Board of Peace** in Jan 2026.", tint="amber")
@@ -153,6 +158,7 @@ text("affinity", 120, -1640, 320,
      "Assets passed **$6 billion** in 2025 (Dealroom). Had returned no profit to investors by 2024.", tint="graphite")
 
 # ---------------------------------------------------------------- Albania
+CLUSTER[0] = "albania"
 text("h_albania", -3250, -2000, 620, "THE ISLAND AND THE LAGOON", "headline", locked=True, rotation=0)
 image("map", -3250, -1880, 460, MAP, "Vlora Bay: Sazan, Zvërnec, Narta Lagoon (schematic)")
 
@@ -206,6 +212,7 @@ web("w_citizens", -2730, -560, "https://citizens.al/en/2026/10/09/jared-kushner-
     "€230M purchase, minority partner, Abehsera runs it.", "2026-10-09T00:00:00Z")
 
 # ---------------------------------------------------------------- Flamingo Revolution
+CLUSTER[0] = "flamingo"
 text("h_flamingo", -3250, -120, 700, "THE FLAMINGO REVOLUTION", "headline", locked=True, rotation=0)
 y = 0
 y = text("f_may23", -3250, y, 300,
@@ -241,6 +248,7 @@ web("w_wiki", -2550, y, "https://en.wikipedia.org/wiki/Flamingo_Revolution", "Wi
     "Timeline, demands and arrests.", None, w=320)
 
 # ---------------------------------------------------------------- Israel
+CLUSTER[0] = "israel"
 text("h_israel", -1600, -560, 760, "ISRAEL'S ROLE? TRACED", "headline", locked=True, rotation=0)
 text("i_question", -1600, -460, 340,
      "THE QUESTION\nDid Israel play a role in the Flamingo protests or the resort?\nMethod: follow each claim back "
@@ -293,6 +301,7 @@ web("w_haaretz", -760, 820, "https://www.haaretz.com/israel-news/security-aviati
     "ATMOS howitzers, SPEAR mortars, drones; production in Albania.", "2025-11-12T00:00:00Z")
 
 # ---------------------------------------------------------------- Billions
+CLUSTER[0] = "billions"
 text("h_billions", 520, -1500, 600, "THE BILLIONS", "headline", locked=True, rotation=0)
 y = -1390
 y = text("b_pif", 520, y, 320,
@@ -416,28 +425,45 @@ for card, source in [
 ]:
     string(card, source, "graphite", thickness=1.2, sag=0.3)
 
-# ---------------------------------------------------------------- Checks and output
-names = list(boxes)
-overlaps = []
-for i, a in enumerate(names):
-    ax, ay, aw, ah = boxes[a]
-    for b in names[i + 1:]:
-        bx, by, bw, bh = boxes[b]
-        if ax < bx + bw + 10 and bx < ax + aw + 10 and ay < by + bh + 10 and by < ay + ah + 10:
-            overlaps.append((a, b))
-for a, b in overlaps:
-    print("OVERLAP", a, b, boxes[a], boxes[b])
+# ---------------------------------------------------------------- Layout and output
+from layout import optimize
+
+for card in cards:
+    if card["_name"] in ("abehsera", "khayyat"):
+        card["_cluster"] = "albania"
+    if card["_name"].startswith("h_") or card["_name"] in ("title", "subtitle", "legend"):
+        card["_cluster"] = "fixed"
+REGIONS = {  # cluster: (x0, y0, x1, y1), below each heading
+    "albania": (-4600, -2620, -2300, -1180),
+    "people": (-1950, -2620, 300, -1930),
+    "billions": (650, -2620, 2950, -1080),
+    "flamingo": (-4600, -760, -2350, 600),
+    "israel": (-1950, -1560, 300, 240),
+}
+FIXED = {
+    "title": (-1700, -3120), "subtitle": (-1700, -3030), "legend": (-880, -3130),
+    "h_albania": (-4600, -2740), "h_flamingo": (-4600, -880), "h_israel": (-1950, -1690), "h_billions": (650, -2740),
+}
+for card in cards:
+    spot = FIXED.get(card["_name"])
+    if spot:
+        card["frame"]["x"], card["frame"]["y"] = spot
+optimize(cards, strings, REGIONS, iterations=int(sys.argv[3]) if len(sys.argv) > 3 else 40000)
+
 ids = {c["id"] for c in cards}
 for s in strings:
     assert s["from"] in ids and s["to"] in ids, s
 xs = [c["frame"]["x"] for c in cards] + [c["frame"]["x"] + c["frame"]["width"] for c in cards]
 ys = [c["frame"]["y"] for c in cards] + [c["frame"]["y"] + c["frame"]["height"] for c in cards]
 print("bounds", min(xs), min(ys), max(xs), max(ys))
+for card in cards:
+    card["frame"] = {k: int(round(v)) for k, v in card["frame"].items()}
+    del card["_name"], card["_cluster"]
 
 board = {
     "format": "evidenceboard", "formatVersion": 1, "id": uid("board"), "title": "The Albania Files",
     "createdAt": NOW, "modifiedAt": NOW, "theme": "cork",
-    "viewport": {"x": (min(xs) + max(xs)) / 2, "y": (min(ys) + max(ys)) / 2, "zoom": 0.24},
+    "viewport": {"x": (min(xs) + max(xs)) / 2, "y": (min(ys) + max(ys)) / 2 + 60, "zoom": 0.16},
     "cards": cards, "strings": strings, "assets": assets,
 }
 with open(OUT, "w") as f:
