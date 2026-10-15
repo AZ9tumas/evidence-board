@@ -194,6 +194,7 @@ extension BoardCanvasView {
     func commitPendingEdits() {
         finishEditing()
         finishCaptionEditing(commit: true)
+        finishLabelEditing(commit: true)
         finishFraming(commit: true)
     }
 

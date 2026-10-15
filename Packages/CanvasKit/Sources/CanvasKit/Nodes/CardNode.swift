@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 import QuartzCore
 import BoardKit
 
@@ -60,6 +60,8 @@ final class CardNode {
     private var detail = DetailLevel.full
     private var isLifted = false
     private var isEditing = false
+    /// Above the Focus/Trace dimming layer.
+    private var isRaised = false
 
     /// The decoded image (uncropped), how big a decode was asked for, and the crop shown
     /// while reframing.
@@ -152,7 +154,7 @@ final class CardNode {
 
         root.bounds = bounds
         root.position = CGPoint(x: newCard.frame.midX, y: newCard.frame.midY)
-        root.zPosition = CGFloat(newCard.z)
+        applyZ()
         applyTransform()
 
         // Explicit shadow paths keep Core Animation from rendering shadows off screen every frame.
@@ -257,8 +259,7 @@ final class CardNode {
     /// and the whole image faded around the card. `nil` ends reframing.
     func setFraming(_ crop: CGRect?) {
         framingCrop = crop
-        // Above every other card, so the faded rest of the image isn't hidden under them.
-        root.zPosition = crop == nil && !isLifted ? CGFloat(card.z) : 1_000_000
+        applyZ()
         applyImage()
     }
 
@@ -333,7 +334,7 @@ final class CardNode {
         isLifted = lifted
         CATransaction.begin()
         CATransaction.setAnimationDuration(0.14)
-        root.zPosition = lifted ? 1_000_000 : CGFloat(card.z)
+        applyZ()
         applyTransform()
         applyShadows()
         CATransaction.commit()
@@ -343,6 +344,26 @@ final class CardNode {
     func setEditing(_ editing: Bool) {
         isEditing = editing
         applyVisibility()
+    }
+
+    /// Keeps the card above the dimming layer while Focus or Trace highlights it.
+    func setRaised(_ raised: Bool) {
+        guard raised != isRaised else { return }
+        isRaised = raised
+        applyZ()
+    }
+
+    func setPinState(_ state: PinState) {
+        pin.setState(state)
+    }
+
+    /// Stacking: file order, then raised above the dimming layer, then lifted or being
+    /// reframed above everything (so the faded rest of a reframed photo isn't hidden).
+    static let dimmingZ: CGFloat = 1_500_000
+
+    private func applyZ() {
+        let z = CGFloat(card.z)
+        root.zPosition = isLifted || framingCrop != nil ? 4_000_000 + z : isRaised ? 2_000_000 + z : z
     }
 
     private func applyTransform() {
@@ -440,22 +461,51 @@ final class CardNode {
     }
 }
 
+/// What a pin is doing, for the connect gesture (DESIGN.md §5.5).
+enum PinState: Sendable {
+    case normal
+    /// The pointer is over its card: brighter and 1.15× larger.
+    case hover
+    /// A string is being pulled out of it.
+    case active
+    /// A string being pulled will tie on here: it pulses.
+    case target
+}
+
 /// The glossy push-pin at the top of a card. Strings attach to its center.
 @MainActor
 final class PinNode {
     let root = CALayer()
+    private let halo = CAGradientLayer()
     private let head = CAGradientLayer()
     private let glint = CALayer()
+    private var colors = GradientPair(.white, .white)
+    private var state = PinState.normal
 
     init() {
         let diameter = CanvasGeometry.pinDiameter
         let bounds = CGRect(x: 0, y: 0, width: diameter, height: diameter)
         root.bounds = bounds
-        root.shadowPath = CGPath(ellipseIn: bounds, transform: nil)
-        root.shadowColor = RGBA.black.cgColor
-        root.shadowOpacity = 0.5
-        root.shadowRadius = 1.5
-        root.shadowOffset = CGSize(width: 1.5, height: 2.5)
+
+        // A soft glow in the pin's color, shown while connecting.
+        let haloSize = diameter * 2.6
+        halo.bounds = CGRect(x: 0, y: 0, width: haloSize, height: haloSize)
+        halo.position = CGPoint(x: bounds.midX, y: bounds.midY)
+        halo.type = .radial
+        halo.startPoint = CGPoint(x: 0.5, y: 0.5)
+        halo.endPoint = CGPoint(x: 1, y: 1)
+        halo.opacity = 0
+        root.addSublayer(halo)
+
+        let needle = CALayer()
+        needle.bounds = bounds
+        needle.position = CGPoint(x: bounds.midX, y: bounds.midY)
+        needle.shadowPath = CGPath(ellipseIn: bounds, transform: nil)
+        needle.shadowColor = RGBA.black.cgColor
+        needle.shadowOpacity = 0.5
+        needle.shadowRadius = 1.5
+        needle.shadowOffset = CGSize(width: 1.5, height: 2.5)
+        root.addSublayer(needle)
 
         head.frame = bounds
         head.type = .radial
@@ -472,7 +522,53 @@ final class PinNode {
     }
 
     func update(locked: Bool, appearance: CanvasAppearance) {
-        head.colors = (locked ? appearance.lockedPin : appearance.pin).cgColors
+        colors = locked ? appearance.lockedPin : appearance.pin
+        halo.colors = [colors.from.opacity(0.7).cgColor, colors.from.opacity(0).cgColor]
+        applyHead()
+    }
+
+    func setState(_ newState: PinState) {
+        guard newState != state else { return }
+        state = newState
+        CATransaction.begin()
+        CATransaction.setDisableActions(false)
+        CATransaction.setAnimationDuration(0.12)
+        let scale: CGFloat = switch state {
+        case .normal: 1
+        case .hover: 1.15
+        case .active: 1.2
+        case .target: 1.3
+        }
+        root.setAffineTransform(CGAffineTransform(scaleX: scale, y: scale))
+        halo.opacity = switch state {
+        case .normal: 0
+        case .hover: 0.45
+        case .active, .target: 0.9
+        }
+        applyHead()
+        CATransaction.commit()
+
+        halo.removeAnimation(forKey: "pulse")
+        if state == .target && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+            let grow = CABasicAnimation(keyPath: "transform.scale")
+            grow.fromValue = 0.7
+            grow.toValue = 1.5
+            let fade = CABasicAnimation(keyPath: "opacity")
+            fade.fromValue = 1
+            fade.toValue = 0.15
+            let pulse = CAAnimationGroup()
+            pulse.animations = [grow, fade]
+            pulse.duration = 0.8
+            pulse.repeatCount = .infinity
+            pulse.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            halo.add(pulse, forKey: "pulse")
+        }
+    }
+
+    private func applyHead() {
+        // Brighter while it's the thing you're about to grab.
+        let lift = state == .normal ? 0 : 0.22
+        head.colors = [colors.from.mixed(with: .white, lift).cgColor, colors.to.mixed(with: .white, lift * 0.5).cgColor]
     }
 }
 

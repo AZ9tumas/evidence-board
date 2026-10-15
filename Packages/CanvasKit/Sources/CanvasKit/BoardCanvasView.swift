@@ -40,7 +40,9 @@ public final class BoardCanvasView: NSView {
     var spatialIndex = SpatialGrid()
 
     var selection: Set<UUID> = []
+    var selectedStrings: Set<UUID> = []
     var interaction = Interaction.idle
+    var tool = CanvasTool.select
     var isSpaceHeld = false
     var textEditor: CardTextEditor?
     /// The card being edited, as it looks right now (its height follows the text).
@@ -56,6 +58,30 @@ public final class BoardCanvasView: NSView {
     var captionEditor: CaptionEditor?
     /// The photo being reframed, if any.
     var framing: FramingSession?
+
+    // Strings (DESIGN.md §4.5, §5.5).
+    /// A string being pulled out of a pin.
+    var connection: ConnectSession?
+    /// The card under the pointer, whose pin is brightened.
+    var hoveredCard: UUID?
+    /// Strings springing to their resting sag after being created.
+    var droopSprings: [UUID: Spring] = [:]
+    let physics = FrameTicker()
+    var labelEditor: StringLabelEditor?
+    /// The color, thickness and style of the last string changed, used for new strings.
+    var newStringStyle = BoardString(from: UUID(), to: UUID())
+    var highlight: Highlight?
+    var highlightedCards: Set<UUID> = []
+    var highlightedStrings: Set<UUID> = []
+    var tracePath: GraphPath?
+    /// Fades everything that Focus or Trace doesn't highlight.
+    let dimLayer = CALayer()
+    /// The glow that travels along a traced path, and the path's length.
+    let pulseLayer = CAShapeLayer()
+    var pulseLength: CGFloat = 0
+    /// What the mode banner says while Focus or Trace is on.
+    var highlightStatus: CanvasModeStatus?
+    let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
 
     struct CameraAnimation {
         let from: Camera
@@ -95,6 +121,14 @@ public final class BoardCanvasView: NSView {
         vignetteLayer.locations = [0, 0.55, 1]
 
         worldLayer.anchorPoint = .zero
+        dimLayer.zPosition = CardNode.dimmingZ
+        dimLayer.isHidden = true
+        cardsLayer.addSublayer(dimLayer)
+        pulseLayer.zPosition = 1_000_000
+        pulseLayer.fillColor = nil
+        pulseLayer.lineCap = .round
+        pulseLayer.isHidden = true
+        stringsLayer.addSublayer(pulseLayer)
         worldLayer.addSublayer(cardsLayer)
         worldLayer.addSublayer(stringsLayer)
         worldLayer.addSublayer(rings.layer)
@@ -106,6 +140,7 @@ public final class BoardCanvasView: NSView {
         rootLayer.addSublayer(overlay.layer)
 
         detailLevel = DetailLevel(zoom: camera.zoom)
+        physics.onTick = { [weak self] dt in self?.stepStringPhysics(dt) ?? false }
         applyAppearance()
         observerToken = store.addObserver { [weak self] changes in self?.storeDidChange(changes) }
         fitAutoHeightTextCards()
@@ -147,6 +182,7 @@ public final class BoardCanvasView: NSView {
         super.viewWillMove(toWindow: newWindow)
         if newWindow == nil {
             stopCameraAnimation()
+            physics.stop()
             renderQueue.stop()
             tierSettleTask?.cancel()
         }
@@ -172,7 +208,10 @@ public final class BoardCanvasView: NSView {
             }
             grid.setContentsScale(scale)
             for node in cardNodes.values { node.setContentsScale(scale) }
-            for node in stringNodes.values { node.setContentsScale(scale) }
+            for node in stringNodes.values {
+                node.setContentsScale(scale)
+                node.setLabelScale(labelScale)
+            }
         }
     }
 
@@ -191,6 +230,7 @@ public final class BoardCanvasView: NSView {
 
     private func applyAppearance() {
         withoutAnimation {
+            dimLayer.backgroundColor = canvasAppearance.background.to.opacity(0.74).cgColor
             backgroundLayer.colors = canvasAppearance.background.cgColors
             vignetteLayer.colors = [RGBA.clear.cgColor, RGBA.clear.cgColor, canvasAppearance.vignette.cgColor]
             grid.setColor(canvasAppearance.gridDot)
@@ -202,9 +242,11 @@ public final class BoardCanvasView: NSView {
     /// Recreates every card and string layer. Used on load and when the theme changes;
     /// edits go through ``storeDidChange(_:)`` instead.
     private func rebuildContent() {
+        cancelConnecting(animated: false)
+        droopSprings = [:]
         withoutAnimation {
-            cardsLayer.sublayers = nil
-            stringsLayer.sublayers = nil
+            cardsLayer.sublayers = [dimLayer]
+            stringsLayer.sublayers = [pulseLayer]
             cardNodes = [:]
             stringNodes = [:]
             stringsByCard = [:]
@@ -215,6 +257,7 @@ public final class BoardCanvasView: NSView {
         }
         visibleIDs = []
         selectionDidChange()
+        refreshHighlight()
         updateVisibility()
     }
 
@@ -255,8 +298,14 @@ public final class BoardCanvasView: NSView {
         if framing?.cardID == id { framing = nil }
     }
 
+    /// Pixels per point for string labels, following the text tier.
+    var labelScale: CGFloat { min(renderTier * backingScale, 8) }
+
     func addStringNode(_ string: BoardString) {
-        let node = StringNode(string: string, scale: backingScale)
+        let node = StringNode(
+            string: string, appearance: canvasAppearance, detail: detailLevel, zoom: camera.zoom,
+            scale: backingScale, labelScale: labelScale
+        )
         stringNodes[string.id] = node
         stringsByCard[string.from, default: []].insert(string.id)
         stringsByCard[string.to, default: []].insert(string.id)
@@ -264,11 +313,22 @@ public final class BoardCanvasView: NSView {
         layoutString(node)
     }
 
-    func removeStringNode(_ id: UUID) {
+    /// Removes a string's layer, snapping it away first when `animated`.
+    func removeStringNode(_ id: UUID, animated: Bool = false) {
         guard let node = stringNodes.removeValue(forKey: id) else { return }
-        node.layer.removeFromSuperlayer()
         stringsByCard[node.string.from]?.remove(id)
         stringsByCard[node.string.to]?.remove(id)
+        droopSprings[id] = nil
+        if labelEditor?.stringID == id { finishLabelEditing(commit: false) }
+        guard animated, !reduceMotion else {
+            node.layer.removeFromSuperlayer()
+            return
+        }
+        node.animateRemoval()
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(170))
+            node.layer.removeFromSuperlayer()
+        }
     }
 
     /// The frame a card shows right now, including an unfinished drag, resize or edit.
@@ -286,15 +346,24 @@ public final class BoardCanvasView: NSView {
         return card
     }
 
+    /// The string as it shows right now, including an unfinished sag drag.
+    func liveString(_ id: UUID) -> BoardString? {
+        if case .adjustingSag(let adjusting, _, _, let latest) = interaction, adjusting == id { return latest }
+        return store.string(id)
+    }
+
     func layoutString(_ node: StringNode) {
-        guard let from = liveCard(node.string.from), let to = liveCard(node.string.to) else { return }
+        let string = liveString(node.id) ?? node.string
+        guard let from = liveCard(string.from), let to = liveCard(string.to) else { return }
         node.update(
-            string: node.string,
+            string: string,
             from: CanvasGeometry.pinPoint(of: from),
             to: CanvasGeometry.pinPoint(of: to),
-            fan: fanOffsets[node.string.id] ?? 0,
+            fan: fanOffsets[string.id] ?? 0,
+            droopScale: droopSprings[string.id]?.value ?? 1,
             appearance: canvasAppearance
         )
+        if tracePath?.strings.contains(string.id) == true { setNeedsPulseUpdate() }
     }
 
     /// Re-routes every string attached to `cardIDs`.
@@ -311,7 +380,7 @@ public final class BoardCanvasView: NSView {
 
     func storeDidChange(_ changes: BoardChanges) {
         withoutAnimation {
-            for id in changes.removedStrings { removeStringNode(id) }
+            for id in changes.removedStrings { removeStringNode(id, animated: true) }
             for id in changes.removedCards { removeCardNode(id) }
             for id in changes.insertedCards {
                 guard cardNodes[id] == nil, let card = store.card(id) else { continue }
@@ -323,19 +392,32 @@ public final class BoardCanvasView: NSView {
                 spatialIndex.insert(id, rect: CanvasGeometry.boundingBox(of: card))
             }
             for id in changes.insertedStrings {
-                guard stringNodes[id] == nil, let string = store.board.strings.first(where: { $0.id == id }) else { continue }
+                guard stringNodes[id] == nil, let string = store.string(id) else { continue }
                 addStringNode(string)
             }
-            if !changes.insertedStrings.isEmpty || !changes.removedStrings.isEmpty {
+            for id in changes.updatedStrings {
+                // Keep the card → string map right if a string was tied to other cards.
+                guard let node = stringNodes[id], let string = store.string(id),
+                      Set([node.string.from, node.string.to]) != Set([string.from, string.to]) else { continue }
+                stringsByCard[node.string.from]?.remove(id)
+                stringsByCard[node.string.to]?.remove(id)
+                stringsByCard[string.from, default: []].insert(id)
+                stringsByCard[string.to, default: []].insert(id)
+            }
+            if !changes.insertedStrings.isEmpty || !changes.removedStrings.isEmpty || !changes.updatedStrings.isEmpty {
                 fanOffsets = CanvasGeometry.fanOffsets(for: store.board.strings)
                 for node in stringNodes.values { layoutString(node) }
             } else {
                 layoutStrings(attachedTo: changes.updatedCards.union(changes.insertedCards))
             }
         }
+        if let connection, !store.contains(card: connection.source) { cancelConnecting(animated: false) }
         let remaining = selection.filter { store.contains(card: $0) }
         if remaining != selection { selection = remaining }
+        let remainingStrings = selectedStrings.filter { stringNodes[$0] != nil }
+        if remainingStrings != selectedStrings { selectedStrings = remainingStrings }
         selectionDidChange()
+        if highlight != nil { refreshHighlight() }
         updateVisibility(force: true)
         controller?.boardDidChange(isEmpty: store.board.cards.isEmpty)
     }
@@ -470,11 +552,15 @@ public final class BoardCanvasView: NSView {
             if level != detailLevel {
                 detailLevel = level
                 for node in cardNodes.values { node.setDetail(level) }
+                for node in stringNodes.values { node.setDetail(level, zoom: camera.zoom) }
+                if level == .minimal { setHoveredCard(nil) }
             }
+            if highlight != nil { layoutDimLayer() }
             updateHandles()
         }
         layoutEditor()
         layoutCaptionEditor()
+        layoutLabelEditor()
         updateVisibility()
         settleTierIfNeeded()
         controller?.cameraDidChange(camera)
@@ -489,11 +575,16 @@ public final class BoardCanvasView: NSView {
             guard !Task.isCancelled, let self else { return }
             withoutAnimation {
                 self.rings.setZoom(self.camera.zoom, cards: self.selection.compactMap { self.liveCard($0) })
+                // Halos, hairlines and fibers depend on the exact zoom.
+                for node in self.stringNodes.values { node.setDetail(self.detailLevel, zoom: self.camera.zoom) }
             }
             let tier = Self.tier(for: self.camera.zoom)
             if tier != self.renderTier {
                 self.renderTier = tier
                 self.scheduleRenders()
+                withoutAnimation {
+                    for node in self.stringNodes.values { node.setLabelScale(self.labelScale) }
+                }
             }
         }
     }

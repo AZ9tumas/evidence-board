@@ -37,6 +37,22 @@ struct BoardCommands: Commands {
                 .disabled(!hasSelection)
         }
 
+        CommandMenu("Strings") {
+            Button("Connect Selected Cards") { canvas?.connectSelection() }
+                .keyboardShortcut("k", modifiers: .command)
+                .disabled(!(canvas?.hasCardPair ?? false))
+            Button(canvas?.tool == .connect ? "Stop Connecting (C)" : "Connect Tool (C)") { canvas?.toggleConnectTool() }
+                .disabled(canvas == nil)
+            Divider()
+            Button("Trace Path") { canvas?.traceSelection() }
+                .keyboardShortcut("t", modifiers: .command)
+                .disabled(!(canvas?.hasCardPair ?? false))
+            Button("Focus on Selection (F)") { canvas?.focusSelection() }
+                .disabled(!hasSelection)
+            Button("Exit Focus or Trace (Esc)") { canvas?.exitMode() }
+                .disabled(canvas?.modeStatus == nil)
+        }
+
         CommandGroup(before: .toolbar) {
             Button("Zoom In") { canvas?.zoomIn() }
                 .keyboardShortcut("=", modifiers: .command)

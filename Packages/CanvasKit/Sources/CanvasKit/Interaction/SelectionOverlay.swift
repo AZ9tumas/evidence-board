@@ -117,6 +117,8 @@ final class HandleOverlay {
     let layer = CALayer()
     private var handles: [ResizeHandle: CALayer] = [:]
     private let marquee = CAShapeLayer()
+    /// The grip at the middle of a selected string.
+    private let sagHandle = CALayer()
     private(set) var handlePoints: [ResizeHandle: CGPoint] = [:]
 
     init() {
@@ -138,10 +140,24 @@ final class HandleOverlay {
         marquee.lineWidth = 1
         marquee.isHidden = true
         layer.addSublayer(marquee)
+
+        let grip = Self.handleSize - 2
+        sagHandle.bounds = CGRect(x: 0, y: 0, width: grip, height: grip)
+        sagHandle.cornerRadius = grip / 2
+        sagHandle.borderColor = RGBA.white.cgColor
+        sagHandle.borderWidth = 1.5
+        sagHandle.shadowColor = RGBA.black.cgColor
+        sagHandle.shadowOpacity = 0.4
+        sagHandle.shadowRadius = 2
+        sagHandle.shadowOffset = CGSize(width: 0, height: 1)
+        sagHandle.shadowPath = CGPath(ellipseIn: sagHandle.bounds, transform: nil)
+        sagHandle.isHidden = true
+        layer.addSublayer(sagHandle)
     }
 
     func setAppearance(_ appearance: CanvasAppearance) {
         for dot in handles.values { dot.borderColor = appearance.selection.from.cgColor }
+        sagHandle.backgroundColor = appearance.selection.from.cgColor
         marquee.strokeColor = appearance.selection.from.opacity(0.9).cgColor
         marquee.fillColor = appearance.selection.from.opacity(0.12).cgColor
     }
@@ -169,6 +185,16 @@ final class HandleOverlay {
     /// The handle under `point` (view space), if any.
     func handle(at point: CGPoint) -> ResizeHandle? {
         handlePoints.first { hypot($0.value.x - point.x, $0.value.y - point.y) <= Self.hitRadius }?.key
+    }
+
+    /// Shows the string grip at `point` (view space), or hides it.
+    func showSagHandle(at point: CGPoint?) {
+        guard let point else {
+            sagHandle.isHidden = true
+            return
+        }
+        sagHandle.position = point
+        sagHandle.isHidden = false
     }
 
     func showMarquee(_ rect: CGRect?) {

@@ -48,7 +48,9 @@ extension Theme {
             paperText: RGBA(0xEDE4D3),
             selection: GradientPair(RGBA(0x5B8CFF), RGBA(0x9B6BFF)),
             photoPaper: GradientPair(RGBA(0xF6F3EC), RGBA(0xE6E0D4)),
-            captionInk: RGBA(0x34302A)
+            captionInk: RGBA(0x34302A),
+            labelFill: GradientPair(RGBA(0x2A3046, alpha: 0.88), RGBA(0x1A1E2E, alpha: 0.88)),
+            labelText: RGBA(0xF2F4FA)
         ),
         textPrimary: RGBA(0xF2F4FA),
         textSecondary: RGBA(0xA7AEC2),

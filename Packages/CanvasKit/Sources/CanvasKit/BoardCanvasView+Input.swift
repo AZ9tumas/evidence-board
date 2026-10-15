@@ -14,6 +14,12 @@ extension BoardCanvasView {
         case resizing(id: UUID, handle: ResizeHandle, original: Card, latest: Card)
         /// Panning a photo inside its frame while reframing.
         case framing(last: CGPoint)
+        /// Pulling a new string out of a pin (see ``BoardCanvasView/connection``).
+        case connecting
+        /// Mouse is down on a string but hasn't moved far enough to count as a drag.
+        case pressingString(id: UUID, start: CGPoint, startWorld: CGPoint)
+        /// Dragging a string up or down to change its sag. Committed on mouse up.
+        case adjustingSag(id: UUID, startWorld: CGPoint, original: BoardString, latest: BoardString)
     }
 
     func location(of event: NSEvent) -> CGPoint {
@@ -22,36 +28,40 @@ extension BoardCanvasView {
 
     /// The topmost card under `point` (view space).
     func card(at point: CGPoint) -> UUID? {
-        let world = camera.viewToWorld(point, in: bounds.size)
-        let tolerance = 2 / camera.zoom
-        return spatialIndex.query(world)
-            .compactMap { liveCard($0) }
-            .filter { CanvasGeometry.contains($0, point: world, tolerance: tolerance) }
-            .max { $0.z < $1.z }?
-            .id
+        topCard(atWorld: camera.viewToWorld(point, in: bounds.size), tolerance: 2 / camera.zoom)
     }
 
     // MARK: - Selection
 
-    func select(_ ids: Set<UUID>) {
-        guard ids != selection else { return }
+    /// Selects cards and strings, replacing the current selection.
+    func select(_ ids: Set<UUID>, strings: Set<UUID> = []) {
+        guard ids != selection || strings != selectedStrings else { return }
         selection = ids
+        selectedStrings = strings
         selectionDidChange()
     }
 
     func selectionDidChange() {
         withoutAnimation {
             rings.show(selection.compactMap { liveCard($0) }, zoom: camera.zoom, appearance: canvasAppearance)
+            for (id, node) in stringNodes { node.setSelected(selectedStrings.contains(id)) }
             updateHandles()
         }
-        controller?.selectionDidChange(count: selection.count)
+        controller?.selectionDidChange(count: selection.count, strings: selectedStrings.count)
     }
 
     func updateHandles() {
         var showsHandles = selection.count == 1 && textEditor == nil && captionEditor == nil && framing == nil
         switch interaction {
-        case .draggingCards, .marquee, .panning: showsHandles = false
+        case .draggingCards, .marquee, .panning, .connecting: showsHandles = false
         default: break
+        }
+        // A lone selected string gets a grip at its middle (unless its label is the grip).
+        if selection.isEmpty, selectedStrings.count == 1, labelEditor == nil, connection == nil,
+           let node = selectedStrings.first.flatMap({ stringNodes[$0] }), !node.showsLabel {
+            overlay.showSagHandle(at: camera.worldToView(node.curve.point(at: 0.5), in: bounds.size))
+        } else {
+            overlay.showSagHandle(at: nil)
         }
         guard showsHandles, let id = selection.first, let card = liveCard(id), !card.locked else {
             overlay.showHandles(for: nil, frame: nil, camera: camera, viewSize: bounds.size)
@@ -80,7 +90,9 @@ extension BoardCanvasView {
         let additive = modifiers.contains(.shift) || modifiers.contains(.command)
 
         if event.clickCount == 2 {
-            if let id = card(at: point) {
+            if let id = string(at: point) {
+                beginLabelEditing(id)
+            } else if let id = card(at: point) {
                 activate(id, at: world)
             } else {
                 createTextCard(at: world)
@@ -94,11 +106,29 @@ extension BoardCanvasView {
             return
         }
 
+        // Pull a string out of a pin, or out of any card with the Connect tool.
+        if !additive, let source = tool == .connect ? (pinCard(at: point) ?? card(at: point)) : pinCard(at: point) {
+            beginConnecting(from: source)
+            return
+        }
+
+        if let id = string(at: point) {
+            if additive {
+                var next = selectedStrings
+                if next.remove(id) == nil { next.insert(id) }
+                select(selection, strings: next)
+            } else if !selectedStrings.contains(id) {
+                select([], strings: [id])
+            }
+            interaction = .pressingString(id: id, start: point, startWorld: world)
+            return
+        }
+
         if let id = card(at: point) {
             if additive {
                 var next = selection
                 if next.remove(id) == nil { next.insert(id) }
-                select(next)
+                select(next, strings: selectedStrings)
             } else if !selection.contains(id) {
                 select([id])
             }
@@ -107,7 +137,7 @@ extension BoardCanvasView {
             }
         } else {
             let base = additive ? selection : []
-            select(base)
+            select(base, strings: additive ? selectedStrings : [])
             interaction = .marquee(start: point, base: base)
         }
     }
@@ -141,6 +171,15 @@ extension BoardCanvasView {
         case .framing(let last):
             panFraming(dx: world.x - last.x, dy: world.y - last.y)
             interaction = .framing(last: world)
+        case .connecting:
+            continueConnecting(to: world)
+        case .pressingString(let id, let start, let startWorld):
+            guard hypot(point.x - start.x, point.y - start.y) > 3, let string = store.string(id) else { return }
+            interaction = .adjustingSag(id: id, startWorld: startWorld, original: string, latest: string)
+            NSCursor.frameResize(position: .top, directions: .all).set()
+            adjustSag(to: world)
+        case .adjustingSag:
+            adjustSag(to: world)
         }
     }
 
@@ -176,6 +215,19 @@ extension BoardCanvasView {
                 boardEditor.perform(.updateCards([latest]), actionName: "Resize")
             } else {
                 restoreNodes([id])
+            }
+        case .connecting:
+            finishConnecting()
+        case .pressingString(let id, _, _):
+            if !modifiers.contains(.shift), !modifiers.contains(.command), selectedStrings.count > 1 || !selection.isEmpty {
+                select([], strings: [id])
+            }
+        case .adjustingSag(let id, _, let original, let latest):
+            NSCursor.arrow.set()
+            if latest != original {
+                boardEditor.perform(.updateStrings([latest]), actionName: "Adjust Slack")
+            } else if let node = stringNodes[id] {
+                withoutAnimation { layoutString(node) }
             }
         }
         withoutAnimation { updateHandles() }
@@ -331,19 +383,28 @@ extension BoardCanvasView {
         super.updateTrackingAreas()
         for area in trackingAreas { removeTrackingArea(area) }
         addTrackingArea(NSTrackingArea(
-            rect: .zero, options: [.mouseMoved, .activeInKeyWindow, .inVisibleRect], owner: self, userInfo: nil
+            rect: .zero, options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect], owner: self, userInfo: nil
         ))
     }
 
     public override func mouseMoved(with event: NSEvent) {
         guard case .idle = interaction else { return }
-        if isSpaceHeld || isFraming(at: location(of: event)) {
+        let point = location(of: event)
+        let hovered = isSpaceHeld || framing != nil || detailLevel == .minimal ? nil : card(at: point)
+        setHoveredCard(hovered)
+        if isSpaceHeld || isFraming(at: point) {
             NSCursor.openHand.set()
-        } else if let handle = overlay.handle(at: location(of: event)) {
+        } else if let handle = overlay.handle(at: point) {
             NSCursor.frameResize(position: handle.cursorPosition, directions: .all).set()
+        } else if pinCard(at: point) != nil || (tool == .connect && hovered != nil) {
+            NSCursor.crosshair.set()
         } else {
             NSCursor.arrow.set()
         }
+    }
+
+    public override func mouseExited(with event: NSEvent) {
+        if case .idle = interaction { setHoveredCard(nil) }
     }
 
     // MARK: - Keyboard
@@ -368,18 +429,23 @@ extension BoardCanvasView {
         case 36, 76: // return, enter
             if selection.count == 1, let id = selection.first {
                 activate(id, at: nil)
+            } else if selection.isEmpty, selectedStrings.count == 1, let id = selectedStrings.first {
+                beginLabelEditing(id)
             }
         case 53: // escape
-            select([])
+            escape()
         case 123: nudgeSelection(dx: -step, dy: 0)
         case 124: nudgeSelection(dx: step, dy: 0)
         case 125: nudgeSelection(dx: 0, dy: step)
         case 126: nudgeSelection(dx: 0, dy: -step)
         default:
-            if modifiers.isEmpty, event.charactersIgnoringModifiers?.lowercased() == "t" {
-                createTextCard(at: pointerWorldLocation() ?? camera.center)
-            } else {
-                super.keyDown(with: event)
+            let key = modifiers.isEmpty ? event.charactersIgnoringModifiers?.lowercased() ?? "" : ""
+            switch key {
+            case "t": createTextCard(at: pointerWorldLocation() ?? camera.center)
+            case "c": setTool(tool == .connect ? .select : .connect)
+            case "v": setTool(.select)
+            case "f": focusSelection()
+            default: super.keyDown(with: event)
             }
         }
     }

@@ -33,8 +33,10 @@ extension BoardCanvasView: NSMenuItemValidation {
 
     public func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
         switch menuItem.action {
-        case #selector(copy(_:)), #selector(cut(_:)), #selector(delete(_:)):
+        case #selector(copy(_:)), #selector(cut(_:)):
             !selection.isEmpty
+        case #selector(delete(_:)):
+            !selection.isEmpty || !selectedStrings.isEmpty
         case #selector(paste(_:)):
             canPaste
         case #selector(selectAll(_:)):
@@ -89,8 +91,11 @@ extension BoardCanvasView: NSMenuItemValidation {
     // MARK: - Selection commands
 
     func deleteSelection(actionName: String = "Delete") {
-        guard !selection.isEmpty else { return }
-        boardEditor.perform(.removeCards(selection), actionName: actionName)
+        var commands: [BoardCommand] = []
+        if !selectedStrings.isEmpty { commands.append(.removeStrings(selectedStrings)) }
+        if !selection.isEmpty { commands.append(.removeCards(selection)) }
+        guard !commands.isEmpty else { return }
+        boardEditor.perform(commands.count == 1 ? commands[0] : .batch(commands), actionName: actionName)
     }
 
     func duplicateSelection() {
@@ -219,6 +224,10 @@ extension BoardCanvasView: NSMenuItemValidation {
     public override func menu(for event: NSEvent) -> NSMenu? {
         commitPendingEdits()
         let point = location(of: event)
+        if let stringID = string(at: point) {
+            if !selectedStrings.contains(stringID) { select([], strings: [stringID]) }
+            return stringMenu()
+        }
         let menu = NSMenu()
         guard let id = card(at: point) else {
             let world = camera.viewToWorld(point, in: bounds.size)
@@ -247,6 +256,12 @@ extension BoardCanvasView: NSMenuItemValidation {
             menu.addItem(item("Reframe Photo", #selector(reframeFromMenu(_:))))
             menu.addItem(.separator())
         }
+        if cards.count == 2 {
+            menu.addItem(item("Connect", #selector(connectFromMenu(_:))))
+            menu.addItem(item("Trace Path", #selector(traceFromMenu(_:))))
+        }
+        menu.addItem(item(highlight == nil ? "Focus" : "Focus Here", #selector(focusFromMenu(_:))))
+        menu.addItem(.separator())
         if !photos.isEmpty {
             let frames = NSMenu()
             for style in ImageFrameStyle.allCases {
@@ -295,20 +310,20 @@ extension BoardCanvasView: NSMenuItemValidation {
         return menu
     }
 
-    private func item(_ title: String, _ action: Selector, value: Any? = nil) -> NSMenuItem {
+    func item(_ title: String, _ action: Selector, value: Any? = nil) -> NSMenuItem {
         let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
         item.target = self
         item.representedObject = value
         return item
     }
 
-    private func submenu(_ title: String, _ menu: NSMenu) -> NSMenuItem {
+    func submenu(_ title: String, _ menu: NSMenu) -> NSMenuItem {
         let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
         item.submenu = menu
         return item
     }
 
-    private func swatch(_ gradient: GradientPair) -> NSImage {
+    func swatch(_ gradient: GradientPair) -> NSImage {
         let from = gradient.from
         let to = gradient.to
         return NSImage(size: NSSize(width: 12, height: 12), flipped: false) { rect in

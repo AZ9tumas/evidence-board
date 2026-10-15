@@ -93,22 +93,81 @@ enum CanvasGeometry {
     }
 
     /// A cubic Bézier that sags like thread under gravity. Longer strings droop more, up to a
-    /// cap. `fan` spreads several strings between the same two cards apart.
-    static func stringPath(from a: CGPoint, to b: CGPoint, sag: CGFloat, fan: CGFloat = 0) -> CGPath {
+    /// cap. `fan` spreads several strings between the same two cards apart, and `droopScale`
+    /// lets the "pull taut" animation overshoot the resting sag.
+    static func stringCurve(
+        from a: CGPoint, to b: CGPoint, sag: CGFloat, fan: CGFloat = 0, droopScale: CGFloat = 1
+    ) -> StringCurve {
         let dx = b.x - a.x
         let dy = b.y - a.y
         let length = max(hypot(dx, dy), 1)
-        let droop = min(length * 0.18, 140) * (0.25 + sag) + fan * 18
+        let droop = droopCap(length) * (0.25 + sag) * droopScale + fan * 18
         let normal = CGVector(dx: -dy / length, dy: dx / length)
         let spread = fan * 12
+        return StringCurve(
+            a: a,
+            c1: CGPoint(x: a.x + dx / 3 + normal.dx * spread, y: a.y + dy / 3 + droop + normal.dy * spread),
+            c2: CGPoint(x: a.x + 2 * dx / 3 + normal.dx * spread, y: a.y + 2 * dy / 3 + droop + normal.dy * spread),
+            b: b
+        )
+    }
 
-        let c1 = CGPoint(x: a.x + dx / 3 + normal.dx * spread, y: a.y + dy / 3 + droop + normal.dy * spread)
-        let c2 = CGPoint(x: a.x + 2 * dx / 3 + normal.dx * spread, y: a.y + 2 * dy / 3 + droop + normal.dy * spread)
+    static func stringPath(from a: CGPoint, to b: CGPoint, sag: CGFloat, fan: CGFloat = 0) -> CGPath {
+        stringCurve(from: a, to: b, sag: sag, fan: fan).path
+    }
 
-        let path = CGMutablePath()
-        path.move(to: a)
-        path.addCurve(to: b, control1: c1, control2: c2)
-        return path
+    /// How far a string of `length` droops per unit of `0.25 + sag`.
+    static func droopCap(_ length: CGFloat) -> CGFloat {
+        min(length * 0.18, 140)
+    }
+
+    /// The sag after dragging a string's middle down by `dy` (world space). The middle of the
+    /// curve sits 0.75 × droop below the chord, so that's the rate it follows the pointer.
+    static func sag(_ sag: CGFloat, afterDragging dy: CGFloat, from a: CGPoint, to b: CGPoint) -> CGFloat {
+        let rate = 0.75 * max(droopCap(hypot(b.x - a.x, b.y - a.y)), 1)
+        return min(max(sag + dy / rate, 0), 1)
+    }
+
+    /// The distance from `point` to the nearest point of a polyline.
+    static func distance(from point: CGPoint, to polyline: [CGPoint]) -> CGFloat {
+        guard var previous = polyline.first else { return .infinity }
+        var best = hypot(point.x - previous.x, point.y - previous.y)
+        for next in polyline.dropFirst() {
+            let dx = next.x - previous.x
+            let dy = next.y - previous.y
+            let lengthSquared = dx * dx + dy * dy
+            let t = lengthSquared > 0
+                ? min(max(((point.x - previous.x) * dx + (point.y - previous.y) * dy) / lengthSquared, 0), 1)
+                : 0
+            best = min(best, hypot(point.x - (previous.x + t * dx), point.y - (previous.y + t * dy)))
+            previous = next
+        }
+        return best
+    }
+
+    static func length(of polyline: [CGPoint]) -> CGFloat {
+        zip(polyline, polyline.dropFirst()).reduce(0) { $0 + hypot($1.1.x - $1.0.x, $1.1.y - $1.0.y) }
+    }
+
+    /// The point `distance` back from the last point of a polyline, and the unit direction
+    /// pointing toward the end there. Used to place arrowheads just clear of a pin.
+    static func point(on polyline: [CGPoint], distanceFromEnd distance: CGFloat) -> (point: CGPoint, direction: CGVector)? {
+        guard polyline.count >= 2 else { return nil }
+        var remaining = distance
+        var index = polyline.count - 1
+        while index > 0 {
+            let end = polyline[index]
+            let start = polyline[index - 1]
+            let segment = hypot(end.x - start.x, end.y - start.y)
+            if segment > 0 && (remaining <= segment || index == 1) {
+                let t = min(remaining / segment, 1)
+                let direction = CGVector(dx: (end.x - start.x) / segment, dy: (end.y - start.y) / segment)
+                return (CGPoint(x: end.x - direction.dx * t * segment, y: end.y - direction.dy * t * segment), direction)
+            }
+            remaining -= segment
+            index -= 1
+        }
+        return nil
     }
 
     /// Offsets that fan out strings sharing the same pair of cards: 0 for a lone string,
@@ -127,6 +186,51 @@ enum CanvasGeometry {
             }
         }
         return offsets
+    }
+}
+
+/// The four points of a string's cubic Bézier, in world space.
+struct StringCurve: Equatable, Sendable {
+    var a: CGPoint
+    var c1: CGPoint
+    var c2: CGPoint
+    var b: CGPoint
+
+    func point(at t: CGFloat) -> CGPoint {
+        let u = 1 - t
+        let w0 = u * u * u
+        let w1 = 3 * u * u * t
+        let w2 = 3 * u * t * t
+        let w3 = t * t * t
+        return CGPoint(
+            x: w0 * a.x + w1 * c1.x + w2 * c2.x + w3 * b.x,
+            y: w0 * a.y + w1 * c1.y + w2 * c2.y + w3 * b.y
+        )
+    }
+
+    /// The same curve, drawn from the other end.
+    var reversed: StringCurve {
+        StringCurve(a: b, c1: c2, c2: c1, b: a)
+    }
+
+    var path: CGPath {
+        let path = CGMutablePath()
+        path.move(to: a)
+        path.addCurve(to: b, control1: c1, control2: c2)
+        return path
+    }
+
+    /// `segments` straight pieces that follow the curve.
+    func flattened(segments: Int = 16) -> [CGPoint] {
+        (0...segments).map { point(at: CGFloat($0) / CGFloat(segments)) }
+    }
+
+    /// A box that contains the curve: the box around its control points.
+    var bounds: CGRect {
+        let xs = [a.x, c1.x, c2.x, b.x]
+        let ys = [a.y, c1.y, c2.y, b.y]
+        let minX = xs.min()!, minY = ys.min()!
+        return CGRect(x: minX, y: minY, width: xs.max()! - minX, height: ys.max()! - minY)
     }
 }
 

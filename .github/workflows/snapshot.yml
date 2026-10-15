@@ -1,5 +1,5 @@
-# Launches the app on a macOS runner in a few states (empty board, sample board, a selected
-# card, a card being edited, 500 extra cards zoomed out) and publishes screenshots as neutral
+# Launches the app on a macOS runner in a few states (empty board, sample board, selection,
+# editing, 500 extra cards, photos, reframing, connecting, Trace, Focus) and publishes screenshots as neutral
 # check runs ("snapshot img<n> part<i>/<total>", base64 JPEG in the output text), so
 # the canvas can be checked visually without a Mac. Runs on demand, or on pushes whose
 # commit message contains [snapshot]. Fetch them with Tools/fetch-snapshots.py.
@@ -53,6 +53,10 @@ jobs:
           capture /tmp/Empty.evboard photos200
           capture /tmp/Harbor.evboard caption
           capture /tmp/Harbor.evboard reframe
+          capture /tmp/Harbor.evboard connect
+          capture /tmp/Harbor.evboard trace
+          capture /tmp/Harbor.evboard focus
+          capture /tmp/Harbor.evboard string
           echo "$shot" > /tmp/shot-count
       - name: Publish images
         env:

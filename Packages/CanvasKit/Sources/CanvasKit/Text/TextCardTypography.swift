@@ -154,7 +154,7 @@ enum TextCardTypography {
 
     /// A transparent bitmap of `size` points at `scale`, with AppKit drawing set up top-down so
     /// row 0 of the bitmap is the top.
-    private static func drawBitmap(size: CGSize, scale: CGFloat, _ draw: () -> Void) -> CGImage? {
+    static func drawBitmap(size: CGSize, scale: CGFloat, _ draw: () -> Void) -> CGImage? {
         let pixelWidth = Int((size.width * scale).rounded(.up))
         let pixelHeight = Int((size.height * scale).rounded(.up))
         guard pixelWidth > 0, pixelHeight > 0, pixelWidth * pixelHeight <= 32_000_000,

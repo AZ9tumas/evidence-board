@@ -39,6 +39,16 @@ public struct RGBA: Sendable, Hashable {
         RGBA(red: red, green: green, blue: blue, alpha: alpha)
     }
 
+    /// This color moved `amount` (0…1) of the way toward `other`.
+    public func mixed(with other: RGBA, _ amount: Double) -> RGBA {
+        RGBA(
+            red: red + (other.red - red) * amount,
+            green: green + (other.green - green) * amount,
+            blue: blue + (other.blue - blue) * amount,
+            alpha: alpha + (other.alpha - alpha) * amount
+        )
+    }
+
     public var cgColor: CGColor {
         CGColor(srgbRed: red, green: green, blue: blue, alpha: alpha)
     }
@@ -80,6 +90,9 @@ public struct CanvasAppearance: Sendable, Hashable {
     /// Paper of polaroid and photo frames, and the ink of captions written on it.
     public var photoPaper: GradientPair
     public var captionInk: RGBA
+    /// The glass capsule behind string labels, and its text.
+    public var labelFill: GradientPair
+    public var labelText: RGBA
 
     public init(
         background: GradientPair,
@@ -97,7 +110,9 @@ public struct CanvasAppearance: Sendable, Hashable {
         paperText: RGBA,
         selection: GradientPair,
         photoPaper: GradientPair,
-        captionInk: RGBA
+        captionInk: RGBA,
+        labelFill: GradientPair = GradientPair(RGBA(0x2A3046, alpha: 0.88), RGBA(0x1A1E2E, alpha: 0.88)),
+        labelText: RGBA = RGBA(0xF2F4FA)
     ) {
         self.background = background
         self.vignette = vignette
@@ -115,6 +130,8 @@ public struct CanvasAppearance: Sendable, Hashable {
         self.selection = selection
         self.photoPaper = photoPaper
         self.captionInk = captionInk
+        self.labelFill = labelFill
+        self.labelText = labelText
     }
 
     func gradient(for tint: Tint) -> GradientPair {
