@@ -199,16 +199,10 @@ private enum SnapshotScenario {
         case "trace":
             canvas.debugSelectCards(at: [1, 4])
             canvas.traceSelection()
-            for step in 0..<3 {
-                try? await Task.sleep(for: .seconds(1.5))
-                let report = "step \(step)\n" + canvas.debugReport() + "\n"
-                if let handle = FileHandle(forWritingAtPath: "/tmp/eb-diag.txt") {
-                    handle.seekToEndOfFile()
-                    handle.write(Data(report.utf8))
-                    try? handle.close()
-                } else {
-                    try? report.write(toFile: "/tmp/eb-diag.txt", atomically: true, encoding: .utf8)
-                }
+            // Keep the window redrawing so the capture shows where the pulse is.
+            for _ in 0..<60 {
+                try? await Task.sleep(for: .milliseconds(200))
+                canvas.debugRedrawWindow()
             }
         case "focus":
             canvas.debugSelectCards(at: [2])

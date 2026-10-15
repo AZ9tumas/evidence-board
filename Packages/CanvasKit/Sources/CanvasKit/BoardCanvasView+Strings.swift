@@ -467,9 +467,6 @@ extension BoardCanvasView {
 
     /// Works out what Focus or Trace shows (again, after an edit) and shows it.
     func refreshHighlight(animated: Bool = false) {
-        #if DEBUG
-        debugCounts["refreshHighlight", default: 0] += 1
-        #endif
         var cards: Set<UUID> = []
         var strings: Set<UUID> = []
         var path: GraphPath?
@@ -564,12 +561,8 @@ extension BoardCanvasView {
     var isPulsing: Bool { tracePath != nil && !pulseLayer.isHidden }
 
     /// A 60 pt glow that travels along the traced path at 600 pt/s (DESIGN.md §6.6). It's
-    /// moved by the frame ticker rather than a Core Animation keyframe animation, which the
-    /// CI Mac's window server drew frozen at the first pin.
+    /// moved by the frame ticker, so it's exactly the piece of path the design asks for.
     private func updatePulse() {
-        #if DEBUG
-        debugCounts["updatePulse", default: 0] += 1
-        #endif
         guard let tracePath, !tracePath.strings.isEmpty, !reduceMotion else {
             withoutAnimation { pulseLayer.isHidden = true }
             pulsePoints = []
@@ -593,9 +586,6 @@ extension BoardCanvasView {
     /// their running distances. Called again when a traced card moves.
     func updatePulsePath() {
         guard let tracePath, !pulseLayer.isHidden else { return }
-        #if DEBUG
-        debugCounts["updatePulsePath", default: 0] += 1
-        #endif
         var points: [CGPoint] = []
         for (index, id) in tracePath.strings.enumerated() {
             guard let node = stringNodes[id], index < tracePath.cards.count else { continue }

@@ -113,17 +113,10 @@ public final class CanvasController {
         view.continueConnecting(to: CGPoint(x: card.frame.midX - 30, y: card.frame.y + 40))
     }
 
-    /// A few lines about the canvas's update counts and the Trace pulse, for the snapshot
-    /// workflow to print.
-    public func debugReport() -> String {
-        guard let view else { return "no view" }
-        let box = view.pulseCore.path?.boundingBoxOfPath
-        return [
-            "reduceMotion=\(Motion.isReduced) ignoresSystemSetting=\(Motion.ignoresSystemSetting)",
-            "counts=\(view.debugCounts.sorted { $0.key < $1.key })",
-            "pulseHidden=\(view.pulseLayer.isHidden) length=\(view.pulseLength) ticking=\(view.physics.isRunning)",
-            "pulse box=\(box.map { "\($0)" } ?? "nil")",
-        ].joined(separator: "\n")
+    /// Redraws the whole window. On the CI Mac, layer-only changes seem to reach the screen
+    /// only when the window redraws, so the snapshot workflow calls this to capture motion.
+    public func debugRedrawWindow() {
+        view?.window?.display()
     }
 
     /// Selects the string at `index` and zooms in on its middle.
