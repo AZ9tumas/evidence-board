@@ -463,7 +463,7 @@ for card in cards:
 board = {
     "format": "evidenceboard", "formatVersion": 1, "id": uid("board"), "title": "The Albania Files",
     "createdAt": NOW, "modifiedAt": NOW, "theme": "cork",
-    "viewport": {"x": (min(xs) + max(xs)) / 2, "y": (min(ys) + max(ys)) / 2 + 60, "zoom": 0.15},
+    "viewport": {"x": (min(xs) + max(xs)) / 2, "y": (min(ys) + max(ys)) / 2 + 60, "zoom": 0.13},
     "cards": cards, "strings": strings, "assets": assets,
 }
 with open(OUT, "w") as f:
