@@ -233,6 +233,7 @@ extension BoardCanvasView: NSMenuItemValidation {
             let world = camera.viewToWorld(point, in: bounds.size)
             menu.addItem(item("New Text Card Here", #selector(newTextCardFromMenu(_:)), value: NSValue(point: world)))
             menu.addItem(item("Insert Image…", #selector(insertImageFromMenu(_:))))
+            menu.addItem(item("Add Link…", #selector(insertLinkFromMenu(_:))))
             menu.addItem(item("Paste", #selector(paste(_:))))
             menu.addItem(.separator())
             menu.addItem(item("Zoom to Fit", #selector(zoomToFitFromMenu(_:))))
@@ -254,6 +255,14 @@ extension BoardCanvasView: NSMenuItemValidation {
         if cards.count == 1, photos.count == 1 {
             menu.addItem(item("Edit Caption", #selector(captionFromMenu(_:))))
             menu.addItem(item("Reframe Photo", #selector(reframeFromMenu(_:))))
+            menu.addItem(.separator())
+        }
+        let links = cards.filter { $0.kind == .web }.count
+        if links > 0 {
+            menu.addItem(item(links == 1 ? "Open in Browser" : "Open \(links) Links in Browser", #selector(openLinksFromMenu(_:))))
+            if cards.count == 1 { menu.addItem(item("Peek", #selector(peekFromMenu(_:)))) }
+            menu.addItem(item(links == 1 ? "Refresh Preview" : "Refresh Previews", #selector(refreshFromMenu(_:))))
+            menu.addItem(item(links == 1 ? "Copy Link" : "Copy Links", #selector(copyLinksFromMenu(_:))))
             menu.addItem(.separator())
         }
         if cards.count == 2 {
@@ -340,6 +349,11 @@ extension BoardCanvasView: NSMenuItemValidation {
 
     @objc private func zoomToFitFromMenu(_ sender: NSMenuItem) { zoomToFit() }
     @objc private func insertImageFromMenu(_ sender: NSMenuItem) { presentImagePicker() }
+    @objc private func insertLinkFromMenu(_ sender: NSMenuItem) { presentLinkPrompt() }
+    @objc private func openLinksFromMenu(_ sender: NSMenuItem) { openSelectionInBrowser() }
+    @objc private func peekFromMenu(_ sender: NSMenuItem) { peekSelection() }
+    @objc private func refreshFromMenu(_ sender: NSMenuItem) { refreshPreviews(all: false) }
+    @objc private func copyLinksFromMenu(_ sender: NSMenuItem) { copySelectedLinks() }
 
     @objc private func captionFromMenu(_ sender: NSMenuItem) {
         guard let id = selection.first else { return }

@@ -204,6 +204,18 @@ private enum SnapshotScenario {
             canvas.focusSelection()
         case "string":
             canvas.debugSelectString(at: 0, zoom: 2.2)
+        case "web":
+            canvas.addTestWebCards()
+            try? await Task.sleep(for: .seconds(2))
+            canvas.zoomToFit()
+        case "webzoom":
+            canvas.addTestWebCards()
+            try? await Task.sleep(for: .seconds(2))
+            canvas.debugLookAtCards(at: [0, 1], zoom: 1.5)
+        case "webzoom2":
+            canvas.addTestWebCards()
+            try? await Task.sleep(for: .seconds(2))
+            canvas.debugLookAtCards(at: [2, 3], zoom: 1.5)
         default:
             break
         }

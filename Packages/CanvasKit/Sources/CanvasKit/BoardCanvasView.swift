@@ -68,6 +68,10 @@ public final class BoardCanvasView: NSView {
     var droopSprings: [UUID: Spring] = [:]
     let physics = FrameTicker()
     var labelEditor: StringLabelEditor?
+    /// Web cards whose previews are being fetched.
+    var previewTasks: [UUID: Task<Void, Never>] = [:]
+    /// Space was pressed and nothing else happened yet: on release it peeks a web card.
+    var spaceTapPending = false
     /// The color, thickness and style of the last string changed, used for new strings.
     var newStringStyle = BoardString(from: UUID(), to: UUID())
     var highlight: Highlight?
@@ -155,6 +159,7 @@ public final class BoardCanvasView: NSView {
         applyAppearance()
         observerToken = store.addObserver { [weak self] changes in self?.storeDidChange(changes) }
         fitAutoHeightTextCards()
+        fitWebCards()
         registerForDraggedTypes(Self.acceptedPasteboardTypes)
     }
 
@@ -293,6 +298,9 @@ public final class BoardCanvasView: NSView {
 
     func addCardNode(_ card: Card) {
         let node = CardNode(card: card, appearance: canvasAppearance, scale: backingScale)
+        if let content = webContent(for: card) {
+            node.update(card: card, appearance: canvasAppearance, web: content)
+        }
         node.setDetail(detailLevel)
         cardNodes[card.id] = node
         cardsLayer.addSublayer(node.root)
@@ -307,6 +315,7 @@ public final class BoardCanvasView: NSView {
         if textEditor?.cardID == id { tearDownEditor() }
         if captionEditor?.cardID == id { finishCaptionEditing(commit: false) }
         if framing?.cardID == id { framing = nil }
+        previewTasks.removeValue(forKey: id)?.cancel()
     }
 
     /// Pixels per point for string labels, following the text tier.
@@ -399,7 +408,7 @@ public final class BoardCanvasView: NSView {
             }
             for id in changes.updatedCards {
                 guard let node = cardNodes[id], let card = store.card(id) else { continue }
-                node.update(card: card, appearance: canvasAppearance)
+                node.update(card: card, appearance: canvasAppearance, web: webContent(for: card))
                 spatialIndex.insert(id, rect: CanvasGeometry.boundingBox(of: card))
             }
             for id in changes.insertedStrings {
@@ -512,15 +521,21 @@ public final class BoardCanvasView: NSView {
                 size: size, scale: scale, appearance: canvasAppearance
             )
         case .web:
-            return
+            guard let layout = node.webLayout else { return }
+            scale = min(renderTier * backingScale, 4096 / max(layout.size.width, layout.size.height, 1))
+            image = WebCardTypography.render(layout, scale: scale)
         }
         withoutAnimation { node.setRenderedText(image, tier: renderTier, scale: scale) }
     }
 
     /// Starts decoding a photo if the card needs more pixels than it has asked for.
     func requestImageIfNeeded(_ id: UUID) {
-        guard let node = cardNodes[id], let card = liveCard(id), case .image(let photo) = card.content,
-              let asset = store.board.assets[photo.asset] else { return }
+        guard let node = cardNodes[id], let card = liveCard(id) else { return }
+        if case .web(let web) = card.content {
+            requestWebImagesIfNeeded(node, web: web)
+            return
+        }
+        guard case .image(let photo) = card.content, let asset = store.board.assets[photo.asset] else { return }
         let photoSize = ImageCardLayout.photoRect(
             for: photo.frameStyle, in: CGSize(width: card.frame.width, height: card.frame.height)
         ).size
@@ -537,6 +552,37 @@ public final class BoardCanvasView: NSView {
         imageStore.load(asset: photo.asset, base64: asset.base64, longSide: needed) { [weak self, weak node] image in
             guard let self, let node, self.cardNodes[node.id] === node else { return }
             withoutAnimation { node.setImage(image) }
+        }
+    }
+
+    /// The page image and site icon of a web card, each decoded at the size it's shown.
+    private func requestWebImagesIfNeeded(_ node: CardNode, web: WebPayload) {
+        guard let snapshot = web.snapshot, let layout = node.webLayout else { return }
+        let scale = renderTier * backingScale
+        // Social posts may show their image as the poster's avatar instead.
+        let imageArea = layout.image ?? (node.webContent?.imageIsAvatar == true ? layout.icon : nil)
+        if let id = snapshot.image, let asset = store.board.assets[id], let area = imageArea {
+            let aspect = node.imageAspect
+                ?? asset.pixelWidth.flatMap { width in asset.pixelHeight.map { CGFloat(width) / CGFloat(max($0, 1)) } }
+                ?? area.width / max(area.height, 1)
+            let needed = ImageCardLayout.bucket(ImageCardLayout.neededLongSide(crop: nil, imageAspect: aspect, photoSize: area.size, scale: scale))
+            if (node.requestedLongSide ?? 0) < needed {
+                node.requestedLongSide = needed
+                imageStore.load(asset: id, base64: asset.base64, longSide: needed) { [weak self, weak node] image in
+                    guard let self, let node, self.cardNodes[node.id] === node else { return }
+                    withoutAnimation { node.setImage(image) }
+                }
+            }
+        }
+        if let id = snapshot.icon, let asset = store.board.assets[id], let area = layout.icon {
+            let needed = ImageCardLayout.bucket(Int((max(area.width, area.height) * scale).rounded(.up)))
+            if (node.requestedIconSide ?? 0) < needed {
+                node.requestedIconSide = needed
+                imageStore.load(asset: id, base64: asset.base64, longSide: needed) { [weak self, weak node] image in
+                    guard let self, let node, self.cardNodes[node.id] === node else { return }
+                    withoutAnimation { node.setIcon(image) }
+                }
+            }
         }
     }
 

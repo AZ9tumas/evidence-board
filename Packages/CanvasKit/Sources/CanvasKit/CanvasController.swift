@@ -12,6 +12,8 @@ public final class CanvasController {
     public private(set) var isBoardEmpty: Bool
     public private(set) var selectionCount = 0
     public private(set) var stringSelectionCount = 0
+    /// How many of the selected cards are web cards.
+    public private(set) var linkSelectionCount = 0
     public private(set) var isEditingText = false
     public private(set) var tool = CanvasTool.select
     /// What the banner over the canvas says while Focus, Trace or the Connect tool is on.
@@ -36,6 +38,7 @@ public final class CanvasController {
     public var hasSelection: Bool { selectionCount > 0 }
     /// ⌘K and ⌘T work on exactly two cards.
     public var hasCardPair: Bool { selectionCount == 2 }
+    public var hasLinkSelection: Bool { linkSelectionCount > 0 }
 
     // MARK: Commands
 
@@ -57,9 +60,25 @@ public final class CanvasController {
     public func toggleLockOnSelection() { view?.toggleLockOnSelection() }
     public func addTestCards(count: Int) { view?.addTestCards(count: count) }
     public func addTestPhotos(count: Int) { view?.addTestPhotos(count: count) }
+    #if DEBUG
+    /// One web card of each layout, plus one still loading, from generated previews.
+    public func addTestWebCards() { view?.addTestWebCards() }
+    #endif
 
     /// Insert ▸ Image…: picks image or PDF files and pins them to the board.
     public func insertImage() { view?.presentImagePicker() }
+
+    // MARK: Links
+
+    /// Insert ▸ Link…: asks for an address and adds a web card with its preview.
+    public func insertLink() { view?.presentLinkPrompt() }
+    /// Fetches the selected web cards' previews again.
+    public func refreshSelectedPreviews() { view?.refreshPreviews(all: false) }
+    public func refreshAllPreviews() { view?.refreshPreviews(all: true) }
+    public func openSelectionInBrowser() { view?.openSelectionInBrowser() }
+    /// A live look at the selected web card's page, in a popover.
+    public func peekSelection() { view?.peekSelection() }
+    public func copySelectedLinks() { view?.copySelectedLinks() }
 
     // MARK: Strings
 
@@ -113,6 +132,14 @@ public final class CanvasController {
         view.continueConnecting(to: CGPoint(x: card.frame.midX - 30, y: card.frame.y + 40))
     }
 
+    /// Centers the view on the cards at `indices` (file order) at `zoom`.
+    public func debugLookAtCards(at indices: [Int], zoom: CGFloat) {
+        guard let view else { return }
+        let cards = indices.filter(store.board.cards.indices.contains).map { store.board.cards[$0] }
+        guard let bounds = CanvasGeometry.contentBounds(of: cards) else { return }
+        view.setCamera(Camera(center: CGPoint(x: bounds.midX, y: bounds.midY), zoom: zoom))
+    }
+
     /// Selects the string at `index` and zooms in on its middle.
     public func debugSelectString(at index: Int, zoom: CGFloat) {
         guard let view, store.board.strings.indices.contains(index) else { return }
@@ -140,9 +167,10 @@ public final class CanvasController {
         if isEmpty != isBoardEmpty { isBoardEmpty = isEmpty }
     }
 
-    func selectionDidChange(count: Int, strings: Int) {
+    func selectionDidChange(count: Int, strings: Int, links: Int) {
         if count != selectionCount { selectionCount = count }
         if strings != stringSelectionCount { stringSelectionCount = strings }
+        if links != linkSelectionCount { linkSelectionCount = links }
     }
 
     func toolDidChange(_ newTool: CanvasTool) {

@@ -17,6 +17,7 @@
 		E0B0A0000000000000000013 /* EvidenceBoard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EvidenceBoard.entitlements; sourceTree = "<group>"; };
 		E0B0A0000000000000000014 /* BoardKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = BoardKit; sourceTree = "<group>"; };
 		E0B0A0000000000000000015 /* CanvasKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = CanvasKit; sourceTree = "<group>"; };
+		E0B0A0000000000000000016 /* LinkPreviewKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = LinkPreviewKit; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -72,6 +73,7 @@
 			children = (
 				E0B0A0000000000000000014 /* BoardKit */,
 				E0B0A0000000000000000015 /* CanvasKit */,
+				E0B0A0000000000000000016 /* LinkPreviewKit */,
 			);
 			path = Packages;
 			sourceTree = "<group>";
@@ -130,6 +132,7 @@
 			packageReferences = (
 				E0B0A0000000000000000050 /* XCLocalSwiftPackageReference "Packages/BoardKit" */,
 				E0B0A0000000000000000051 /* XCLocalSwiftPackageReference "Packages/CanvasKit" */,
+				E0B0A0000000000000000052 /* XCLocalSwiftPackageReference "Packages/LinkPreviewKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E0B0A0000000000000000003 /* Products */;
@@ -373,6 +376,10 @@
 		E0B0A0000000000000000051 /* XCLocalSwiftPackageReference "Packages/CanvasKit" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/CanvasKit;
+		};
+		E0B0A0000000000000000052 /* XCLocalSwiftPackageReference "Packages/LinkPreviewKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/LinkPreviewKit;
 		};
 /* End XCLocalSwiftPackageReference section */
 

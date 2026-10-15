@@ -13,6 +13,6 @@ let package = Package(
     ],
     targets: [
         .target(name: "CanvasKit", dependencies: ["BoardKit", "LinkPreviewKit"]),
-        .testTarget(name: "CanvasKitTests", dependencies: ["CanvasKit"]),
+        .testTarget(name: "CanvasKitTests", dependencies: ["CanvasKit", "BoardKit", "LinkPreviewKit"]),
     ]
 )

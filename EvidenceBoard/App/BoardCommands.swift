@@ -7,6 +7,7 @@ struct BoardCommands: Commands {
     @FocusedValue(\.canvasController) private var canvas
 
     private var hasSelection: Bool { canvas?.hasSelection ?? false }
+    private var hasLinkSelection: Bool { canvas?.hasLinkSelection ?? false }
 
     var body: some Commands {
         CommandGroup(after: .pasteboard) {
@@ -22,6 +23,26 @@ struct BoardCommands: Commands {
             Button("Image…") { canvas?.insertImage() }
                 .keyboardShortcut("i", modifiers: [.command, .shift])
                 .disabled(canvas == nil)
+            Button("Link…") { canvas?.insertLink() }
+                .keyboardShortcut("l", modifiers: .command)
+                .disabled(canvas == nil)
+        }
+
+        CommandMenu("Board") {
+            Button("Refresh Preview") { canvas?.refreshSelectedPreviews() }
+                .keyboardShortcut("r", modifiers: .command)
+                .disabled(!hasLinkSelection)
+            Button("Refresh All Previews") { canvas?.refreshAllPreviews() }
+                .keyboardShortcut("r", modifiers: [.command, .shift])
+                .disabled(canvas == nil)
+            Divider()
+            // ⌘↩ is handled by the canvas, so it doesn't reach the text editor's own ⌘↩.
+            Button("Open in Browser (⌘↩)") { canvas?.openSelectionInBrowser() }
+                .disabled(!hasLinkSelection)
+            Button("Peek (Space)") { canvas?.peekSelection() }
+                .disabled(canvas?.linkSelectionCount != 1 || canvas?.selectionCount != 1)
+            Button("Copy Link") { canvas?.copySelectedLinks() }
+                .disabled(!hasLinkSelection)
         }
 
         CommandMenu("Arrange") {
@@ -72,6 +93,8 @@ struct BoardCommands: Commands {
             Divider()
             Button("Add 50 Test Photos") { canvas?.addTestPhotos(count: 50) }
             Button("Add 200 Test Photos") { canvas?.addTestPhotos(count: 200) }
+            Divider()
+            Button("Add Test Links") { canvas?.addTestWebCards() }
         }
         #endif
     }

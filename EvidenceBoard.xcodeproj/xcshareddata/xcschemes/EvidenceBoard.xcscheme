@@ -49,6 +49,20 @@
                ReferencedContainer = "container:Packages/CanvasKit">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "LinkPreviewKitTests"
+               BuildableName = "LinkPreviewKitTests"
+               BlueprintName = "LinkPreviewKitTests"
+               ReferencedContainer = "container:Packages/LinkPreviewKit">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -76,6 +90,16 @@
                BuildableName = "CanvasKitTests"
                BlueprintName = "CanvasKitTests"
                ReferencedContainer = "container:Packages/CanvasKit">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "LinkPreviewKitTests"
+               BuildableName = "LinkPreviewKitTests"
+               BlueprintName = "LinkPreviewKitTests"
+               ReferencedContainer = "container:Packages/LinkPreviewKit">
             </BuildableReference>
          </TestableReference>
       </Testables>

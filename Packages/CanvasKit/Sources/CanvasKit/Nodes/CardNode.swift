@@ -20,7 +20,8 @@ enum DetailLevel: Comparable, Sendable {
 ///
 /// Text cards show a bitmap of their text, rendered per zoom tier by the canvas. Image cards
 /// show a photo in a polaroid, photo or borderless frame, with an optional caption (also a
-/// text bitmap). Web cards still show placeholder bars until M4.
+/// text bitmap). Web cards add a mesh gradient, an ambient glow, the page image, favicon and
+/// badges from `WebCardParts`, with all their text in one bitmap.
 @MainActor
 final class CardNode {
     private struct Shadow {
@@ -68,6 +69,11 @@ final class CardNode {
     private(set) var fullImage: CGImage?
     var requestedLongSide: Int?
     private var framingCrop: CGRect?
+
+    /// Web cards only.
+    private var web: WebCardParts?
+    private(set) var webContent: WebCardContent?
+    private(set) var webLayout: WebCardLayout?
 
     init(card: Card, appearance: CanvasAppearance, scale: CGFloat) {
         id = card.id
@@ -119,13 +125,24 @@ final class CardNode {
         return nil
     }
 
-    /// Whether the card shows text drawn by the text renderer: a text card, or a captioned photo.
+    /// Whether the card shows text drawn by the text renderer: a text card, a captioned
+    /// photo, or a web card with its preview.
     var hasTextContent: Bool {
         switch card.content {
         case .text: true
         case .image(let image): !(image.caption ?? "").isEmpty
-        case .web: false
+        case .web: !(webLayout?.blocks.isEmpty ?? true)
         }
+    }
+
+    var isWebCard: Bool {
+        if case .web = card.content { return true }
+        return false
+    }
+
+    var requestedIconSide: Int? {
+        get { web?.requestedIconSide }
+        set { web?.requestedIconSide = newValue }
     }
 
     func setContentsScale(_ scale: CGFloat) {
@@ -139,13 +156,15 @@ final class CardNode {
 
     // MARK: Updating
 
-    /// Applies a new version of the card. Returns whether the text bitmap must be redrawn.
+    /// Applies a new version of the card. Web cards also take what their preview shows;
+    /// without it they keep the last one. Returns whether the text bitmap must be redrawn.
     @discardableResult
-    func update(card newCard: Card, appearance: CanvasAppearance) -> Bool {
+    func update(card newCard: Card, appearance: CanvasAppearance, web newWeb: WebCardContent? = nil) -> Bool {
         let old = card
         card = newCard
         let sizeChanged = old.frame.width != newCard.frame.width || old.frame.height != newCard.frame.height
-        let contentChanged = old.content != newCard.content
+        let webChanged = newWeb != nil && newWeb != webContent
+        let contentChanged = old.content != newCard.content || webChanged
         let needsRender = sizeChanged || contentChanged || renderedTier == nil
 
         let bounds = CGRect(x: 0, y: 0, width: newCard.frame.width, height: newCard.frame.height)
@@ -186,7 +205,9 @@ final class CardNode {
             cornerWidth: max(radius - 0.5, 0), cornerHeight: max(radius - 0.5, 0), transform: nil
         )
 
-        if let image = imagePayload {
+        if isWebCard, let content = newWeb ?? webContent {
+            applyWeb(content, bounds: bounds, appearance: appearance, contentChanged: contentChanged || sizeChanged)
+        } else if let image = imagePayload {
             if image.asset != (old.content.imagePayload?.asset) {
                 fullImage = nil
                 requestedLongSide = nil
@@ -214,7 +235,11 @@ final class CardNode {
         }
 
         skeleton.frame = bounds
-        if sizeChanged || contentChanged || skeleton.sublayers == nil {
+        if let web, let layout = webLayout {
+            if sizeChanged || contentChanged || skeleton.sublayers == nil {
+                skeleton.sublayers = layout.skeletonBars.isEmpty ? [] : web.skeletonLayers(for: layout, bounds: bounds, appearance: appearance)
+            }
+        } else if sizeChanged || contentChanged || skeleton.sublayers == nil {
             skeleton.sublayers = Self.placeholders(for: newCard, in: bounds.size, appearance: appearance)
         }
 
@@ -222,6 +247,58 @@ final class CardNode {
         pin.update(locked: newCard.locked, appearance: appearance)
         applyVisibility()
         return needsRender
+    }
+
+    // MARK: Web
+
+    private func applyWeb(_ content: WebCardContent, bounds: CGRect, appearance: CanvasAppearance, contentChanged: Bool) {
+        let parts = web ?? makeWebParts()
+        if contentChanged || webLayout == nil || webContent != content {
+            if webContent?.palette != content.palette || webContent?.imageAspect != content.imageAspect {
+                // A new preview: the old decodes don't apply any more.
+                fullImage = nil
+                requestedLongSide = nil
+                parts.discardImages()
+            }
+            webContent = content
+            webLayout = WebCardLayout(content: content, width: bounds.width, appearance: appearance)
+        }
+        guard let layout = webLayout else { return }
+        parts.apply(layout, content: content, bounds: bounds, appearance: appearance)
+        stroke.colors = [
+            (RGBA(hex: content.palette.vibrant) ?? appearance.cardStroke.from).opacity(0.6).cgColor,
+            (RGBA(hex: content.palette.vibrant) ?? appearance.cardStroke.from).opacity(0).cgColor,
+        ]
+        let imageRect = layout.image ?? .zero
+        photo.frame = imageRect
+        photo.cornerRadius = WebCardLayout.heroCornerRadius
+        photo.backgroundColor = (RGBA(hex: content.palette.darkMuted) ?? appearance.skeleton).cgColor
+        let darkMuted = RGBA(hex: content.palette.darkMuted) ?? .black
+        scrim.colors = [darkMuted.opacity(0).cgColor, darkMuted.opacity(0.85).cgColor]
+        scrim.frame = layout.wash.map { $0.offsetBy(dx: -imageRect.minX, dy: -imageRect.minY) } ?? .zero
+        self.content.frame = bounds
+        if layout.icon != nil, parts.iconImage == nil, !content.imageIsAvatar {
+            parts.setMonogram(for: content, side: layout.icon!.width, scale: max(root.contentsScale, 2))
+        }
+        applyImage()
+    }
+
+    private func makeWebParts() -> WebCardParts {
+        let parts = WebCardParts()
+        root.insertSublayer(parts.glow, at: 0)
+        body.insertSublayer(parts.mesh, at: 0)
+        // Badges and the favicon sit above the photo, below the text.
+        root.insertSublayer(parts.icon, below: content)
+        root.insertSublayer(parts.play, below: content)
+        root.insertSublayer(parts.badge, below: content)
+        web = parts
+        return parts
+    }
+
+    /// Shows a decode of the site icon.
+    func setIcon(_ image: CGImage) {
+        web?.setIcon(image, usesHeroAsAvatar: webContent?.imageIsAvatar ?? false)
+        applyVisibility()
     }
 
     private func bodyFill(for card: Card, appearance: CanvasAppearance) -> GradientPair {
@@ -238,15 +315,20 @@ final class CardNode {
     /// so reframing and resizing never need a new decode unless more pixels are required.
     func setImage(_ image: CGImage) {
         fullImage = image
+        web?.setHero(image, usesAsAvatar: webContent?.imageIsAvatar ?? false)
         applyImage()
         applyVisibility()
     }
 
     func discardImage() {
-        guard fullImage != nil || requestedLongSide != nil else { return }
+        guard fullImage != nil || requestedLongSide != nil || web?.requestedIconSide != nil else { return }
         fullImage = nil
         requestedLongSide = nil
         photo.contents = nil
+        web?.discardImages()
+        if let content = webContent, let side = webLayout?.icon?.width, !content.imageIsAvatar {
+            web?.setMonogram(for: content, side: side, scale: max(root.contentsScale, 2))
+        }
         applyVisibility()
     }
 
@@ -265,8 +347,13 @@ final class CardNode {
 
     /// The normalized part of the image the photo area shows right now.
     var visibleCrop: CGRect? {
-        guard let image = imagePayload, let aspect = imageAspect else { return nil }
-        return framingCrop ?? ImageCardLayout.visibleCrop(crop: image.crop, imageAspect: aspect, photoSize: photo.bounds.size)
+        guard let aspect = imageAspect else { return nil }
+        if let image = imagePayload {
+            return framingCrop ?? ImageCardLayout.visibleCrop(crop: image.crop, imageAspect: aspect, photoSize: photo.bounds.size)
+        }
+        // Web images fill their area, centered.
+        guard isWebCard, photo.bounds.width > 0, photo.bounds.height > 0 else { return nil }
+        return ImageCardLayout.visibleCrop(crop: nil, imageAspect: aspect, photoSize: photo.bounds.size)
     }
 
     var photoFrame: CGRect { photo.frame }
@@ -393,10 +480,20 @@ final class CardNode {
         stroke.isHidden = detail != .full || (image != nil && image?.frameStyle != .borderless)
         body.borderWidth = detail == .full || image != nil ? 0 : 1
         pin.root.isHidden = !showsDetail
+        content.isHidden = !showsDetail || isEditing || !hasTextContent
+        if let web, let layout = webLayout {
+            photo.isHidden = layout.image == nil
+            scrim.isHidden = !showsDetail || layout.wash == nil
+            skeleton.isHidden = !showsDetail || layout.skeletonBars.isEmpty
+            web.glow.isHidden = !showsDetail || layout.image == nil || fullImage == nil || webContent?.variant == .social
+            web.icon.isHidden = !showsDetail || layout.icon == nil
+            web.play.isHidden = !showsDetail || layout.playButton == nil
+            web.badge.isHidden = !showsDetail || layout.durationBadge == nil
+            return
+        }
         photo.isHidden = image == nil
         let captioned = !(image?.caption ?? "").isEmpty
         scrim.isHidden = !showsDetail || !captioned || !ImageCardLayout.captionIsOverlaid(for: image?.frameStyle ?? .polaroid)
-        content.isHidden = !showsDetail || isEditing || !hasTextContent
         // Text cards show placeholder bars only until their first bitmap arrives.
         skeleton.isHidden = !showsDetail || isEditing || image != nil || (isTextCard && content.contents != nil)
     }
@@ -417,20 +514,8 @@ final class CardNode {
         case .image:
             return []
 
-        case .web(let web):
-            let heroHeight = min(size.width * 9 / 16, size.height * 0.55)
-            let hero = CGRect(x: 0, y: 0, width: size.width, height: heroHeight)
-            let heroColors: [RGBA]
-            if let palette = web.snapshot?.palette,
-               let top = RGBA(hex: palette.darkVibrant), let bottom = RGBA(hex: palette.darkMuted) {
-                heroColors = [top, bottom]
-            } else {
-                heroColors = [bar.opacity(bar.alpha * 2.2), bar.opacity(bar.alpha * 1.2)]
-            }
-            var layers = [block(hero, colors: heroColors, radius: 0)]
-            layers.append(block(CGRect(x: 18, y: heroHeight + 16, width: size.width * 0.38, height: 6), colors: [bar, bar], radius: 3))
-            layers += lines(from: heroHeight + 34, height: 10, in: size, color: bar)
-            return layers
+        case .web:
+            return [] // web cards draw their own skeleton (WebCardParts)
         }
     }
 

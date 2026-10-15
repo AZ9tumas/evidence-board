@@ -47,7 +47,10 @@ extension BoardCanvasView {
             for (id, node) in stringNodes { node.setSelected(selectedStrings.contains(id)) }
             updateHandles()
         }
-        controller?.selectionDidChange(count: selection.count, strings: selectedStrings.count)
+        controller?.selectionDidChange(
+            count: selection.count, strings: selectedStrings.count,
+            links: selection.filter { store.card($0)?.kind == .web }.count
+        )
     }
 
     func updateHandles() {
@@ -280,11 +283,22 @@ extension BoardCanvasView {
     }
 
     private func resize(_ id: UUID, handle: ResizeHandle, original: Card, to world: CGPoint, keepAspectRatio: Bool) {
-        let minimum = original.kind == .text ? TextCardTypography.minimumSize : ImageCardLayout.minimumSize
+        let minimum = switch original.kind {
+        case .text: TextCardTypography.minimumSize
+        case .image: ImageCardLayout.minimumSize
+        case .web: WebCardLayout.minimumSize
+        }
         var frame = CanvasGeometry.resizedFrame(
             of: original, dragging: handle, to: world, minimumSize: minimum, keepAspectRatio: keepAspectRatio
         )
         var latest = original
+        if original.kind == .web {
+            // Web cards choose their width; the height follows the layout.
+            frame.width = min(frame.width, Double(WebCardLayout.widthRange.upperBound))
+            if let layout = webLayout(for: original, width: CGFloat(frame.width)) {
+                frame.height = Double(layout.size.height)
+            }
+        }
         if case .text(var text) = original.content {
             if text.autoHeight, abs(frame.height - original.frame.height) < 8 {
                 // A mostly sideways drag keeps the height following the text.
@@ -308,6 +322,7 @@ extension BoardCanvasView {
     // MARK: - Trackpad and wheel
 
     public override func scrollWheel(with event: NSEvent) {
+        spaceTapPending = false
         stopCameraAnimation()
         let point = location(of: event)
         if isFraming(at: point) {
@@ -330,6 +345,7 @@ extension BoardCanvasView {
     }
 
     public override func magnify(with event: NSEvent) {
+        spaceTapPending = false
         stopCameraAnimation()
         let point = location(of: event)
         if isFraming(at: point) {
@@ -362,6 +378,7 @@ extension BoardCanvasView {
     }
 
     private func beginPan(at point: CGPoint) {
+        spaceTapPending = false
         stopCameraAnimation()
         interaction = .panning(last: point)
         NSCursor.closedHand.set()
@@ -422,14 +439,18 @@ extension BoardCanvasView {
             finishFraming(commit: event.keyCode != 53)
             return
         }
+        if event.keyCode != Self.spaceKey { spaceTapPending = false }
         switch event.keyCode {
         case Self.spaceKey:
             if !isSpaceHeld {
                 isSpaceHeld = true
+                spaceTapPending = !event.isARepeat
                 if case .idle = interaction { NSCursor.openHand.set() }
             }
         case 51, 117: // delete, forward delete
             deleteSelection()
+        case 36, 76 where modifiers == .command: // ⌘↩
+            openSelectionInBrowser()
         case 36, 76: // return, enter
             if selection.count == 1, let id = selection.first {
                 activate(id, at: nil)
@@ -461,10 +482,16 @@ extension BoardCanvasView {
         }
         isSpaceHeld = false
         if case .idle = interaction { NSCursor.arrow.set() }
+        // A quick tap (no pan) on a selected web card peeks at the page.
+        if spaceTapPending {
+            spaceTapPending = false
+            peekSelection()
+        }
     }
 
     public override func resignFirstResponder() -> Bool {
         isSpaceHeld = false
+        spaceTapPending = false
         return super.resignFirstResponder()
     }
 

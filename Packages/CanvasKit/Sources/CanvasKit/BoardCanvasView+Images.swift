@@ -23,12 +23,13 @@ extension BoardCanvasView {
     ]
 
     /// Everything the canvas accepts from the clipboard or a drag.
-    static let acceptedPasteboardTypes: [NSPasteboard.PasteboardType] = [.boardClip, .fileURL] + imagePasteboardTypes + [.string]
+    static let acceptedPasteboardTypes: [NSPasteboard.PasteboardType] = [.boardClip, .fileURL] + imagePasteboardTypes + [.URL, .string]
 
     // MARK: - Pasting and dropping
 
-    /// Adds whatever `pasteboard` holds at `world`: copied cards, image files, image data or
-    /// plain text, in that order of preference. Returns false if there was nothing usable.
+    /// Adds whatever `pasteboard` holds at `world`: copied cards, image or `.webloc` files,
+    /// image data, web links or plain text, in that order of preference. Returns false if
+    /// there was nothing usable.
     @discardableResult
     func ingest(_ pasteboard: NSPasteboard, at world: CGPoint, actionName: String) -> Bool {
         if let data = pasteboard.data(forType: .boardClip),
@@ -44,13 +45,21 @@ extension BoardCanvasView {
         let urls = pasteboard.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL] ?? []
         if !urls.isEmpty {
             let images = urls.filter(Self.isImageFile)
-            guard !images.isEmpty else { return false }
-            importImages(images.map { .file($0) }, at: world, actionName: actionName)
+            let links = urls.filter { $0.pathExtension.lowercased() == "webloc" }.compactMap(Self.webURL(fromWebloc:))
+            guard !images.isEmpty || !links.isEmpty else { return false }
+            if !images.isEmpty { importImages(images.map { .file($0) }, at: world, actionName: actionName) }
+            if !links.isEmpty { insertWebCards(links, at: world, actionName: actionName) }
             return true
         }
 
         if let data = Self.imagePasteboardTypes.lazy.compactMap({ pasteboard.data(forType: $0) }).first {
             importImages([.data(data)], at: world, actionName: actionName)
+            return true
+        }
+
+        let links = Self.webURLs(on: pasteboard)
+        if !links.isEmpty {
+            insertWebCards(links, at: world, actionName: actionName)
             return true
         }
 
@@ -186,7 +195,7 @@ extension BoardCanvasView {
                 beginFraming(id)
             }
         case .web:
-            break
+            openInBrowser(id)
         }
     }
 
