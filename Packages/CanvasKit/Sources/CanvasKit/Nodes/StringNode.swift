@@ -52,6 +52,9 @@ final class StringNode {
     private var labelSize: (text: String, size: CGSize)?
     private var renderedLabel: (text: String, scale: CGFloat)?
     private var shadowIsStale = true
+    /// A live update skipped the hidden layers; they're routed before they're shown again.
+    private var hiddenGeometryIsStale = false
+    private var knotRadius: CGFloat?
     private(set) var isSelected = false
     private(set) var emphasis = StringEmphasis.normal
     private var isEditingLabel = false
@@ -107,22 +110,25 @@ final class StringNode {
 
     /// Routes the string between two pins. `droopScale` above 1 adds slack, for the "pull
     /// taut" animation and the live string while connecting. `live` is for every frame of a
-    /// drag: only the geometry moves, and the shadow (a stroked copy of the curve, the costly
-    /// part) waits until the next full update, when the drag ends.
+    /// drag: only the geometry of the layers you can see moves, and the shadow (a stroked
+    /// copy of the curve, the costly part) waits until the next full update, when the drag
+    /// ends.
     func update(
         string: BoardString, from a: CGPoint, to b: CGPoint, fan: CGFloat,
         droopScale: CGFloat = 1, appearance: CanvasAppearance, live: Bool = false
     ) {
         if string.label != self.string.label || appearance != self.appearance { renderedLabel = nil }
+        let styleUnchanged = string == self.string && appearance == self.appearance
         self.string = string
         self.appearance = appearance
         curve = CanvasGeometry.stringCurve(from: a, to: b, sag: CGFloat(string.sag), fan: fan, droopScale: droopScale)
         polyline = curve.flattened()
         length = CanvasGeometry.length(of: polyline)
-        applyGeometry()
-        if live, self.string == string, self.appearance == appearance {
+        if live, styleUnchanged {
             if !shadow.isHidden { shadow.isHidden = true }
+            applyGeometry(live: true)
         } else {
+            applyGeometry()
             applyStyle()
         }
     }
@@ -161,37 +167,68 @@ final class StringNode {
 
     // MARK: Geometry
 
-    private func applyGeometry() {
+    /// Puts every layer on the current curve. `live` (every frame of a drag) leaves out the
+    /// layers that are hidden, about two thirds of the work; `hiddenGeometryIsStale` makes
+    /// sure they're routed before they show.
+    private func applyGeometry(live: Bool = false) {
         let path = curve.path
         let width = CGFloat(string.thickness + appearance.stringBoost)
         let box = curve.bounds.insetBy(dx: -(width * 2 + 12), dy: -(width * 2 + 12))
-        for shape in [halo, thread, gradientMask, fibers] { shape.path = path }
+        let center = CGPoint(x: box.midX, y: box.midY)
+        func needed(_ layer: CALayer) -> Bool {
+            guard live, layer.isHidden else { return true }
+            hiddenGeometryIsStale = true
+            return false
+        }
+        if !live { hiddenGeometryIsStale = false }
+
         // Shape layers get real bounds whose origin is the box's, so their paths stay in world
         // coordinates but Core Animation knows where they draw.
-        let center = CGPoint(x: box.midX, y: box.midY)
-        let drawn: [CAShapeLayer] = [halo, thread, fibers, knots[0], knots[1], arrows[0], arrows[1]]
-        for shape in drawn {
+        for shape in [halo, thread, fibers] where needed(shape) {
+            shape.path = path
             shape.bounds = box
             shape.position = center
         }
 
         // The gradient runs from pin to pin. Its mask uses world coordinates inside the box.
-        gradient.frame = box
-        gradientMask.bounds = box
-        gradientMask.position = CGPoint(x: box.width / 2, y: box.height / 2)
-        gradient.startPoint = CGPoint(x: (curve.a.x - box.minX) / box.width, y: (curve.a.y - box.minY) / box.height)
-        gradient.endPoint = CGPoint(x: (curve.b.x - box.minX) / box.width, y: (curve.b.y - box.minY) / box.height)
-        shadow.bounds = box
-        shadow.position = CGPoint(x: box.midX, y: box.midY)
+        if needed(gradient) {
+            gradientMask.path = path
+            gradient.frame = box
+            gradientMask.bounds = box
+            gradientMask.position = CGPoint(x: box.width / 2, y: box.height / 2)
+            gradient.startPoint = CGPoint(x: (curve.a.x - box.minX) / box.width, y: (curve.a.y - box.minY) / box.height)
+            gradient.endPoint = CGPoint(x: (curve.b.x - box.minX) / box.width, y: (curve.b.y - box.minY) / box.height)
+        }
+        if needed(shadow) {
+            shadow.bounds = box
+            shadow.position = center
+        }
         shadowIsStale = true
 
-        // The string is drawn above the cards, so a small knot over each pin makes it look tied on.
+        // The string is drawn above the cards, so a small knot over each pin makes it look tied
+        // on. Knots are drawn around their own origin, so moving one is a single position.
         let radius = max(width * 1.3, 2.2)
-        for (knot, point) in zip(knots, [curve.a, curve.b]) {
-            knot.path = CGPath(ellipseIn: CGRect(x: point.x - radius, y: point.y - radius, width: radius * 2, height: radius * 2), transform: nil)
+        if knotRadius != radius {
+            knotRadius = radius
+            let circle = CGRect(x: -radius, y: -radius, width: radius * 2, height: radius * 2)
+            for knot in knots {
+                knot.path = CGPath(ellipseIn: circle, transform: nil)
+                knot.bounds = circle
+            }
         }
-        arrows[1].path = string.arrow == .none ? nil : arrowhead(at: polyline, width: width)
-        arrows[0].path = string.arrow == .both ? arrowhead(at: polyline.reversed(), width: width) : nil
+        for (knot, point) in zip(knots, [curve.a, curve.b]) where needed(knot) {
+            knot.position = point
+        }
+        for (index, arrow) in arrows.enumerated() where needed(arrow) {
+            let shown = index == 1 ? string.arrow != .none : string.arrow == .both
+            guard shown else {
+                if arrow.path != nil { arrow.path = nil }
+                continue
+            }
+            arrow.path = arrowhead(at: index == 1 ? polyline : polyline.reversed(), width: width)
+            arrow.bounds = box
+            arrow.position = center
+        }
 
         hitBounds = box
         if let text = string.label, !text.isEmpty {
@@ -252,6 +289,7 @@ final class StringNode {
     }
 
     private func applyStyle() {
+        if hiddenGeometryIsStale { applyGeometry() }
         let width = CGFloat(string.thickness + appearance.stringBoost)
         let colors = appearance.gradient(for: string.color)
         let dimmed = emphasis == .dimmed

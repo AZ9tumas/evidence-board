@@ -66,7 +66,8 @@ Tools/                     Helper scripts
 
 **Hardening (M6)**
 - **Performance budgets in CI:** every push runs a release-build suite that drives a real canvas and checks the design's budgets: pan and zoom on 500 and 3,000-card boards, dragging 50 cards with 200 strings, opening and saving a 50 MB board, memory at rest, and nothing running when idle. The run summary has the table; the numbers are in [`docs/DESIGN.md` §11](docs/DESIGN.md#11-performance-budgets).
-- **Faster big boards:** saving a 50 MB board takes about 50 ms (image data is written straight into the file), and while you pan or zoom, text drawing yields to the camera.
+- **Faster big boards:** card text is drawn on background threads, strings re-route cheaply while you drag, and saving a 50 MB board takes about 50 ms (image data is written straight into the file).
+- **Launch:** not within budget on CI. A release build reaches its first board frame in 345–700 ms on GitHub's virtual Macs (budget 400 ms on an M1 Air), and the app's own code is under 60 ms of that; the rest is the system and SwiftUI. The snapshot run's summary breaks it down. It needs measuring on a real Mac.
 - **VoiceOver and keyboard:** every card and string is spoken with its content, tint, lock and connections, with actions (Edit, Open in Browser, Peek, Connect, Focus, Lock, Delete) and a **Connections** rotor. **Tab** walks the cards top to bottom, **⌥ + arrows** jump to the nearest card that way, and **⌘K** with one card selected ties it to the previous one.
 - **Increase Contrast and Reduce Transparency** are honored, and a test checks every theme's text against WCAG AA.
 - **Fuzzing:** the loader is fuzzed with libFuzzer in CI and by a seeded mutation test. It now caps text lengths and repairs impossible numbers, so whatever loads can always be saved.
@@ -114,6 +115,6 @@ Tools/                     Helper scripts
 
 **Base (M0):** the document app (New, Open, Save, autosave, Versions), the forgiving JSON codec, the Noir canvas, and the camera.
 
-Not verified yet: Liquid Glass (CI runs macOS 15); frame rate on real hardware (CI measures main-thread time per frame, not what the screen shows); VoiceOver and the Quick Look extensions in use (CI builds and tests them, but the build is unsigned); how the string physics feel on a real trackpad, and the Trace glow moving along the path. The glow's position is tested, but CI screen captures never show it. Fetching previews from live sites and Peek also need a Mac: CI checks the pipeline against 62 saved page heads, and the screenshots show generated previews.
+Not verified yet: Liquid Glass (CI runs macOS 15); launch time and frame rate on real hardware (CI measures main-thread time per frame, not what the screen shows); VoiceOver and the Quick Look extensions in use (CI builds and tests them, but the build is unsigned); how the string physics feel on a real trackpad, and the Trace glow moving along the path. The glow's position is tested, but CI screen captures never show it. Fetching previews from live sites and Peek also need a Mac: CI checks the pipeline against 62 saved page heads, and the screenshots show generated previews.
 
 See the roadmap in [`docs/DESIGN.md` §16](docs/DESIGN.md#16-roadmap).
