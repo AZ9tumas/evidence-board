@@ -18,7 +18,8 @@ struct StringInteractionTests {
         self.init(connected: false)
     }
 
-    /// Three text cards in a row, 400 pt apart, optionally tied 0 → 1 → 2.
+    /// Three text cards in a row, 400 pt apart, optionally tied 0 → 1 → 2. The canvas fits
+    /// their height to the text when it opens (about 72 pt), so points below y = 60 are on them.
     init(connected: Bool) {
         let stamp = Date(timeIntervalSince1970: 1_800_000_000)
         cards = (0..<3).map { index in
@@ -63,7 +64,7 @@ struct StringInteractionTests {
     }
 
     @Test func draggingFromAPinOntoACardTiesAString() throws {
-        drag(from: pin(0), to: CGPoint(x: 480, y: 60))
+        drag(from: pin(0), to: CGPoint(x: 480, y: 40))
         let string = try #require(store.board.strings.first)
         #expect(store.board.strings.count == 1)
         #expect(string.from == cards[0].id && string.to == cards[1].id)
@@ -84,7 +85,7 @@ struct StringInteractionTests {
     }
 
     @Test func draggingACardStillMovesIt() {
-        drag(from: CGPoint(x: 100, y: 70), to: CGPoint(x: 140, y: 120))
+        drag(from: CGPoint(x: 100, y: 45), to: CGPoint(x: 140, y: 95))
         #expect(store.board.strings.isEmpty)
         #expect(store.card(cards[0].id)?.frame.x == 40)
     }
@@ -118,12 +119,19 @@ struct StringInteractionTests {
     @Test func commandKConnectsTwoCardsAndTraceFindsThePath() throws {
         let test = StringInteractionTests(connected: true)
         test.view.select([test.cards[0].id, test.cards[2].id])
+        Motion.ignoresSystemSetting = true
 
         test.view.traceSelection()
         #expect(test.view.highlight == .trace(from: test.cards[0].id, to: test.cards[2].id))
         #expect(test.view.tracePath?.cards == test.cards.map(\.id))
         #expect(test.view.highlightedStrings.count == 2)
         #expect(test.view.stringNodes.values.allSatisfy { $0.emphasis == .glowing })
+        // The pulse runs along both strings, from the first card's pin to the last one's.
+        #expect(!test.view.pulseLayer.isHidden)
+        #expect(test.view.pulseCore.animation(forKey: "pulse") != nil)
+        #expect(test.view.pulseLength > 800)
+        let box = try #require(test.view.pulseCore.path?.boundingBoxOfPath)
+        #expect(abs(box.minX - test.pin(0).x) < 1 && abs(box.maxX - test.pin(2).x) < 1)
 
         test.view.escape()
         #expect(test.view.highlight == nil)
@@ -157,11 +165,11 @@ struct StringInteractionTests {
     @Test func connectToolPullsFromAnywhereOnACard() {
         view.setTool(.connect)
         #expect(view.tool == .connect)
-        let start = CGPoint(x: 60, y: 80)
-        let end = CGPoint(x: 880, y: 60)
+        let start = CGPoint(x: 60, y: 45)
+        let end = CGPoint(x: 880, y: 40)
         view.mouseDown(with: mouse(.leftMouseDown, at: start))
         #expect(view.connection?.source == cards[0].id)
-        view.mouseDragged(with: mouse(.leftMouseDragged, at: CGPoint(x: 470, y: 70)))
+        view.mouseDragged(with: mouse(.leftMouseDragged, at: CGPoint(x: 470, y: 45)))
         #expect(view.connection?.target == cards[1].id)
         view.mouseDragged(with: mouse(.leftMouseDragged, at: end))
         #expect(view.connection?.target == cards[2].id)

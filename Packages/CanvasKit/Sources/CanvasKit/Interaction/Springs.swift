@@ -4,12 +4,18 @@ import QuartzCore
 /// Whether to tone motion down (DESIGN.md §6.6): springs become fades, pulses stop.
 @MainActor
 enum Motion {
-    static var isReduced: Bool {
+    /// Shows full motion even with Reduce Motion on. Tests set it, and debug builds launched
+    /// by the snapshot workflow (whose Mac has Reduce Motion on) start with it set.
+    static var ignoresSystemSetting: Bool = {
         #if DEBUG
-        // Lets the snapshot workflow show motion even if its Mac has Reduce Motion on.
-        if ProcessInfo.processInfo.environment["EB_IGNORE_REDUCE_MOTION"] != nil { return false }
+        ProcessInfo.processInfo.environment["EB_SNAPSHOT_SCENARIO"] != nil
+        #else
+        false
         #endif
-        return NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+    }()
+
+    static var isReduced: Bool {
+        !ignoresSystemSetting && NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
     }
 }
 
