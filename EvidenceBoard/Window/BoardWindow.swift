@@ -14,6 +14,7 @@ struct BoardWindow: View {
     private let system = SystemAppearance.shared
 
     init(store: BoardStore) {
+        LaunchTiming.mark("window view made")
         self.store = store
         _canvas = State(initialValue: CanvasController(store: store))
     }

@@ -103,7 +103,7 @@ jobs:
             sleep 1
             pkill -x EvidenceBoard || true
             sleep 1
-            cat "$2" 2>/dev/null || echo 99999
+            head -n 1 "$2" 2>/dev/null || echo 99999
           }
           # The very first launch of a fresh, unsigned build pays for the system scanning and
           # registering it, which a downloaded, notarized app pays once at install. Do that
@@ -116,6 +116,8 @@ jobs:
           board=$(launch /tmp/Harbor.evboard /tmp/l7.txt)
           median=$(echo $warm | tr ' ' '\n' | sort -n | sed -n 3p)
           echo "cold $cold ms; warm$warm ms (median $median); sample board $board ms"
+          # Where the time goes: before "app code starts" is the system (exec, dyld, AppKit).
+          for n in 1 4 7; do echo "--- launch $n"; tail -n +2 "/tmp/l$n.txt" 2>/dev/null; done
           verdict() { [ "$1" -lt 400 ] && echo pass || echo FAIL; }
           {
             echo "### Launch (release build, GitHub macOS 15 runner)"
@@ -124,6 +126,10 @@ jobs:
             echo "| Cold launch to empty board (file cache purged) | ${cold} ms | < 400 ms | $(verdict "$cold") |"
             echo "| Warm launch to empty board (median of 5) | ${median} ms | < 400 ms | $(verdict "$median") |"
             echo "| Launch to the sample board | ${board} ms | < 400 ms | $(verdict "$board") |"
+            echo
+            echo "Steps of the sample board launch:"
+            echo
+            tail -n +2 /tmp/l7.txt 2>/dev/null | sed 's/^/- /'
           } | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Publish images
         env:

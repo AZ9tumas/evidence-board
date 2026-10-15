@@ -22,11 +22,13 @@ final class BoardDocument: ReferenceFileDocument, Sendable {
     }
 
     nonisolated init(configuration: ReadConfiguration) throws {
+        LaunchTiming.mark("document read starts")
         guard let data = configuration.file.regularFileContents else {
             throw CocoaError(.fileReadCorruptFile)
         }
         let result = try BoardCodec.decode(data)
         store = BoardStore(board: result.board, loadReport: result.report)
+        LaunchTiming.mark("document decoded")
     }
 
     nonisolated func snapshot(contentType: UTType) throws -> Board {

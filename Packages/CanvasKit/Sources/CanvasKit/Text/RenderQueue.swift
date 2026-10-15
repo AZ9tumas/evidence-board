@@ -38,8 +38,9 @@ final class RenderQueue: NSObject {
     /// moves, so a pan or zoom frame stays within its 4 ms budget (DESIGN.md §11).
     static let budget: CFTimeInterval = 0.004
     static let movingBudget: CFTimeInterval = 0.001
-    /// Bitmaps being drawn at once. More would only draw cards that may have scrolled away.
-    static let maxInFlight = 4
+    /// Bitmaps being drawn at once: up to 4, leaving two cores for the main thread and the
+    /// render server. More would only draw cards that may have scrolled away.
+    static let maxInFlight = max(1, min(4, ProcessInfo.processInfo.activeProcessorCount - 2))
 
     /// Whether the camera is moving right now.
     var isMoving: () -> Bool = { false }
