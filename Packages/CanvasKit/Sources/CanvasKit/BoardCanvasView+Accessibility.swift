@@ -246,7 +246,7 @@ enum LinkURLText {
 }
 
 /// A card for VoiceOver. Its methods are called on the main thread.
-final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityCustomRotorItemSearchDelegate, @unchecked Sendable {
+final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityElementProtocol, NSAccessibilityCustomRotorItemSearchDelegate, @unchecked Sendable {
     let cardID: UUID
     private weak var canvas: BoardCanvasView?
 
@@ -373,7 +373,7 @@ final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityCus
 }
 
 /// A string for VoiceOver. Its methods are called on the main thread.
-final class StringAccessibilityElement: NSAccessibilityElement, @unchecked Sendable {
+final class StringAccessibilityElement: NSAccessibilityElement, NSAccessibilityElementProtocol, @unchecked Sendable {
     let stringID: UUID
     private weak var canvas: BoardCanvasView?
 
