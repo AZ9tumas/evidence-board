@@ -5,7 +5,9 @@ import CanvasKit
 struct EvidenceBoardApp: App {
     init() {
         LaunchTiming.mark("app code starts")
-        CanvasLaunchMarks.mark = LaunchTiming.isTiming ? { LaunchTiming.mark($0) } : nil
+        if LaunchTiming.isTiming {
+            CanvasLaunchMarks.mark = { step in LaunchTiming.mark(step) }
+        }
     }
 
     var body: some Scene {
