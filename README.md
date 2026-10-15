@@ -6,7 +6,7 @@ A native macOS app for building detective-style evidence boards. You place **tex
 - 🧾 **File format schema:** [`docs/schema/evidenceboard.schema.json`](docs/schema/evidenceboard.schema.json)
 - 🗂 **Sample board:** [`docs/examples/harbor-case.evboard`](docs/examples/harbor-case.evboard)
 
-![Web cards in the M4 build: hero, article, media, portrait, social, compact and fallback layouts, plus one still loading](docs/images/m4-web-cards.jpg)
+![The sample board in the four M5 themes: Noir, Cork, Blueprint and Daylight](docs/images/m5-themes.jpg)
 
 ## Highlights
 
@@ -68,6 +68,9 @@ Tools/                     Helper scripts
 - **Glass:** HUDs, banners, search and minimap use Liquid Glass on macOS 26 and a frosted material before that.
 
 **Web cards (M4)**
+
+![Every web card layout: hero, article, media, portrait, social, compact and fallback, plus one still loading](docs/images/m4-web-cards.jpg)
+
 - **Add:** paste a link, drag one from a browser, drop a `.webloc` file, or use **Insert ▸ Link…** (⌘L). The card appears at once as a shimmering skeleton while the preview loads.
 - **Previews:** the app reads the page's `<head>` (Open Graph, Twitter cards, JSON‑LD, icons) alongside the system's LinkPresentation, picks the best title, image and icon, and takes a 5-color palette from the image. No page script ever runs.
 - **Seven layouts:** Hero, Article (with byline), Media (play button and duration), Portrait, Social (avatar, name, handle, the post as a quote), Compact (a full mesh gradient when there's no image) and Fallback (when the page can't be reached). Each card gets a mesh-gradient body, a gradient border and a soft glow from its own palette.
