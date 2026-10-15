@@ -36,6 +36,10 @@ swift test --package-path Packages/BoardKit       # also runs on Linux
 swift test --package-path Packages/LinkPreviewKit  # also runs on Linux
 swift test --package-path Packages/CanvasKit
 xcodebuild -project EvidenceBoard.xcodeproj -scheme EvidenceBoard build
+
+# Performance budgets (release build) and the loader fuzzer (Linux)
+EB_PERF=1 swift test -c release -Xswiftc -enable-testing --package-path Packages/CanvasKit --filter PerformanceTests
+Tools/Fuzz/run.sh 60
 ```
 
 ### Without a Mac
@@ -51,13 +55,22 @@ Config/                    Info.plist (document types) and sandbox entitlements
 Packages/BoardKit/         Model, JSON codec, validation, BoardStore. Foundation only
 Packages/CanvasKit/        Camera and the Core Animation canvas (AppKit)
 Packages/LinkPreviewKit/   Link previews: fetch, head parser, merger, palette, cache
+QuickLook/                 Finder thumbnail and Quick Look preview extensions
 docs/                      Design document, JSON schema, sample board
 Tools/                     Helper scripts
 ```
 
 ## Status
 
-**M0 (skeleton)** through **M4 (web cards)** and **M5 (design polish)** are done.
+**M0 (skeleton)** through **M5 (design polish)** and **M6 (hardening)** are done.
+
+**Hardening (M6)**
+- **Performance budgets in CI:** every push runs a release-build suite that drives a real canvas and checks the design's budgets: pan and zoom on 500 and 3,000-card boards, dragging 50 cards with 200 strings, opening and saving a 50 MB board, memory at rest, and nothing running when idle. The run summary has the table; the numbers are in [`docs/DESIGN.md` §11](docs/DESIGN.md#11-performance-budgets).
+- **Faster big boards:** saving a 50 MB board takes about 50 ms (image data is written straight into the file), and while you pan or zoom, text drawing yields to the camera.
+- **VoiceOver and keyboard:** every card and string is spoken with its content, tint, lock and connections, with actions (Edit, Open in Browser, Peek, Connect, Focus, Lock, Delete) and a **Connections** rotor. **Tab** walks the cards top to bottom, **⌥ + arrows** jump to the nearest card that way, and **⌘K** with one card selected ties it to the previous one.
+- **Increase Contrast and Reduce Transparency** are honored, and a test checks every theme's text against WCAG AA.
+- **Fuzzing:** the loader is fuzzed with libFuzzer in CI and by a seeded mutation test. It now caps text lengths and repairs impossible numbers, so whatever loads can always be saved.
+- **Quick Look:** Finder shows boards as thumbnails, and Space previews the whole board, drawn without opening the app or touching the network.
 
 **Design polish (M5)**
 - **Four themes:** Noir, Cork (procedural cork grain, paper cards, red wool), Blueprint (drafting grid, blue glass cards, white thread) and Daylight. **Automatic** (the default for new boards) follows Dark Mode. Switch with **Board ▸ Theme**, the toolbar's ◐ menu or **⌥⌘T**; the board cross-fades, the theme is saved in the file, and it can be undone.
@@ -101,6 +114,6 @@ Tools/                     Helper scripts
 
 **Base (M0):** the document app (New, Open, Save, autosave, Versions), the forgiving JSON codec, the Noir canvas, and the camera.
 
-Not verified yet: Liquid Glass (CI runs macOS 15), frame rate and memory on real hardware (they need a Mac and Instruments), how the string physics feel on a real trackpad, and the Trace glow moving along the path. The glow's position is tested, but CI screen captures never show it. Fetching previews from live sites and Peek also need a Mac: CI checks the pipeline against 62 saved page heads, and the screenshots show generated previews.
+Not verified yet: Liquid Glass (CI runs macOS 15); frame rate on real hardware (CI measures main-thread time per frame, not what the screen shows); VoiceOver and the Quick Look extensions in use (CI builds and tests them, but the build is unsigned); how the string physics feel on a real trackpad, and the Trace glow moving along the path. The glow's position is tested, but CI screen captures never show it. Fetching previews from live sites and Peek also need a Mac: CI checks the pipeline against 62 saved page heads, and the screenshots show generated previews.
 
 See the roadmap in [`docs/DESIGN.md` §16](docs/DESIGN.md#16-roadmap).

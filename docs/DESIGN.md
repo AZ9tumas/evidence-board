@@ -859,7 +859,7 @@ Other rules:
 ### 10.6 Culling and hit testing
 
 - **SpatialGrid**: a uniform grid (512 pt cells) over each card's *rotated* bounding box, updated on every change. It's simpler than an R-tree and just as fast at these sizes. Huge cards go in an overflow list, and very large queries scan occupied cells instead of empty ones.
-- **Visible set** = query(viewport rect expanded by 25%). Only visible cards get content bitmaps. Card chrome layers exist for every card: Core Animation skips off-screen layers when compositing, and 500 cards of chrome is cheap. Layer pooling is kept in reserve for M6 if profiling asks for it.
+- **Visible set** = query(viewport rect expanded by 25%). Only visible cards get content bitmaps. Card chrome layers exist for every card: Core Animation skips off-screen layers when compositing, and 500 cards of chrome is cheap. Layer pooling was kept in reserve for M6; the M6 budgets (§11) pass without it, so it isn't built. Mid-gesture, only cards that just came into view join the render queue, which draws for 1.5 ms of a moving frame (5 ms at rest) and is re-sorted, nearest first, once the camera settles.
 - Strings are visible if their Bézier bounding box intersects the viewport.
 - **Hit testing**: grid point query, then exact test in card-local (unrotated) space, topmost by `z`. For strings: a coarse bounding-box check, then distance to a pre-flattened polyline (16 segments), within 6 pt screen distance.
 
@@ -932,6 +932,26 @@ Reference hardware: base M1 MacBook Air. Targets must also hold on a 120 Hz ProM
 
 Instruments templates are checked into `Tools/Instruments/` (Time Profiler, Core Animation FPS, Allocations, Hangs). CI runs `XCTMetric` performance tests (§15) with regression thresholds.
 
+**As built (M6).** CI checks the budgets on every push, on a GitHub macOS 15 arm64 runner (a virtual Mac, slower than an M1 Air), in a release build. A Swift Testing suite (`PerformanceTests`, `CodecPerformanceTests`, run with `EB_PERF=1`) drives a real canvas in an offscreen window and measures **main-thread time per frame**: what the app controls. Core Animation's render server and the display aren't measured, so frame rate itself still needs Instruments on a real Mac. Results from the run that closed M6:
+
+| Scenario | Budget | Measured in CI |
+|---|---|---|
+| Pan, 500 cards (200 photos, 150 web), p95 frame | < 4 ms | 0.1–0.5 ms |
+| Zoom, 500 cards, p95 frame | < 4 ms | 2.2–3.3 ms |
+| Pan or zoom, 3,000 cards, p95 frame (whole board in view, 30%, zoom sweep) | < 16.7 ms | 1.8–3.7 ms |
+| Drag 50 cards with 200 strings, p95 frame | < 8.3 ms (one 120 Hz frame) | 7.3 ms |
+| Open a 52 MB, 300-card board: decode and validate | < 500 ms | 60–115 ms |
+| Open that board: first frame | < 800 ms | 183 ms |
+| Open that board: visible photos decoded | < 1.5 s | 327 ms |
+| Save a 50 MB board | < 300 ms | 42–65 ms |
+| Memory, 500-card board at rest | < 450 MB | 269 MB |
+| Work scheduled at rest (display links, physics, pulses, fetches) | none | none |
+| Launch to first board frame (Debug build, snapshot workflow) | < 400 ms | see the snapshot run summary |
+
+Dragging is the tightest: re-routing 200 strings every frame. It's the first place to look if a real Mac drops frames.
+
+The link-preview budget needs the network and isn't measured in CI. Saving got its speed from writing image data straight into the JSON (it's plain base64, so it needs no escaping) instead of passing megabytes of text through the encoder.
+
 ---
 
 ## 12. Xcode project setup
@@ -944,8 +964,10 @@ Instruments templates are checked into `Tools/Instruments/` (Time Profiler, Core
 | `BoardKit` | Swift Package (local) | Model, codec, migrations, graph queries. No UI, so it's fully unit-testable |
 | `CanvasKit` | Swift Package (local) | Canvas engine (AppKit + CA) |
 | `LinkPreviewKit` | Swift Package (local) | Metadata pipeline, palette extraction |
-| `EvidenceBoardQuickLook` | Quick Look Preview Extension | Shows a board thumbnail and preview in Finder |
+| `EvidenceBoardPreview` | Quick Look Preview Extension (data-based) | Space in Finder shows the whole board as a picture |
 | `EvidenceBoardThumbnail` | Thumbnail Extension | Finder icon = board snapshot |
+
+*As built (M6):* both extensions live in `QuickLook/` and draw with `BoardRenderer` (CanvasKit), which renders a board without a window: background, cards with shadows, text, photos and link previews, strings and pins, with placeholder bars where text would be too small to read. They read only the file, never the network, and are sandboxed. Their modules build in the Swift 5 language mode, since Quick Look's completion handlers predate Swift concurrency.
 | `EvidenceBoardTests` / `…UITests` | Test bundles | §15 |
 
 There are **no third-party dependencies**. The HTML `<head>` parser is a small hand-written tokenizer (meta, link, title and `application/ld+json` script blocks only), about 300 lines in `LinkPreviewKit`.
@@ -1059,7 +1081,7 @@ docs/
 - **Image decoding** goes through ImageIO only, with a pixel-count limit of 100 MP, to guard against decompression bombs.
 - **Opening a file is network-silent.** A shared board can't be used as a tracking beacon, because previews render from the embedded snapshot.
 - **Peek** uses `WKWebsiteDataStore.nonPersistent()`, so there are no cookies, no shared login and no persistence.
-- **Untrusted JSON** goes through bounded parsing. Files over 2 GB are rejected, and string lengths and card counts are capped (100k cards) to avoid memory exhaustion.
+- **Untrusted JSON** goes through bounded parsing. Files over 2 GB are rejected, and string lengths and card counts are capped (100k cards) to avoid memory exhaustion. *As built (M6):* text is capped at a million characters and titles, captions, labels and link fields at 10,000; 500k strings and 100k assets; a photo crop that isn't finite is dropped and one outside the photo is pulled back in; an impossible video duration is dropped. Whatever loads is guaranteed to save, and saving then reloading changes nothing; a seeded mutation test and a 60-second libFuzzer run in CI check exactly that (§15).
 - **No analytics** and no network calls other than link previews the user explicitly requested.
 
 ---
@@ -1073,6 +1095,8 @@ docs/
 - **Reduce Motion**, **Reduce Transparency** (glass becomes solid theme colors) and **Increase Contrast** (card strokes at 40%, strings +1 pt) are all honored.
 - String colors are never the only signal. Labels and dash styles provide redundant encoding.
 
+**As built (M6).** The canvas is a *layout area* whose children are the cards, in reading order, then the strings. A card says its kind and content ("Text card: Ferry left 11 minutes early, amber, locked, 2 connections"; "Web card: Harbor authority releases night logs, example.com"), and its actions are Edit (or Edit Caption, or Open in Browser and Peek), Connect to the card focused before it, Focus on Connections, Lock or Unlock, and Delete. A string says "String from ⟨A⟩ to ⟨B⟩, labelled ⟨label⟩", plus its arrow and dash style, with actions to go to either end, edit the label or delete it. The Connections rotor walks a card's strings. Tab, ⇧Tab, ⌥ + arrows (to the nearest card within about 70° of the direction) and ⌘K work as above, with each move announced. Increase Contrast draws card edges at 40% and strings a point thicker and makes translucent fills opaque; Reduce Transparency turns glass panels and translucent cards solid. A test checks every theme's card text, typewriter text, captions and string labels against 4.5:1, over both ends of each gradient and of the board behind translucent fills.
+
 ---
 
 ## 15. Testing strategy
@@ -1084,9 +1108,10 @@ docs/
 | **LinkPreviewKit** | Head parser against 62 saved page heads modeled on real sites; merger priority; variants; palette roles; cache | Fixtures with expectations in a leading comment, no live network in CI |
 | **CanvasKit** | Camera math, hit testing and resizing on rotated cards, spatial grid against brute force, text measuring and rendering, string path bounds | Unit tests |
 | **Rendering** | Card visuals per theme and variant | Web card layouts for all 62 fixtures at four widths are checked for overlaps, overflow and line limits. Screenshots of every variant come from the snapshot workflow |
-| **Performance** | Pan/zoom FPS on a synthetic 500 / 3,000-card board, open/save timings | `XCTOSSignpostMetric`, `XCTMemoryMetric`, `XCTClockMetric` with baselines |
+| **Performance** | Pan/zoom FPS on a synthetic 500 / 3,000-card board, open/save timings | `XCTOSSignpostMetric`, `XCTMemoryMetric`, `XCTClockMetric` with baselines. *As built:* a release-build Swift Testing suite measures main-thread frame time, open/save, memory and idle work against the §11 budgets, and CI prints a budget table |
 | **UI** | Create, paste, connect, save, reopen flows | XCUITest |
-| **Fuzzing** | Board loader against malformed and huge JSON | libFuzzer harness on `BoardCodec.decode` |
+| **Fuzzing** | Board loader against malformed and huge JSON | libFuzzer harness on `BoardCodec.decode` (`Tools/Fuzz`, 60 s per CI run, about 2,000 inputs a second), plus a seeded test of 5,500 byte-level and structural mutations that runs with the unit tests |
+| **Accessibility** | VoiceOver labels, actions and rotor; keyboard focus; WCAG AA contrast of every theme | Unit tests on the accessibility tree and key handling; a contrast test over all four themes, also with Increase Contrast |
 
 ---
 
@@ -1100,7 +1125,7 @@ docs/
 | **M3 — Strings** | Pins, connect gesture, sag geometry, gradients, labels, Focus and Trace modes | "Connect the dots" feels physical. Trace works on 1,000-edge graphs in < 5 ms |
 | **M4 — Web cards** | Metadata pipeline, palette, all 7 layout variants, skeletons, snapshots, Peek | 60-site fixture suite renders with no layout bugs |
 | **M5 — Design polish** | All 4 themes, motion specs, Liquid Glass, app icon, minimap, search | Design review sign-off |
-| **M6 — Hardening** | LOD, culling, performance budgets, accessibility, fuzzing, Quick Look extensions | All §11 budgets green in CI |
+| **M6 — Hardening** | LOD, culling, performance budgets, accessibility, fuzzing, Quick Look extensions | All §11 budgets green in CI *(done; see the table in §11)* |
 | **1.0** | Notarized, Developer ID and Mac App Store builds | — |
 
 **Post‑1.0 ideas** (they keep the three-card-type rule): the `.evboardpkg` package format for huge boards, iCloud Drive sync of board files, an iPad companion app (shared `BoardKit` + `LinkPreviewKit`), a timeline arrangement (auto-layout cards by `publishedAt`) and Shortcuts / App Intents ("Add link to board").
