@@ -60,7 +60,7 @@ def optimize(cards, strings, regions, iterations=40000, seed=3):
         labels = (hit & labelled[:, None]).sum()
         centre = p + size / 2
         pull = np.hypot(*(centre - anchor).T)[is_movable].sum()
-        value = other * 1.5 + own * 0.45 + labels * 30 + length.sum() * 0.012 + pull * 0.01
+        value = other * 1.5 + own * 0.9 + labels * 30 + length.sum() * 0.012 + pull * 0.01
         return value, (other, own, labels)
 
     def fits(p, i):

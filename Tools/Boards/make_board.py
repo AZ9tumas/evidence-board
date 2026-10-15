@@ -383,7 +383,7 @@ string("b_phoenix", "i_d2", "red", "holds Elbit shares")
 string("affinity", "b_wbd", "red", "withdrew", style="dashed")
 string("affinity", "b_belgrade", "red", "withdrew", style="dashed")
 string("kushner", "b_gaza", "amber", "executive board")
-string("kushner", "abehsera", "violet", "long-time partner", thickness=2.5)
+string("kushner", "abehsera", "violet", "business partner", thickness=2.5)
 string("abehsera", "developer", "violet", "chairs SRED", arrow="forward")
 string("khayyat", "developer", "lime", "majority owners", arrow="forward", thickness=2.5)
 string("khayyat", "freeze", "lime", "Albania Land Development")
@@ -448,7 +448,7 @@ for card in cards:
     spot = FIXED.get(card["_name"])
     if spot:
         card["frame"]["x"], card["frame"]["y"] = spot
-optimize(cards, strings, REGIONS, iterations=int(sys.argv[3]) if len(sys.argv) > 3 else 90000, seed=int(sys.argv[4]) if len(sys.argv) > 4 else 2)
+optimize(cards, strings, REGIONS, iterations=int(sys.argv[3]) if len(sys.argv) > 3 else 90000, seed=int(sys.argv[4]) if len(sys.argv) > 4 else 1)
 
 ids = {c["id"] for c in cards}
 for s in strings:

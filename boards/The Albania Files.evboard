@@ -77,8 +77,8 @@
    "frame": {
     "height": 146,
     "width": 300,
-    "x": -760,
-    "y": -2090
+    "x": -1500,
+    "y": -2100
    },
    "id": "63AE535B-2A14-58EE-907C-8E1AE9C625F0",
    "locked": false,
@@ -99,8 +99,8 @@
    "frame": {
     "height": 185,
     "width": 300,
-    "x": -1370,
-    "y": -2150
+    "x": -1030,
+    "y": -2590
    },
    "id": "BEF417B5-E965-527D-8118-88C3378B0D0A",
    "locked": false,
@@ -121,8 +121,8 @@
    "frame": {
     "height": 204,
     "width": 300,
-    "x": -960,
-    "y": -2600
+    "x": -850,
+    "y": -2250
    },
    "id": "936C4F54-4DE1-5247-8178-9E063FF5B27C",
    "locked": false,
@@ -143,8 +143,8 @@
    "frame": {
     "height": 165,
     "width": 300,
-    "x": -1930,
-    "y": -2210
+    "x": -1590,
+    "y": -2520
    },
    "id": "D9B3B494-4D73-54E5-B27C-B2AE9A8459AD",
    "locked": false,
@@ -165,8 +165,8 @@
    "frame": {
     "height": 185,
     "width": 300,
-    "x": -2740,
-    "y": -1860
+    "x": -2650,
+    "y": -2620
    },
    "id": "28392B18-1CDA-5052-97F5-A03FF13516CC",
    "locked": false,
@@ -187,8 +187,8 @@
    "frame": {
     "height": 185,
     "width": 300,
-    "x": -3480,
-    "y": -1440
+    "x": -4160,
+    "y": -2180
    },
    "id": "18916E49-2E93-552C-8704-935E5A128A07",
    "locked": false,
@@ -209,8 +209,8 @@
    "frame": {
     "height": 126,
     "width": 300,
-    "x": -430,
-    "y": -2570
+    "x": -100,
+    "y": -2550
    },
    "id": "9FA8B464-170F-5EFF-A9AE-BB87D8FE5C30",
    "locked": false,
@@ -231,8 +231,8 @@
    "frame": {
     "height": 165,
     "width": 320,
-    "x": -140,
-    "y": -2370
+    "x": -130,
+    "y": -2130
    },
    "id": "A8203190-EC25-50DB-8CFF-498C7FAFFEAF",
    "locked": false,
@@ -274,7 +274,7 @@
    "frame": {
     "height": 631,
     "width": 460,
-    "x": -3850,
+    "x": -3630,
     "y": -2600
    },
    "id": "B28825AA-DDC4-5C09-9F0C-7902776013C4",
@@ -294,8 +294,8 @@
    "frame": {
     "height": 165,
     "width": 310,
-    "x": -2610,
-    "y": -1520
+    "x": -2750,
+    "y": -2060
    },
    "id": "ACA32FD2-E527-51CE-BBE7-8B0FFC502E5F",
    "locked": false,
@@ -315,8 +315,8 @@
    "frame": {
     "height": 204,
     "width": 310,
-    "x": -2620,
-    "y": -2610
+    "x": -3030,
+    "y": -2430
    },
    "id": "CC8C4A69-D9D2-5BE7-9D89-39BCCF7DE0C3",
    "locked": false,
@@ -336,8 +336,8 @@
    "frame": {
     "height": 204,
     "width": 310,
-    "x": -3240,
-    "y": -1850
+    "x": -2650,
+    "y": -1590
    },
    "id": "C1BC49B3-AD75-58A9-8DD0-5840ECEE1A75",
    "locked": false,
@@ -357,8 +357,8 @@
    "frame": {
     "height": 153,
     "width": 310,
-    "x": -3270,
-    "y": -2160
+    "x": -4120,
+    "y": -1660
    },
    "id": "629FE6D1-F8E5-5904-B36E-FA379377A6BB",
    "locked": false,
@@ -378,8 +378,8 @@
    "frame": {
     "height": 224,
     "width": 320,
-    "x": -3020,
-    "y": -1510
+    "x": -3190,
+    "y": -1850
    },
    "id": "0C3EF10F-9CB8-5A74-B5DF-A34410A6A012",
    "locked": false,
@@ -399,8 +399,8 @@
    "frame": {
     "height": 263,
     "width": 320,
-    "x": -4080,
-    "y": -1480
+    "x": -3220,
+    "y": -1500
    },
    "id": "DA38D96D-F353-535E-A26C-7F59FC1674EB",
    "locked": false,
@@ -420,8 +420,8 @@
    "frame": {
     "height": 204,
     "width": 320,
-    "x": -4200,
-    "y": -1860
+    "x": -3710,
+    "y": -1840
    },
    "id": "FD55A935-2646-5568-80DC-DEDAC84950C9",
    "locked": false,
@@ -441,8 +441,8 @@
    "frame": {
     "height": 261,
     "width": 340,
-    "x": -3310,
-    "y": -2520
+    "x": -3620,
+    "y": -1480
    },
    "id": "4886A2CE-A1FA-56CB-BED8-0F15D5A641E2",
    "locked": false,
@@ -474,8 +474,8 @@
    "frame": {
     "height": 261,
     "width": 340,
-    "x": -2890,
-    "y": -2250
+    "x": -4080,
+    "y": -1450
    },
    "id": "9771843A-4D21-5915-933A-96379DB62BA0",
    "locked": false,
@@ -507,8 +507,8 @@
    "frame": {
     "height": 236,
     "width": 340,
-    "x": -4280,
-    "y": -2260
+    "x": -4060,
+    "y": -2500
    },
    "id": "17C4CAB4-3E75-50BB-8851-B50C51D58336",
    "locked": false,
@@ -540,8 +540,8 @@
    "frame": {
     "height": 261,
     "width": 340,
-    "x": -4570,
-    "y": -1520
+    "x": -4520,
+    "y": -1890
    },
    "id": "7428B4E7-8FE6-56AE-98C5-5B3D49A504B2",
    "locked": false,
@@ -573,8 +573,8 @@
    "frame": {
     "height": 236,
     "width": 340,
-    "x": -3740,
-    "y": -1900
+    "x": -4580,
+    "y": -1580
    },
    "id": "87E566B1-D250-5A5D-AAEA-4C1C29A374FD",
    "locked": false,
@@ -627,8 +627,8 @@
    "frame": {
     "height": 146,
     "width": 300,
-    "x": -3770,
-    "y": -70
+    "x": -4040,
+    "y": -600
    },
    "id": "ED89C74B-9306-52EE-8CF8-E351DB782B40",
    "locked": false,
@@ -649,8 +649,8 @@
    "frame": {
     "height": 185,
     "width": 300,
-    "x": -3140,
-    "y": -320
+    "x": -3000,
+    "y": -710
    },
    "id": "7013CDBB-484F-5B54-857C-46025097C43D",
    "locked": false,
@@ -671,8 +671,8 @@
    "frame": {
     "height": 171,
     "width": 300,
-    "x": -3390,
-    "y": 30
+    "x": -2760,
+    "y": 60
    },
    "id": "FE63CFB4-1C80-5C4A-BC27-BC4058192CC5",
    "locked": false,
@@ -692,8 +692,8 @@
    "frame": {
     "height": 165,
     "width": 300,
-    "x": -3540,
-    "y": -370
+    "x": -3550,
+    "y": -210
    },
    "id": "00201136-C67E-581A-AD26-58B9D02C6A84",
    "locked": false,
@@ -714,8 +714,8 @@
    "frame": {
     "height": 206,
     "width": 300,
-    "x": -2880,
-    "y": -710
+    "x": -3140,
+    "y": -80
    },
    "id": "3FCC06B7-BB89-579A-981A-416A78194295",
    "locked": false,
@@ -735,8 +735,8 @@
    "frame": {
     "height": 146,
     "width": 300,
-    "x": -3320,
-    "y": -690
+    "x": -3390,
+    "y": -550
    },
    "id": "438F0ABC-26BB-5D4A-93D4-AE865DE2A478",
    "locked": false,
@@ -757,8 +757,8 @@
    "frame": {
     "height": 185,
     "width": 300,
-    "x": -3640,
-    "y": 260
+    "x": -3710,
+    "y": 270
    },
    "id": "530A7375-F04C-5A54-B61B-48FF86BD1DA7",
    "locked": false,
@@ -779,8 +779,8 @@
    "frame": {
     "height": 243,
     "width": 320,
-    "x": -4170,
-    "y": 310
+    "x": -4130,
+    "y": 300
    },
    "id": "1E2F48E4-0D6D-5AEB-AC0F-8C30F3C10B01",
    "locked": false,
@@ -812,8 +812,8 @@
    "frame": {
     "height": 236,
     "width": 320,
-    "x": -3940,
-    "y": -390
+    "x": -4020,
+    "y": -240
    },
    "id": "C15F3EF1-ACBF-5A1E-99C7-7142383A6BE7",
    "locked": false,
@@ -845,8 +845,8 @@
    "frame": {
     "height": 193,
     "width": 320,
-    "x": -4370,
-    "y": -10
+    "x": -4470,
+    "y": -630
    },
    "id": "4D24B9AA-454E-5298-9202-0FDACDFD48BC",
    "locked": false,
@@ -899,8 +899,8 @@
    "frame": {
     "height": 136,
     "width": 340,
-    "x": -1160,
-    "y": -520
+    "x": -1480,
+    "y": -1130
    },
    "id": "A18B2DC2-C806-50A3-94C1-D9104E9C765D",
    "locked": false,
@@ -920,8 +920,8 @@
    "frame": {
     "height": 165,
     "width": 330,
-    "x": -590,
-    "y": -760
+    "x": -930,
+    "y": -640
    },
    "id": "53757100-4224-5E47-A2D0-59D91F9021F8",
    "locked": false,
@@ -942,8 +942,8 @@
    "frame": {
     "height": 165,
     "width": 330,
-    "x": -1240,
-    "y": -290
+    "x": -950,
+    "y": -400
    },
    "id": "E9BAE0FE-803F-53CA-98D8-AFE511BC9BEE",
    "locked": false,
@@ -964,8 +964,8 @@
    "frame": {
     "height": 126,
     "width": 330,
-    "x": -910,
-    "y": -950
+    "x": -800,
+    "y": -840
    },
    "id": "F664B547-5DA8-5F25-9A66-29727DF9F66B",
    "locked": false,
@@ -986,8 +986,8 @@
    "frame": {
     "height": 224,
     "width": 330,
-    "x": -1590,
-    "y": -760
+    "x": -1720,
+    "y": -810
    },
    "id": "9CF5CA65-EB60-5A84-A1B5-A1260E3663B1",
    "locked": false,
@@ -1008,8 +1008,8 @@
    "frame": {
     "height": 165,
     "width": 330,
-    "x": -1820,
-    "y": -170
+    "x": -1590,
+    "y": -210
    },
    "id": "D465315E-5E65-5266-9F97-8944440BA706",
    "locked": false,
@@ -1030,8 +1030,8 @@
    "frame": {
     "height": 165,
     "width": 330,
-    "x": -1040,
-    "y": -750
+    "x": -1130,
+    "y": -150
    },
    "id": "B3F6E61A-20D3-5DD7-9A32-7DB1C1AF28AB",
    "locked": false,
@@ -1052,8 +1052,8 @@
    "frame": {
     "height": 204,
     "width": 340,
-    "x": -870,
-    "y": -1230
+    "x": -750,
+    "y": -1140
    },
    "id": "BC2FF0C7-EE4D-5859-AD53-B6ACDF796382",
    "locked": false,
@@ -1074,8 +1074,8 @@
    "frame": {
     "height": 204,
     "width": 340,
-    "x": -90,
-    "y": -1510
+    "x": -170,
+    "y": -1050
    },
    "id": "5010CB4F-148B-5880-BB90-56F5FA84E765",
    "locked": false,
@@ -1096,8 +1096,8 @@
    "frame": {
     "height": 146,
     "width": 340,
-    "x": -1340,
-    "y": -1380
+    "x": -880,
+    "y": -1470
    },
    "id": "5F583333-F5DF-5D92-9C8D-5C429F0829F8",
    "locked": false,
@@ -1118,8 +1118,8 @@
    "frame": {
     "height": 206,
     "width": 420,
-    "x": -470,
-    "y": -1070
+    "x": -370,
+    "y": -500
    },
    "id": "5509DC2B-FC59-5472-9D02-32B3DF823C57",
    "locked": false,
@@ -1139,8 +1139,8 @@
    "frame": {
     "height": 236,
     "width": 340,
-    "x": -760,
-    "y": -200
+    "x": -1480,
+    "y": -520
    },
    "id": "4E701931-AC0D-59D6-8C20-6889FB275E52",
    "locked": false,
@@ -1172,8 +1172,8 @@
    "frame": {
     "height": 261,
     "width": 340,
-    "x": -1330,
-    "y": -1080
+    "x": -180,
+    "y": -1370
    },
    "id": "4CCB535A-6A52-5A04-A9AF-CA019B7C8221",
    "locked": false,
@@ -1226,8 +1226,8 @@
    "frame": {
     "height": 185,
     "width": 320,
-    "x": 680,
-    "y": -2570
+    "x": 1030,
+    "y": -2410
    },
    "id": "8DB6A00E-04CB-5223-928D-6ED61806E964",
    "locked": false,
@@ -1248,8 +1248,8 @@
    "frame": {
     "height": 146,
     "width": 320,
-    "x": 830,
-    "y": -1960
+    "x": 990,
+    "y": -2130
    },
    "id": "9E2433F1-1A3C-5CCE-9A5F-84EB5691DAE1",
    "locked": false,
@@ -1270,8 +1270,8 @@
    "frame": {
     "height": 185,
     "width": 320,
-    "x": 2460,
-    "y": -1780
+    "x": 1940,
+    "y": -1370
    },
    "id": "DDF7349F-97EB-5368-A79C-05A7378E48FF",
    "locked": false,
@@ -1292,8 +1292,8 @@
    "frame": {
     "height": 185,
     "width": 320,
-    "x": 1670,
-    "y": -2430
+    "x": 1540,
+    "y": -2300
    },
    "id": "02811C1B-224F-5CE9-8B53-7877DFD40718",
    "locked": false,
@@ -1314,8 +1314,8 @@
    "frame": {
     "height": 185,
     "width": 320,
-    "x": 870,
-    "y": -1710
+    "x": 660,
+    "y": -1470
    },
    "id": "BF6EF423-381E-5035-A3AB-7D5D8791B6E9",
    "locked": false,
@@ -1336,8 +1336,8 @@
    "frame": {
     "height": 185,
     "width": 320,
-    "x": 1210,
-    "y": -2030
+    "x": 1060,
+    "y": -1470
    },
    "id": "736335ED-5FFD-5DB8-9F20-272EBE996BB1",
    "locked": false,
@@ -1358,8 +1358,8 @@
    "frame": {
     "height": 185,
     "width": 320,
-    "x": 2010,
-    "y": -2020
+    "x": 1840,
+    "y": -1960
    },
    "id": "E1E90836-B11A-5F8E-8EA4-C1DCA18378AC",
    "locked": false,
@@ -1380,8 +1380,8 @@
    "frame": {
     "height": 204,
     "width": 320,
-    "x": 800,
-    "y": -1460
+    "x": 1060,
+    "y": -1920
    },
    "id": "8657BE0C-A54A-56ED-885A-661FF50D2955",
    "locked": false,
@@ -1402,8 +1402,8 @@
    "frame": {
     "height": 136,
     "width": 320,
-    "x": 1600,
-    "y": -1610
+    "x": 2160,
+    "y": -2550
    },
    "id": "38C38842-D3FD-5FD1-AAFE-92D068CBC2E8",
    "locked": false,
@@ -1423,8 +1423,8 @@
    "frame": {
     "height": 236,
     "width": 340,
-    "x": 1260,
-    "y": -2330
+    "x": 1990,
+    "y": -2340
    },
    "id": "72F344C9-FABE-548D-A9D2-8A883A5DE063",
    "locked": false,
@@ -1456,8 +1456,8 @@
    "frame": {
     "height": 243,
     "width": 340,
-    "x": 2170,
-    "y": -2380
+    "x": 2370,
+    "y": -1850
    },
    "id": "35A3C3FA-2757-52A7-8EF6-699E58BD2F91",
    "locked": false,
@@ -1489,8 +1489,8 @@
    "frame": {
     "height": 261,
     "width": 340,
-    "x": 2030,
-    "y": -1710
+    "x": 1430,
+    "y": -1820
    },
    "id": "8F884C98-9A1E-5B29-A24B-D3ADBFE4E0E6",
    "locked": false,
@@ -1522,8 +1522,8 @@
    "frame": {
     "height": 243,
     "width": 340,
-    "x": 1610,
-    "y": -1980
+    "x": 1910,
+    "y": -1670
    },
    "id": "FBF3B57A-F08D-5C62-BBC8-81DE0650D0EB",
    "locked": false,
@@ -1555,8 +1555,8 @@
    "frame": {
     "height": 218,
     "width": 340,
-    "x": 2390,
-    "y": -2050
+    "x": 1510,
+    "y": -1380
    },
    "id": "7BFACF2A-82BD-50A5-85C5-2B5FA03D8F0E",
    "locked": false,
@@ -1588,8 +1588,8 @@
    "frame": {
     "height": 236,
     "width": 340,
-    "x": 1590,
-    "y": -1360
+    "x": 2450,
+    "y": -2180
    },
    "id": "52662641-9B81-59A5-8E62-A361679C619B",
    "locked": false,
@@ -1870,7 +1870,7 @@
    "color": "violet",
    "from": "BEF417B5-E965-527D-8118-88C3378B0D0A",
    "id": "F8AD3901-1529-5FEB-A4BD-DE25664B21D3",
-   "label": "long-time partner",
+   "label": "business partner",
    "sag": 0.45,
    "style": "solid",
    "thickness": 2.5,
@@ -2356,8 +2356,8 @@
  "theme": "cork",
  "title": "The Albania Files",
  "viewport": {
-  "x": -910.0,
-  "y": -1228.5,
+  "x": -905.0,
+  "y": -1233.5,
   "zoom": 0.13
  }
 }
