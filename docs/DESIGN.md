@@ -109,8 +109,10 @@ Board ─┬─ Cards (nodes)
 - Supported: PNG, JPEG, HEIC, GIF (first frame), WebP, TIFF and PDF (first page).
 - Optional **caption** (single line, under the image, in the polaroid style).
 - **Frame styles**: *Polaroid* (white border with a thick bottom), *Borderless* (rounded 10 pt corners) and *Photo* (thin border with a deckled shadow).
-- Crop: non-destructive, stored as a normalized rect, edited in place (⏎ to commit).
-- On import, images over **4096 px** on the long edge are downsampled (configurable). The original format is kept when possible. Everything is stored in the board's asset table, deduplicated by SHA‑256.
+- **Reframe** (non-destructive crop): double-click the photo, then drag to pan it inside its frame and scroll or pinch to zoom it, with the rest of the image shown faded around the card. ↩ or a click elsewhere keeps it, Esc puts it back. The crop is stored as a normalized rect; the photo area always shows it "aspect filled", so resizing the card never distorts the photo.
+- Double-click the caption area (or press ↩) to edit the caption in place.
+- Photos resize with their shape kept; hold ⇧ to change the shape.
+- On import, images over **4096 px** on the long edge are downsampled. PNG and upright JPEG files that fit are stored byte for byte; HEIC, TIFF, WebP, GIF, rotated JPEGs and oversized images are re-encoded (JPEG at quality 0.88 if opaque, PNG if transparent), and PDFs render their first page as PNG. Everything is stored in the board's asset table, deduplicated by SHA‑256.
 
 ### 4.4 Web card
 
@@ -830,9 +832,10 @@ Other rules:
 
 ### 10.5 Image pipeline
 
-- **Decode**: `CGImageSourceCreateThumbnailAtIndex` with `kCGImageSourceThumbnailMaxPixelSize` set to the needed pixel size and `kCGImageSourceShouldCacheImmediately = true`, on a background actor. Full-resolution images are never decoded for display.
-- **Cache**: `NSCache<CacheKey, CGImage>` keyed by `(assetID, tier)`, with `totalCostLimit` at about 15% of physical memory, evicted on `DispatchSource.makeMemoryPressureSource`.
-- **Lazy base64**: an asset's base64 is decoded into `Data` the first time it's needed and then released after decoding.
+- **Decode**: `CGImageSourceCreateThumbnailAtIndex` with `kCGImageSourceThumbnailMaxPixelSize` set to the needed pixel size (photo size × tier × backing scale ÷ crop), orientation applied and `kCGImageSourceShouldCacheImmediately = true`, on background tasks, at most three at a time, nearest cards first. Full-resolution images are never decoded for display.
+- **Cache**: `ImageStore`, keyed by `(assetID, size)` with sizes bucketed to powers of two (64…8192 px), so each photo has only a handful of decodes. Any cached decode at least as large as the request is reused. It's an LRU bounded by about a tenth of physical memory (256 MB to 1.5 GB). Photos far off screen release their bitmap, so the cache is the only thing holding them.
+- **Cropping** happens at display time with `CGImage.cropping(to:)` on the decoded image, which shares its pixels, so reframing and resizing never re-decode unless more pixels are needed.
+- **Lazy base64**: an asset's base64 is decoded into `Data` only inside the decode task and released right after.
 
 ### 10.6 Culling and hit testing
 

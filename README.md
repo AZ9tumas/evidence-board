@@ -55,18 +55,24 @@ Tools/                     Helper scripts
 
 ## Status
 
-**M0 (skeleton)** and **M1 (text cards)** are done. The board is a working text board:
+**M0 (skeleton)**, **M1 (text cards)** and **M2 (image cards)** are done.
 
-- **Create:** double-click empty canvas, press **T**, use **Insert ▸ Text Card** (⌘⇧T), or paste plain text.
-- **Edit:** double-click a card or press **↩**. The editor sits exactly over the card and shows the raw text, `**markdown**` included. Press **Esc** or **⌘↩** to finish. A new card left empty disappears.
-- **Select:** click, ⇧/⌘-click, drag a marquee, or **⌘A**. One card gets a turning gradient ring and resize handles.
-- **Move and resize:** drag cards (they lift while you drag), nudge with the arrow keys (⇧ for 10 pt), or drag a corner handle. Height follows the text until you change it by hand.
-- **Arrange:** Bring to Front / Send to Back, Lock, Duplicate (⌘D), Delete, Cut, Copy and Paste between boards. Right-click a card for Style (Note, Headline, Typewriter) and Color.
-- **Undo:** every change is one undo step and marks the document as edited.
-- **Rendering:** text is drawn by TextKit into bitmaps per zoom tier, only for cards near the view and only a few per frame. Zoomed out, cards drop to simpler detail levels. **Debug ▸ Add 500 Test Cards** fills a board for performance checks.
+**Images (M2)**
+- **Add:** drop images or image files from Finder or a browser, paste them, or use **Insert ▸ Image…** (⌘⇧I). PDFs show their first page.
+- **Frames:** Polaroid (the default), Photo or Borderless, from the right-click menu.
+- **Captions:** double-click the caption area, or select the photo and press **↩**. Captions are set in New York italic, on the paper or over the photo.
+- **Reframe:** double-click the photo, then drag to move it inside the frame and scroll or pinch to zoom. The rest of the picture shows faded around the card. **↩** keeps the change, **Esc** cancels. Nothing is ever cut from the stored image.
+- **Resize:** photos keep their shape. Hold **⇧** to change it.
+- **Storage:** images are capped at 4096 px, re-encoded only when needed, and stored once even if used many times. On screen they're decoded off the main thread at just the size needed, with a bounded memory cache. **Debug ▸ Add 200 Test Photos** fills a board for checking.
 
-From M0: the document app (New, Open, Save, autosave, Versions), the forgiving JSON codec, the Noir canvas, and the camera (trackpad pan, pinch and ⌘-scroll zoom, Space-drag, ⌘= ⌘− ⌘0 ⌘1).
+**Text (M1)**
+- **Create:** double-click empty canvas, press **T**, use **Insert ▸ Text Card** (⌘⇧T), or paste text.
+- **Edit:** double-click a card or press **↩**. **Esc** or **⌘↩** finishes. Markdown `**bold**`, `*italic*` and `` `code` `` render on the card.
+- **Select, move, resize:** click, ⇧/⌘-click, marquee, ⌘A, drag, arrow keys, and corner handles.
+- **Arrange:** front/back, lock, duplicate, copy, cut and paste between boards, plus style and color from the right-click menu. Every change is one undo step.
 
-Not verified yet: frame rate on real hardware (the 120 fps target for 500 cards needs a Mac and Instruments). Image and web cards still show placeholders until M2 and M4. Strings are drawn but can't be created until M3.
+**Base (M0):** the document app (New, Open, Save, autosave, Versions), the forgiving JSON codec, the Noir canvas, and the camera.
+
+Not verified yet: frame rate and memory on real hardware (they need a Mac and Instruments). Web cards still show placeholders until M4, and strings can't be created until M3.
 
 See the roadmap in [`docs/DESIGN.md` §16](docs/DESIGN.md#16-roadmap).
