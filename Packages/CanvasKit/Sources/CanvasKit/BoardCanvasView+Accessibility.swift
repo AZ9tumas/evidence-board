@@ -402,30 +402,43 @@ final class StringAccessibilityElement: NSAccessibilityElement {
         setAccessibilityParent(canvas)
     }
 
+    // AppKit calls these on the main thread. The element is handed to the main actor through
+    // a nonisolated(unsafe) local, as it isn't Sendable (its AppKit superclass isn't).
+
     nonisolated override func accessibilityLabel() -> String? {
-        onMain { [self] in
-            guard let canvas, let string = canvas.store.string(stringID) else { return nil }
-            return canvas.spokenLabel(of: string)
-        }
+        nonisolated(unsafe) let element = self
+        return onMain { element.spokenText() }
     }
 
     nonisolated override func accessibilityFrame() -> NSRect {
-        onMain { [self] in
-            guard let canvas, let node = canvas.stringNodes[stringID] else { return .zero }
-            return canvas.screenRect(ofWorld: node.curve.bounds.insetBy(dx: -4, dy: -4))
-        }
+        nonisolated(unsafe) let element = self
+        return onMain { element.screenFrame() }
     }
 
     nonisolated override func accessibilityPerformPress() -> Bool {
-        onMain { [self] in
-            guard let canvas else { return false }
-            canvas.select([], strings: [stringID])
-            return true
-        }
+        nonisolated(unsafe) let element = self
+        return onMain { element.selectString() }
     }
 
     nonisolated override func accessibilityCustomActions() -> [NSAccessibilityCustomAction]? {
-        onMain { [self] in customActions() }
+        nonisolated(unsafe) let element = self
+        return onMain { element.customActions() }
+    }
+
+    private func spokenText() -> String? {
+        guard let canvas, let string = canvas.store.string(stringID) else { return nil }
+        return canvas.spokenLabel(of: string)
+    }
+
+    private func screenFrame() -> NSRect {
+        guard let canvas, let node = canvas.stringNodes[stringID] else { return .zero }
+        return canvas.screenRect(ofWorld: node.curve.bounds.insetBy(dx: -4, dy: -4))
+    }
+
+    private func selectString() -> Bool {
+        guard let canvas else { return false }
+        canvas.select([], strings: [stringID])
+        return true
     }
 
     private func customActions() -> [NSAccessibilityCustomAction]? {
