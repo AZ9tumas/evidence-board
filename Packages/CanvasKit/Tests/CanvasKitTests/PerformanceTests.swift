@@ -122,14 +122,32 @@ enum PerfBoards {
 @MainActor
 @Suite("Performance budgets", .enabled(if: Budget.enabled), .serialized)
 struct PerformanceTests {
-    /// One frame: move the camera, then draw for the frame's slice.
+    /// One frame: move the camera, then draw for the frame's slice. The two parts are kept
+    /// in `parts` so a slow frame can be traced to one of them.
     func frame(_ view: BoardCanvasView, _ camera: Camera) -> Double {
         let clock = ContinuousClock()
         let start = clock.now
         view.setCamera(camera)
+        let moved = clock.now
         view.renderQueue.runSlice()
-        return Budget.milliseconds(clock.now - start)
+        let end = clock.now
+        parts.camera.append(Budget.milliseconds(moved - start))
+        parts.slice.append(Budget.milliseconds(end - moved))
+        return Budget.milliseconds(end - start)
     }
+
+    final class Parts {
+        var camera: [Double] = []
+        var slice: [Double] = []
+
+        func report(_ name: String) {
+            print(String(format: "BUDGET-INFO|%@|camera p95 %.2f ms, bitmaps p95 %.2f ms", name, Budget.percentile(camera, 0.95), Budget.percentile(slice, 0.95)))
+            camera = []
+            slice = []
+        }
+    }
+
+    let parts = Parts()
 
     func pan(_ view: BoardCanvasView, around center: CGPoint, radius: CGFloat, zoom: CGFloat, frames: Int) -> [Double] {
         (0..<frames).map { step in
@@ -155,10 +173,14 @@ struct PerformanceTests {
         _ = pan(view, around: center, radius: 1800, zoom: 0.6, frames: 60)
         await PerfBoards.settle(0.5)
 
+        parts.camera = []
+        parts.slice = []
         let panning = pan(view, around: center, radius: 1800, zoom: 0.6, frames: 240)
         Budget.check("Pan, 500 cards (p95 frame)", Budget.percentile(panning, 0.95), under: 4)
+        parts.report("pan, 500 cards")
         let zooming = zoomSweep(view, center: center, from: 0.2, to: 1.5, frames: 240)
         Budget.check("Zoom, 500 cards (p95 frame)", Budget.percentile(zooming, 0.95), under: 4)
+        parts.report("zoom, 500 cards")
     }
 
     @Test func panAndZoom3000Cards() async {

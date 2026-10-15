@@ -38,7 +38,7 @@ jobs:
           echo "Reduce Motion: $(defaults read com.apple.universalaccess reduceMotion 2>&1)"
           capture() {
             shot=$((shot + 1))
-            open -n --env "EB_SNAPSHOT_SCENARIO=${2:-none}" --env "EB_LAUNCH_LOG=/tmp/launch$shot.txt" \
+            open -n --env "EB_SNAPSHOT_SCENARIO=${2:-none}" \
               -a "$app" "$1" --args -ApplePersistenceIgnoreState YES
             sleep 9
             pgrep -x EvidenceBoard >/dev/null && echo "shot $shot: running" || echo "shot $shot: APP NOT RUNNING"
@@ -73,27 +73,57 @@ jobs:
           capture /tmp/Harbor.evboard minimap
           capture /tmp/Harbor.evboard renderer
           # Quick Look: register the extensions and ask Finder's machinery for a thumbnail. The
-          # build is unsigned, so the system may refuse them; then there's no extra shot.
+          # build is unsigned, so the system may refuse them; then qlmanage falls back to a
+          # generic text icon, which isn't ours, so it's only published when ours is registered.
           pluginkit -a "$app/Contents/PlugIns/EvidenceBoardThumbnail.appex" || true
           pluginkit -a "$app/Contents/PlugIns/EvidenceBoardPreview.appex" || true
-          pluginkit -m -v -p com.apple.quicklook.thumbnail 2>&1 | grep -i evidence || echo "thumbnail extension not registered"
-          mkdir -p /tmp/ql
-          qlmanage -t -s 900 -o /tmp/ql /tmp/Harbor.evboard 2>&1 | tail -n 3 || true
-          if [ -f /tmp/ql/Harbor.evboard.png ]; then
-            shot=$((shot + 1))
-            sips -Z 900 -s format jpeg -s formatOptions 70 /tmp/ql/Harbor.evboard.png --out "/tmp/shot$shot.jpg" >/dev/null
-            echo "shot $shot: Quick Look thumbnail"
+          if pluginkit -m -v -p com.apple.quicklook.thumbnail 2>&1 | grep -i evidence; then
+            mkdir -p /tmp/ql
+            qlmanage -t -s 900 -o /tmp/ql /tmp/Harbor.evboard 2>&1 | tail -n 3 || true
+            if [ -f /tmp/ql/Harbor.evboard.png ]; then
+              shot=$((shot + 1))
+              sips -Z 900 -s format jpeg -s formatOptions 70 /tmp/ql/Harbor.evboard.png --out "/tmp/shot$shot.jpg" >/dev/null
+              echo "shot $shot: Quick Look thumbnail"
+            fi
+          else
+            echo "thumbnail extension not registered (unsigned build): no Quick Look shot"
           fi
           echo "$shot" > /tmp/shot-count
-          # Launch to first board frame: the first launch after the build is the cold one.
-          for n in 1 2 3; do echo "launch $n: $(cat /tmp/launch$n.txt 2>/dev/null || echo '?') ms"; done
-          cold=$(cat /tmp/launch1.txt 2>/dev/null || echo 99999)
-          warm=$(cat /tmp/launch2.txt 2>/dev/null || echo 99999)
+      - name: Launch budget (release build)
+        run: |
+          xcodebuild build -project EvidenceBoard.xcodeproj -scheme EvidenceBoard \
+            -configuration Release -destination 'platform=macOS' -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO -quiet
+          app="$PWD/build/Build/Products/Release/EvidenceBoard.app"
+          # launch <file> <log>: time from process start to the first board frame.
+          launch() {
+            rm -f "$2"
+            open -n --env "EB_LAUNCH_LOG=$2" -a "$app" "$1" --args -ApplePersistenceIgnoreState YES
+            for _ in $(seq 1 40); do [ -s "$2" ] && break; sleep 0.5; done
+            sleep 1
+            pkill -x EvidenceBoard || true
+            sleep 1
+            cat "$2" 2>/dev/null || echo 99999
+          }
+          # The very first launch of a fresh, unsigned build pays for the system scanning and
+          # registering it, which a downloaded, notarized app pays once at install. Do that
+          # once, then empty the file cache so the next launch reads everything from disk.
+          echo "first launch after build: $(launch /tmp/Empty.evboard /tmp/l0.txt) ms"
+          sudo purge
+          cold=$(launch /tmp/Empty.evboard /tmp/l1.txt)
+          warm=""
+          for n in 2 3 4 5 6; do warm="$warm $(launch /tmp/Empty.evboard /tmp/l$n.txt)"; done
+          board=$(launch /tmp/Harbor.evboard /tmp/l7.txt)
+          median=$(echo $warm | tr ' ' '\n' | sort -n | sed -n 3p)
+          echo "cold $cold ms; warm$warm ms (median $median); sample board $board ms"
+          verdict() { [ "$1" -lt 400 ] && echo pass || echo FAIL; }
           {
+            echo "### Launch (release build, GitHub macOS 15 runner)"
             echo "| Budget | Measured | Target | Result |"
             echo "|---|---|---|---|"
-            echo "| Cold launch to empty board (first launch after build) | ${cold} ms | < 400 ms | $([ "$cold" -lt 400 ] && echo pass || echo FAIL) |"
-            echo "| Launch to sample board (later launch) | ${warm} ms | < 400 ms | $([ "$warm" -lt 400 ] && echo pass || echo FAIL) |"
+            echo "| Cold launch to empty board (file cache purged) | ${cold} ms | < 400 ms | $(verdict "$cold") |"
+            echo "| Warm launch to empty board (median of 5) | ${median} ms | < 400 ms | $(verdict "$median") |"
+            echo "| Launch to the sample board | ${board} ms | < 400 ms | $(verdict "$board") |"
           } | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Publish images
         env:

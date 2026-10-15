@@ -15,6 +15,8 @@ final class RenderQueue: NSObject {
 
     private weak var view: NSView?
     private var pending: [UUID] = []
+    /// What one bitmap has taken lately, so a slice doesn't start one it can't finish.
+    private var typicalCost: CFTimeInterval = 0.0005
     private var link: CADisplayLink?
     private let render: (UUID) -> Void
 
@@ -53,13 +55,18 @@ final class RenderQueue: NSObject {
         runSlice()
     }
 
-    /// Draws for one frame's slice of time.
+    /// Draws for one frame's slice of time: at least one bitmap, then more while the next
+    /// one is likely to fit.
     func runSlice() {
-        let deadline = CACurrentMediaTime() + (isMoving() ? Self.movingBudget : Self.budget)
+        var now = CACurrentMediaTime()
+        let deadline = now + (isMoving() ? Self.movingBudget : Self.budget)
         var index = 0
-        while index < pending.count, CACurrentMediaTime() < deadline {
+        while index < pending.count, index == 0 || now + typicalCost < deadline {
             render(pending[index])
             index += 1
+            let finished = CACurrentMediaTime()
+            typicalCost += (finished - now - typicalCost) * 0.25
+            now = finished
         }
         pending.removeFirst(index)
         if pending.isEmpty { stop() }

@@ -30,7 +30,7 @@ extension BoardCanvasView {
     }
 
     public override func accessibilityHitTest(_ point: NSPoint) -> Any? {
-        nonisolated(unsafe) let canvas = self
+        let canvas = self
         return onMain { canvas.accessibilityElement(atScreenPoint: point) }
     }
 

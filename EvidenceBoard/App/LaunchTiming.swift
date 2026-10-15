@@ -1,10 +1,9 @@
-#if DEBUG
 import Darwin
 import Foundation
 
 /// How long the app took from process start to its first board frame, written to the file
 /// named by `EB_LAUNCH_LOG` so the snapshot workflow can check the launch budget
-/// (DESIGN.md §11). Debug builds only.
+/// (DESIGN.md §11). Does nothing unless that variable is set.
 enum LaunchTiming {
     @MainActor private static var recorded = false
 
@@ -28,4 +27,3 @@ enum LaunchTiming {
         return Date(timeIntervalSince1970: TimeInterval(time.tv_sec) + TimeInterval(time.tv_usec) / 1_000_000)
     }
 }
-#endif

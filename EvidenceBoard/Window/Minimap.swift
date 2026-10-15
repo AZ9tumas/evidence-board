@@ -10,7 +10,7 @@ struct Minimap: View {
     let theme: Theme
     let alwaysVisible: Bool
 
-    static let maxSize = CGSize(width: 220, height: 150)
+    nonisolated static let maxSize = CGSize(width: 220, height: 150)
     @State private var isHovered = false
 
     var body: some View {
