@@ -40,6 +40,9 @@ final class ImageStore {
     private var queue: [(Request, String)] = []
     private var running = 0
 
+    /// Whether any photo is being decoded or waiting to be.
+    var isBusy: Bool { running > 0 || !queue.isEmpty }
+
     init(budget: Int = ImageStore.defaultBudget) {
         self.budget = budget
     }

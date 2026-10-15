@@ -117,6 +117,16 @@ enum PerfBoards {
     static func settle(_ seconds: Double = 0.05) async {
         try? await Task.sleep(for: .seconds(seconds))
     }
+
+    /// Waits (up to 5 s) until no photo is decoding and no bitmap is waiting to be drawn.
+    @MainActor
+    static func settleWork(of view: BoardCanvasView) async {
+        let clock = ContinuousClock()
+        let start = clock.now
+        repeat {
+            await settle(0.05)
+        } while (view.imageStore.isBusy || !view.renderQueue.isEmpty) && clock.now - start < .seconds(5)
+    }
 }
 
 @MainActor
@@ -199,7 +209,7 @@ struct PerformanceTests {
         Budget.check("Zoom, 3,000 cards (p95 frame)", Budget.percentile(zooming, 0.95), under: 16.7)
     }
 
-    @Test func drag50CardsWith200Strings() {
+    @Test func drag50CardsWith200Strings() async {
         // 50 cards in a cluster, each tied to four others.
         var board = PerfBoards.board(cards: 200, strings: 0, columns: 20)
         let cluster = (0..<50).map { board.cards[($0 / 10) * 20 + $0 % 10].id }
@@ -210,6 +220,9 @@ struct PerformanceTests {
         defer { window.close() }
         view.setCamera(Camera(center: CGPoint(x: 1500, y: 800), zoom: 0.5))
         view.select(Set(cluster))
+        // Like the pan test, measure a board that has finished opening: photos decoding in
+        // the background would compete with the drag for the runner's three cores.
+        await PerfBoards.settleWork(of: view)
 
         // Grab the card left of its pin, inside its (text-fitted) height.
         let grab = store.card(cluster[0])!.frame
