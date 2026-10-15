@@ -268,7 +268,7 @@ extension BoardCanvasView {
                 cardNodes[id]?.setPosition(frame)
                 if let card = store.card(id) { rings.move(card, to: frame) }
             }
-            layoutStrings(attachedTo: current.keys)
+            layoutStrings(attachedTo: current.keys, live: true)
         }
     }
 
@@ -315,7 +315,7 @@ extension BoardCanvasView {
         withoutAnimation {
             cardNodes[id]?.update(card: latest, appearance: canvasAppearance)
             rings.move(latest, to: frame)
-            layoutStrings(attachedTo: [id])
+            layoutStrings(attachedTo: [id], live: true)
             updateHandles()
         }
         renderTextNow(of: id)

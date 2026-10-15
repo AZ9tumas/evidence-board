@@ -106,10 +106,12 @@ final class StringNode {
     // MARK: Updating
 
     /// Routes the string between two pins. `droopScale` above 1 adds slack, for the "pull
-    /// taut" animation and the live string while connecting.
+    /// taut" animation and the live string while connecting. `live` is for every frame of a
+    /// drag: only the geometry moves, and the shadow (a stroked copy of the curve, the costly
+    /// part) waits until the next full update, when the drag ends.
     func update(
         string: BoardString, from a: CGPoint, to b: CGPoint, fan: CGFloat,
-        droopScale: CGFloat = 1, appearance: CanvasAppearance
+        droopScale: CGFloat = 1, appearance: CanvasAppearance, live: Bool = false
     ) {
         if string.label != self.string.label || appearance != self.appearance { renderedLabel = nil }
         self.string = string
@@ -118,7 +120,11 @@ final class StringNode {
         polyline = curve.flattened()
         length = CanvasGeometry.length(of: polyline)
         applyGeometry()
-        applyStyle()
+        if live, self.string == string, self.appearance == appearance {
+            if !shadow.isHidden { shadow.isHidden = true }
+        } else {
+            applyStyle()
+        }
     }
 
     func setDetail(_ level: DetailLevel, zoom: CGFloat) {

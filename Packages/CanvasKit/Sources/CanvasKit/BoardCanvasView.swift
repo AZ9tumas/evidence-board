@@ -409,7 +409,7 @@ public final class BoardCanvasView: NSView {
         return store.string(id)
     }
 
-    func layoutString(_ node: StringNode) {
+    func layoutString(_ node: StringNode, live: Bool = false) {
         let string = liveString(node.id) ?? node.string
         guard let from = liveCard(string.from), let to = liveCard(string.to) else { return }
         node.update(
@@ -418,17 +418,19 @@ public final class BoardCanvasView: NSView {
             to: CanvasGeometry.pinPoint(of: to),
             fan: fanOffsets[string.id] ?? 0,
             droopScale: droopSprings[string.id]?.value ?? 1,
-            appearance: canvasAppearance
+            appearance: canvasAppearance,
+            live: live
         )
         if tracePath?.strings.contains(string.id) == true { setNeedsPulseUpdate() }
     }
 
     /// Re-routes every string attached to `cardIDs`.
-    func layoutStrings(attachedTo cardIDs: some Sequence<UUID>) {
+    /// `live` while cards are being dragged or resized: see ``StringNode/update``.
+    func layoutStrings(attachedTo cardIDs: some Sequence<UUID>, live: Bool = false) {
         var done = Set<UUID>()
         for cardID in cardIDs {
             for stringID in stringsByCard[cardID] ?? [] where done.insert(stringID).inserted {
-                if let node = stringNodes[stringID] { layoutString(node) }
+                if let node = stringNodes[stringID] { layoutString(node, live: live) }
             }
         }
     }
