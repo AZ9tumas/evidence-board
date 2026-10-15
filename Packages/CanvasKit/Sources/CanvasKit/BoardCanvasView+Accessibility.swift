@@ -30,13 +30,16 @@ extension BoardCanvasView {
     }
 
     public override func accessibilityHitTest(_ point: NSPoint) -> Any? {
-        onMain { [self] () -> Any? in
-            guard let window else { return self }
-            let local = convert(window.convertPoint(fromScreen: point), from: nil)
-            if let id = card(at: local) { return accessibilityElement(forCard: id) }
-            if let id = string(at: local) { return accessibilityElement(forString: id) }
-            return self
-        }
+        nonisolated(unsafe) let canvas = self
+        return onMain { canvas.accessibilityElement(atScreenPoint: point) }
+    }
+
+    func accessibilityElement(atScreenPoint point: NSPoint) -> Any? {
+        guard let window else { return self }
+        let local = convert(window.convertPoint(fromScreen: point), from: nil)
+        if let id = card(at: local) { return accessibilityElement(forCard: id) }
+        if let id = string(at: local) { return accessibilityElement(forString: id) }
+        return self
     }
 
     func accessibilityElement(forCard id: UUID) -> CardAccessibilityElement? {
@@ -260,52 +263,76 @@ final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityCus
         setAccessibilityParent(canvas)
     }
 
+    // AppKit calls these on the main thread. The element is handed to the main actor through
+    // a nonisolated(unsafe) local, as it isn't Sendable (its AppKit superclass isn't).
+
     nonisolated override func accessibilityLabel() -> String? {
-        onMain { [self] in
-            guard let canvas, let card = canvas.liveCard(cardID) else { return nil }
-            return canvas.spokenLabel(of: card)
-        }
+        nonisolated(unsafe) let element = self
+        return onMain { element.spokenText() }
     }
 
     nonisolated override func accessibilityRoleDescription() -> String? {
-        onMain { [self] in
-            switch canvas?.liveCard(cardID)?.content {
-            case .text: "text card"
-            case .image: "photo card"
-            case .web: "web card"
-            case nil: nil
-            }
-        }
+        nonisolated(unsafe) let element = self
+        return onMain { element.kindDescription() }
     }
 
     nonisolated override func accessibilityFrame() -> NSRect {
-        onMain { [self] in
-            guard let canvas, let card = canvas.liveCard(cardID) else { return .zero }
-            return canvas.screenRect(ofWorld: CanvasGeometry.boundingBox(of: card))
-        }
+        nonisolated(unsafe) let element = self
+        return onMain { element.screenFrame() }
     }
 
     nonisolated override func isAccessibilitySelected() -> Bool {
-        onMain { [self] in canvas?.selection.contains(cardID) ?? false }
+        nonisolated(unsafe) let element = self
+        return onMain { element.isSelected() }
     }
 
     nonisolated override func accessibilityPerformPress() -> Bool {
-        onMain { [self] in
-            canvas?.focusCard(cardID)
-            return canvas != nil
-        }
+        nonisolated(unsafe) let element = self
+        return onMain { element.focus() }
     }
 
     nonisolated override func setAccessibilityFocused(_ focused: Bool) {
         super.setAccessibilityFocused(focused)
         guard focused else { return }
-        onMain { [self] in
-            if let canvas, canvas.selection != [cardID] { canvas.select([cardID]) }
-        }
+        nonisolated(unsafe) let element = self
+        onMain { element.selectCard() }
     }
 
     nonisolated override func accessibilityCustomActions() -> [NSAccessibilityCustomAction]? {
-        onMain { [self] in customActions() }
+        nonisolated(unsafe) let element = self
+        return onMain { element.customActions() }
+    }
+
+    private func spokenText() -> String? {
+        guard let canvas, let card = canvas.liveCard(cardID) else { return nil }
+        return canvas.spokenLabel(of: card)
+    }
+
+    private func kindDescription() -> String? {
+        switch canvas?.liveCard(cardID)?.content {
+        case .text: "text card"
+        case .image: "photo card"
+        case .web: "web card"
+        case nil: nil
+        }
+    }
+
+    private func screenFrame() -> NSRect {
+        guard let canvas, let card = canvas.liveCard(cardID) else { return .zero }
+        return canvas.screenRect(ofWorld: CanvasGeometry.boundingBox(of: card))
+    }
+
+    private func isSelected() -> Bool {
+        canvas?.selection.contains(cardID) ?? false
+    }
+
+    private func focus() -> Bool {
+        canvas?.focusCard(cardID)
+        return canvas != nil
+    }
+
+    private func selectCard() {
+        if let canvas, canvas.selection != [cardID] { canvas.select([cardID]) }
     }
 
     private func customActions() -> [NSAccessibilityCustomAction]? {
@@ -346,12 +373,15 @@ final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityCus
 
     /// The strings tied to this card, in file order.
     nonisolated var connections: [StringAccessibilityElement] {
-        onMain { [self] in
-            guard let canvas else { return [] }
-            return canvas.store.board.strings
-                .filter { $0.from == cardID || $0.to == cardID }
-                .compactMap { canvas.accessibilityElement(forString: $0.id) }
-        }
+        nonisolated(unsafe) let element = self
+        return onMain { element.connectionElements() }
+    }
+
+    private func connectionElements() -> [StringAccessibilityElement] {
+        guard let canvas else { return [] }
+        return canvas.store.board.strings
+            .filter { $0.from == cardID || $0.to == cardID }
+            .compactMap { canvas.accessibilityElement(forString: $0.id) }
     }
 
     nonisolated func rotor(
