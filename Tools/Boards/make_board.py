@@ -1,4 +1,4 @@
-"""Builds "The Albania Files" evidence board from sourced facts. Usage: make_board.py map.jpg out.evboard"""
+"""Builds "The Albania Files" evidence board from sourced facts. Usage: make_board.py map.jpg out.evboard [iterations] [seed]"""
 import base64
 import hashlib
 import json
@@ -144,8 +144,8 @@ text("rama", -1190, -1960, 300,
      "**EDI RAMA**\nPrime Minister of Albania. Chairs the Strategic Investment Committee that approved Sazan. "
      "Defends the project; protesters want him out.", tint="azure")
 text("abehsera", -1190, -1610, 300,
-     "**ASHER ABEHSERA**\nKushner's long-time real-estate partner from New York. Chairman and CEO of "
-     "**Sazan Real Estate Development (SRED)**, which leads the project (AFP, Reuters).", tint="violet")
+     "**ASHER ABEHSERA**\nKushner's business partner; they worked on New York real estate together (AFP). Chairman "
+     "and CEO of **Sazan Real Estate Development (SRED)**, which leads the project (Reuters, Exit News).", tint="violet")
 text("khayyat", -1190, -1290, 300,
      "**MOUTAZ & RAMEZ AL-KHAYYAT**\nQatar-based brothers of Syrian origin, co-founders of UCC Holding. Filings show them "
      "holding most of SRED (Exit News). Their **Albania Land Development** bought Zvërnec beachfront plots (OCCRP).",
@@ -258,8 +258,8 @@ y = text("i_c1", -1600, y, 330,
          "❌ **\"Selling the coast to Jewish billionaires and the Israeli military\"**\nAI-generated posts and fake "
          "headlines on Facebook, TikTok, Instagram and YouTube (Times of Israel). Nothing behind them.", tint="graphite") + GAP
 y = text("i_c2", -1600, y, 330,
-         "❌ **Video of \"Israeli soldiers beating locals\"**\nWent viral in June 2026. Nothing shows the men are "
-         "Israeli soldiers (Times of Israel).", tint="graphite") + GAP
+         "❌ **Video of \"Israeli soldiers beating locals\"**\nWent viral in June 2026, part of the wave of fakes the "
+         "Times of Israel describes. No evidence the men are Israeli soldiers.", tint="graphite") + GAP
 y = text("i_c3", -1600, y, 330,
          "❌ **Photo: a fence with Israeli and Albanian flags as a \"new border\"**\nDigitally manipulated (fact-check, "
          "June 2026).", tint="graphite") + GAP
@@ -269,8 +269,8 @@ y = text("i_c4", -1230, y, 330,
          "Qatar-based Al-Khayyat brothers, Kushner and Abehsera. A leader of Albania's Jewish community: *\"This has "
          "nothing to do with the Albanian Jewish community or with Israeli investors.\"*", tint="graphite") + GAP
 y = text("i_c5", -1230, y, 330,
-         "❌ **Were the guards Israeli?**\nThe firm at Zvërnec was **Major Security**, an Albanian private security "
-         "company. No reporting on foreign ownership.", tint="graphite") + GAP
+         "❌ **Were the guards Israeli?**\nThe firm at Zvërnec was **Major Security**, a private security company "
+         "whose licence Albania's Interior Minister wants reviewed. No reporting on foreign ownership.", tint="graphite") + GAP
 text("i_c6", -1230, y, 330,
      "⚠️ **Who spreads it?**\nLocal observers blame Russia, Iran and Turkey for stirring unrest; others call the "
      "antisemitism a false flag to discredit the protests. Neither is proven.", tint="graphite")
@@ -312,8 +312,8 @@ y = text("b_gulf", 520, y, 320,
          "✅ **Qatar and Abu Dhabi**\nQatar's QIA and Abu Dhabi's Lunate: **$539M** combined by March 2022. Later "
          "reporting: UAE- and Qatar-linked firms, at least **$1.5B**.", tint="teal") + GAP
 text("b_fees", 520, y, 320,
-     "⚠️ **Fees and fresh money**\nReported: about **$157M** in fees from foreign investors (about $87M Saudi), and a push "
-     "to raise about $5B more in the Gulf while serving as envoy. Figures vary by source and date.", tint="teal")
+     "⚠️ **Fees and fresh money**\nReported: about **$157M** in fees from foreign investors (about $87M Saudi), and "
+     "about $5B more sought or raised in the Gulf while he serves as envoy. Accounts and figures differ.", tint="teal")
 y = -1390
 y = text("b_ea", 880, y, 320,
          "✅ **$55 billion: Electronic Arts**\nTaken private by **PIF, Silver Lake and Affinity**. Announced 29 Sep "
@@ -448,7 +448,7 @@ for card in cards:
     spot = FIXED.get(card["_name"])
     if spot:
         card["frame"]["x"], card["frame"]["y"] = spot
-optimize(cards, strings, REGIONS, iterations=int(sys.argv[3]) if len(sys.argv) > 3 else 40000)
+optimize(cards, strings, REGIONS, iterations=int(sys.argv[3]) if len(sys.argv) > 3 else 90000, seed=int(sys.argv[4]) if len(sys.argv) > 4 else 2)
 
 ids = {c["id"] for c in cards}
 for s in strings:
@@ -463,7 +463,7 @@ for card in cards:
 board = {
     "format": "evidenceboard", "formatVersion": 1, "id": uid("board"), "title": "The Albania Files",
     "createdAt": NOW, "modifiedAt": NOW, "theme": "cork",
-    "viewport": {"x": (min(xs) + max(xs)) / 2, "y": (min(ys) + max(ys)) / 2 + 60, "zoom": 0.16},
+    "viewport": {"x": (min(xs) + max(xs)) / 2, "y": (min(ys) + max(ys)) / 2 + 60, "zoom": 0.15},
     "cards": cards, "strings": strings, "assets": assets,
 }
 with open(OUT, "w") as f:

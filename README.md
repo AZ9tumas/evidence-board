@@ -57,8 +57,15 @@ Packages/CanvasKit/        Camera and the Core Animation canvas (AppKit)
 Packages/LinkPreviewKit/   Link previews: fetch, head parser, merger, palette, cache
 QuickLook/                 Finder thumbnail and Quick Look preview extensions
 docs/                      Design document, JSON schema, sample board
-Tools/                     Helper scripts
+boards/                    Finished boards (open with the app)
+Tools/                     Helper scripts; Tools/Boards builds the boards in boards/
 ```
+
+## Boards
+
+**`boards/The Albania Files.evboard`**: Jared Kushner, Ivanka and Donald Trump; the Sazan Island and Zvërnec resort in Albania; the 2026 "Flamingo Revolution" protests; the claims of an Israeli role, each traced to its source with a verdict; and Affinity Partners' billion-dollar deals. Built from public reporting up to 15 Oct 2026. Every card names its source and is marked ✅ reported, ⚠️ disputed or ❌ no evidence. The map is a schematic drawn for the board.
+
+Its 16 link cards carry the headline and outlet, but no page images. To fetch the real previews, open the board and choose **Board ▸ Refresh All Previews** (⇧⌘R). To rebuild it, run `python3 Tools/Boards/make_map.py map.jpg` and `python3 Tools/Boards/make_board.py map.jpg out.evboard` (Pillow and NumPy). The layout step moves cards so strings and their labels stay off the text, and `Tools/Boards/check.py` reports any that don't.
 
 ## Status
 
