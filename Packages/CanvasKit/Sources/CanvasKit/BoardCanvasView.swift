@@ -76,8 +76,11 @@ public final class BoardCanvasView: NSView {
     var tracePath: GraphPath?
     /// Fades everything that Focus or Trace doesn't highlight.
     let dimLayer = CALayer()
-    /// The glow that travels along a traced path, and the path's length.
-    let pulseLayer = CAShapeLayer()
+    /// The glow that travels along a traced path (a soft wide stroke under a bright core),
+    /// and the path's length.
+    let pulseLayer = CALayer()
+    let pulseGlow = CAShapeLayer()
+    let pulseCore = CAShapeLayer()
     var pulseLength: CGFloat = 0
     /// What the mode banner says while Focus or Trace is on.
     var highlightStatus: CanvasModeStatus?
@@ -125,9 +128,12 @@ public final class BoardCanvasView: NSView {
         dimLayer.isHidden = true
         cardsLayer.addSublayer(dimLayer)
         pulseLayer.zPosition = 1_000_000
-        pulseLayer.fillColor = nil
-        pulseLayer.lineCap = .round
         pulseLayer.isHidden = true
+        for stroke in [pulseGlow, pulseCore] {
+            stroke.fillColor = nil
+            stroke.lineCap = .round
+            pulseLayer.addSublayer(stroke)
+        }
         stringsLayer.addSublayer(pulseLayer)
         worldLayer.addSublayer(cardsLayer)
         worldLayer.addSublayer(stringsLayer)

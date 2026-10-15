@@ -554,7 +554,7 @@ extension BoardCanvasView {
 
     /// A glow segment that travels along the traced path at 600 pt/s (DESIGN.md §6.6).
     private func updatePulse() {
-        pulseLayer.removeAnimation(forKey: "pulse")
+        for stroke in [pulseGlow, pulseCore] { stroke.removeAnimation(forKey: "pulse") }
         guard let tracePath, !tracePath.strings.isEmpty, !reduceMotion else {
             withoutAnimation { pulseLayer.isHidden = true }
             return
@@ -563,12 +563,11 @@ extension BoardCanvasView {
         let color = stringNodes[tracePath.strings[0]].map { canvasAppearance.gradient(for: $0.string.color).from } ?? canvasAppearance.pin.from
         withoutAnimation {
             pulseLayer.isHidden = false
-            pulseLayer.strokeColor = color.mixed(with: .white, 0.7).cgColor
-            pulseLayer.lineWidth = 4
-            pulseLayer.shadowColor = color.cgColor
-            pulseLayer.shadowOpacity = 1
-            pulseLayer.shadowRadius = 6
-            pulseLayer.shadowOffset = .zero
+            // A wide translucent stroke reads as glow without an offscreen shadow pass.
+            pulseGlow.strokeColor = color.opacity(0.4).cgColor
+            pulseGlow.lineWidth = 12
+            pulseCore.strokeColor = color.mixed(with: .white, 0.7).cgColor
+            pulseCore.lineWidth = 4
         }
         let length = max(pulseLength, 60)
         let travel = CFTimeInterval(length / 600)
@@ -588,7 +587,7 @@ extension BoardCanvasView {
         pulse.animations = [head, tail]
         pulse.duration = travel * (1 + segment) + 0.35
         pulse.repeatCount = .infinity
-        pulseLayer.add(pulse, forKey: "pulse")
+        for stroke in [pulseGlow, pulseCore] { stroke.add(pulse, forKey: "pulse") }
     }
 
     /// Joins the traced strings end to end, each drawn in the direction of travel.
@@ -608,7 +607,10 @@ extension BoardCanvasView {
             total += node.length
         }
         pulseLength = total
-        withoutAnimation { pulseLayer.path = path }
+        withoutAnimation {
+            pulseGlow.path = path
+            pulseCore.path = path
+        }
     }
 
     func setNeedsPulseUpdate() {
