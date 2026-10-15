@@ -38,7 +38,8 @@ jobs:
           echo "Reduce Motion: $(defaults read com.apple.universalaccess reduceMotion 2>&1)"
           capture() {
             shot=$((shot + 1))
-            open -n --env "EB_SNAPSHOT_SCENARIO=${2:-none}" -a "$app" "$1" --args -ApplePersistenceIgnoreState YES
+            open -n --env "EB_SNAPSHOT_SCENARIO=${2:-none}" --env "EB_LAUNCH_LOG=/tmp/launch$shot.txt" \
+              -a "$app" "$1" --args -ApplePersistenceIgnoreState YES
             sleep 9
             pgrep -x EvidenceBoard >/dev/null && echo "shot $shot: running" || echo "shot $shot: APP NOT RUNNING"
             screencapture -x "/tmp/shot$shot.png"
@@ -84,6 +85,16 @@ jobs:
             echo "shot $shot: Quick Look thumbnail"
           fi
           echo "$shot" > /tmp/shot-count
+          # Launch to first board frame: the first launch after the build is the cold one.
+          for n in 1 2 3; do echo "launch $n: $(cat /tmp/launch$n.txt 2>/dev/null || echo '?') ms"; done
+          cold=$(cat /tmp/launch1.txt 2>/dev/null || echo 99999)
+          warm=$(cat /tmp/launch2.txt 2>/dev/null || echo 99999)
+          {
+            echo "| Budget | Measured | Target | Result |"
+            echo "|---|---|---|---|"
+            echo "| Cold launch to empty board (first launch after build) | ${cold} ms | < 400 ms | $([ "$cold" -lt 400 ] && echo pass || echo FAIL) |"
+            echo "| Launch to sample board (later launch) | ${warm} ms | < 400 ms | $([ "$warm" -lt 400 ] && echo pass || echo FAIL) |"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Publish images
         env:
           GH_TOKEN: ${{ github.token }}

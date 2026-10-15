@@ -1,5 +1,6 @@
 import AppKit
 import BoardKit
+import ObjectiveC
 
 /// The board for VoiceOver and the keyboard (DESIGN.md §14): every card and string is an
 /// accessibility element with a spoken label and actions, each card has a Connections rotor,
@@ -246,7 +247,7 @@ enum LinkURLText {
 }
 
 /// A card for VoiceOver. Its methods are called on the main thread.
-final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityElementProtocol, NSAccessibilityCustomRotorItemSearchDelegate, @unchecked Sendable {
+final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityCustomRotorItemSearchDelegate, @unchecked Sendable {
     let cardID: UUID
     private weak var canvas: BoardCanvasView?
 
@@ -367,15 +368,30 @@ final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityEle
         case .previous: next = current.map { $0 - 1 } ?? items.count - 1
         @unknown default: return nil
         }
-        guard items.indices.contains(next) else { return nil }
-        return NSAccessibilityCustomRotor.ItemResult(targetElement: items[next])
+        guard items.indices.contains(next),
+              let target = StringAccessibilityElement.asRotorTarget(items[next]) else { return nil }
+        return NSAccessibilityCustomRotor.ItemResult(targetElement: target)
     }
 }
 
 /// A string for VoiceOver. Its methods are called on the main thread.
-final class StringAccessibilityElement: NSAccessibilityElement, NSAccessibilityElementProtocol, @unchecked Sendable {
+final class StringAccessibilityElement: NSAccessibilityElement, @unchecked Sendable {
     let stringID: UUID
     private weak var canvas: BoardCanvasView?
+
+    /// Rotor results must be `NSAccessibilityElement` protocol objects. The class implements
+    /// everything that protocol asks for, but Swift can't state the conformance (the SDK's
+    /// `accessibilityIdentifier` optionality differs), so it's declared to the runtime once.
+    private static let declaresElementProtocol: Bool = {
+        guard let element = NSProtocolFromString("NSAccessibilityElement") else { return false }
+        class_addProtocol(StringAccessibilityElement.self, element)
+        return true
+    }()
+
+    static func asRotorTarget(_ element: StringAccessibilityElement) -> NSAccessibilityElementProtocol? {
+        guard declaresElementProtocol else { return nil }
+        return (element as AnyObject) as? NSAccessibilityElementProtocol
+    }
 
     @MainActor
     init(stringID: UUID, canvas: BoardCanvasView) {

@@ -69,6 +69,7 @@ struct BoardWindow: View {
             .focusedSceneValue(\.canvasController, canvas)
             #if DEBUG
             .task { await SnapshotScenario.run(on: canvas) }
+            .onAppear { LaunchTiming.recordFirstFrame() }
             #endif
             .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
             .preferredColorScheme(theme.colorScheme)
