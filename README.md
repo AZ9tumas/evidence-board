@@ -57,7 +57,15 @@ Tools/                     Helper scripts
 
 ## Status
 
-**M0 (skeleton)**, **M1 (text cards)**, **M2 (image cards)**, **M3 (strings)** and **M4 (web cards)** are done.
+**M0 (skeleton)** through **M4 (web cards)** and **M5 (design polish)** are done.
+
+**Design polish (M5)**
+- **Four themes:** Noir, Cork (procedural cork grain, paper cards, red wool), Blueprint (drafting grid, blue glass cards, white thread) and Daylight. **Automatic** (the default for new boards) follows Dark Mode. Switch with **Board ▸ Theme**, the toolbar's ◐ menu or **⌥⌘T**; the board cross-fades, the theme is saved in the file, and it can be undone.
+- **Search (⌘F):** finds cards by text, captions, link titles, sites and addresses. Matches glow, the rest dims, **↩** or **⌘G** steps through them. **Esc** closes it.
+- **Minimap:** bottom right, while you pan or zoom (or always, from the View menu). Click or drag in it to move there.
+- **Toolbar:** Select, Connect and Hand tools (**V**, **C**, **H**), New Text Card, Add Link, Search and Theme.
+- **Motion:** cards spring in and settle when dropped, previews cross-fade in, photos fade in. Reduce Motion turns it all into short fades.
+- **Glass:** HUDs, banners, search and minimap use Liquid Glass on macOS 26 and a frosted material before that.
 
 **Web cards (M4)**
 - **Add:** paste a link, drag one from a browser, drop a `.webloc` file, or use **Insert ▸ Link…** (⌘L). The card appears at once as a shimmering skeleton while the preview loads.
@@ -90,6 +98,6 @@ Tools/                     Helper scripts
 
 **Base (M0):** the document app (New, Open, Save, autosave, Versions), the forgiving JSON codec, the Noir canvas, and the camera.
 
-Not verified yet: frame rate and memory on real hardware (they need a Mac and Instruments), how the string physics feel on a real trackpad, and the Trace glow moving along the path. The glow's position is tested, but CI screen captures never show it. Fetching previews from live sites and Peek also need a Mac: CI checks the pipeline against 62 saved page heads, and the screenshots show generated previews.
+Not verified yet: Liquid Glass (CI runs macOS 15), frame rate and memory on real hardware (they need a Mac and Instruments), how the string physics feel on a real trackpad, and the Trace glow moving along the path. The glow's position is tested, but CI screen captures never show it. Fetching previews from live sites and Peek also need a Mac: CI checks the pipeline against 62 saved page heads, and the screenshots show generated previews.
 
 See the roadmap in [`docs/DESIGN.md` §16](docs/DESIGN.md#16-roadmap).

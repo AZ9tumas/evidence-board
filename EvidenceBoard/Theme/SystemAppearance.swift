@@ -33,18 +33,29 @@ final class SystemAppearance {
 struct WindowAppearance: NSViewRepresentable {
     let isDark: Bool
 
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        view.setAccessibilityElement(false)
+    func makeNSView(context: Context) -> AppearanceView {
+        let view = AppearanceView()
+        view.isDark = isDark
         return view
     }
 
-    func updateNSView(_ view: NSView, context: Context) {
-        let appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
-        if let window = view.window {
-            window.appearance = appearance
-        } else {
-            Task { @MainActor in view.window?.appearance = appearance }
+    func updateNSView(_ view: AppearanceView, context: Context) {
+        view.isDark = isDark
+    }
+
+    /// Applies the appearance once it's in a window, and again whenever it changes.
+    final class AppearanceView: NSView {
+        var isDark = true {
+            didSet { if isDark != oldValue { apply() } }
+        }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            apply()
+        }
+
+        private func apply() {
+            window?.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
         }
     }
 }

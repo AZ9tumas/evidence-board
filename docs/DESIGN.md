@@ -90,7 +90,7 @@ Board ─┬─ Cards (nodes)
 
 - Infinite in every direction, with zoom from **5% to 800%**.
 - The background is a themed gradient plus an optional subtle texture (dot grid, cork grain or blueprint lines), drawn procedurally so it never pixelates.
-- A **minimap** sits in the bottom-right corner. It fades in while you pan or zoom and fades out after 1.5 s idle.
+- A **minimap** sits in the bottom-right corner. It fades in while you pan or zoom and fades out after 1.5 s idle (it stays while the pointer is over it, and `View ▸ Always Show Minimap` keeps it up). It shows every card as a small tile in its tint and every string as a hairline; click or drag in it to move the view there.
 - A **zoom HUD** sits in the bottom-left corner: `−  72%  +`, with a click to choose presets (Fit, 50%, 100%, 200%).
 
 ### 4.2 Text card
@@ -138,7 +138,7 @@ Board ─┬─ Cards (nodes)
 - Smart **alignment guides** while dragging (magenta hairlines, snap within 6 pt).
 - **Lock** a card (it becomes un-draggable and its pin turns brass).
 - **Z-order**: bring to front and send to back. Cards you're dragging always float to the top temporarily.
-- **Search** (⌘F) across text, captions, link titles and URLs. Matches glow, non-matches dim, and ↩ moves to the next match.
+- **Search** (⌘F) across text, captions, link titles, site names, descriptions and URLs. Every word must match, ignoring case and accents. Matches glow in the selection color, non-matches dim, and ↩ (or ⌘G, ⇧⌘G back) moves to the next match, selecting it and bringing it into view at a readable zoom. Esc closes it.
 
 ### 4.7 Documents
 
@@ -170,7 +170,7 @@ Board ─┬─ Cards (nodes)
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Toolbar** (from left): document title (with rename on click), a tool segmented control (Select V, Text T, Connect C, Hand H), Search, Theme picker, Inspector toggle.
+- **Toolbar** (from left): document title (with rename on click), a tool segmented control (Select V, Connect C, Hand H), then New Text Card, Add Link, Search and the Theme menu. *(As built in M5; the Text tool is the T key and the New Text Card button, and the Inspector toggle arrives with the inspector.)*
 - There's no sidebar. The board fills the window edge to edge, under a transparent title bar (`.windowStyle(.hiddenTitleBar)` with toolbar, full-size content view).
 - The **inspector** is a floating glass panel docked top-right, 280 pt wide. It's contextual and shows the properties of the current selection.
 
@@ -266,7 +266,7 @@ The default theme is **Noir**: a night-time detective office, deep ink-blue dark
 
 ### 6.2 Other themes
 
-Every theme is a `Theme` value with the same token set, so you can switch live (⌥⌘T or the toolbar ◐ menu). The theme is saved per board.
+Every theme is a `Theme` value with the same token set, so you can switch live (⌥⌘T, `Board ▸ Theme` or the toolbar ◐ menu). The theme is saved per board, and switching is one undoable step that cross-fades the whole board in 0.4 s.
 
 | Theme | Mood | Background | Cards | String |
 |---|---|---|---|---|
@@ -275,7 +275,9 @@ Every theme is a `Theme` value with the same token set, so you can switch live (
 | **Blueprint** | Engineering | `#0D3B66` → `#08284A` + 1 pt line grid | Translucent blue glass, white text | White / cyan |
 | **Daylight** | Light mode | `#F5F6FA` → `#E7EAF3` + soft dots | White with 1 pt hairline | Red, slightly desaturated |
 
-The app follows the system appearance by default: **Noir** in dark mode and **Daylight** in light mode. A board that sets an explicit theme keeps it.
+The app follows the system appearance by default (**Automatic**: **Noir** in dark mode and **Daylight** in light mode). A board that sets an explicit theme keeps it, and its window takes that theme's light or dark appearance.
+
+**As built (M5).** Each theme also sets the card shadow color and strength (warm brown on Cork, softer on Daylight) and its own string color, used for strings left at the default Evidence Red: deep red wool on Cork, white to cyan on Blueprint, a quieter red on Daylight. The textures are drawn in view space by replicator layers, like the dot grid: Blueprint's 24 pt drafting grid has a heavier line every fifth and doubles its pitch when it would get dense; Cork's grain is one seamless, seeded 256 pt tile drawn once per theme, which moves with the board but keeps its size when you zoom, so it never pixelates. Light themes get deeper tints so colors hold up on paper, and web card text picks its ink against the mesh it actually sits on.
 
 ### 6.3 Typography
 
@@ -322,15 +324,17 @@ All motion uses springs. Nothing is linear except the shimmer.
 | String created | Path `strokeEnd` 0 → 1 over 0.22 s, then sag overshoots 1.25× → 1.0 (spring 0.45, 0.6) |
 | String deleted | Snaps: `strokeStart` → 1 over 0.15 s, ease-in |
 | Trace pulse | A 60 pt glow segment travels along the path at 600 pt/s, repeating while Trace mode is on |
-| Link preview resolves | Skeleton shimmer cross-fades to content (0.25 s). Hero image blurs in (20 → 0 pt blur) |
+| Link preview resolves | Skeleton shimmer cross-fades to content (0.25 s). The hero fades in when it's decoded (0.3 s; a blur-in may follow) |
 | Selection ring | Gradient ring rotates slowly (12 s per revolution) while selected |
 | Theme switch | 0.4 s cross-fade of the background, with token animations on every card |
 
 **Reduce Motion**: every spring becomes a 0.15 s fade, there's no pulse, rotating rings or blur-in, and Trace shows the path statically.
 
+**As built (M5).** Card springs are `CASpringAnimation`s made to match SwiftUI's `spring(response:dampingFraction:)`. Cards pop in only when up to 40 arrive at once, so a big paste or the test boards don't animate hundreds of cards. Search matches glow with a soft halo in the selection color, stronger on the match being shown.
+
 ### 6.7 App icon
 
-A squircle in Noir ink gradient, three glossy card silhouettes at slight angles, and one red string pulled diagonally between two red pins. Light-mode and tinted variants come from the Icon Composer layered file (`AppIcon.icon`) for macOS 26, with a classic `AppIcon.appiconset` fallback.
+A squircle in Noir ink gradient, three glossy card silhouettes at slight angles, and one red string pulled diagonally between two red pins. Light-mode and tinted variants come from the Icon Composer layered file (`AppIcon.icon`) for macOS 26, with a classic `AppIcon.appiconset` fallback. *(As built: the `AppIcon.appiconset` ships; the layered `AppIcon.icon` needs Icon Composer on a Mac and is still to come.)*
 
 ---
 
@@ -1107,7 +1111,7 @@ docs/
 
 | Shortcut | Action |
 |---|---|
-| V / T / C / H | Select / Text / Connect / Hand tool |
+| V / C / H | Select / Connect / Hand tool |
 | Double-click canvas, or T | New text card (at the pointer) |
 | ⌘⇧T | Insert ▸ Text Card |
 | Double-click card, or ↩ | Edit text |
@@ -1122,8 +1126,9 @@ docs/
 | ⌘T | Trace path between two selected cards |
 | Space | Peek web card (live view) |
 | ⌘↩ | Open web card in browser |
-| ⌘R | Refresh link preview |
+| ⌘R / ⇧⌘R | Refresh link preview / all previews |
 | ⌘F | Search board |
+| ↩ or ⌘G / ⇧⌘G | Next / previous search match |
 | ⌘0 / ⌘1 / ⌘2 | Zoom to fit / 100% / selection |
 | ⌘+ / ⌘− | Zoom in / out |
 | ⌘] / ⌘[ | Bring forward / send backward |
