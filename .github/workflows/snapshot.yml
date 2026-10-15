@@ -57,7 +57,7 @@ jobs:
           capture /tmp/Harbor.evboard reframe
           capture /tmp/Harbor.evboard connect
           capture /tmp/Harbor.evboard trace
-          capture /tmp/Harbor.evboard tracepath
+          capture /tmp/Harbor.evboard trace
           capture /tmp/Harbor.evboard focus
           capture /tmp/Harbor.evboard string
           echo "$shot" > /tmp/shot-count

@@ -552,64 +552,82 @@ extension BoardCanvasView {
         dimLayer.frame = visible.insetBy(dx: -visible.width, dy: -visible.height)
     }
 
-    /// A glow segment that travels along the traced path at 600 pt/s (DESIGN.md §6.6).
+    /// A glow that travels along the traced path at 600 pt/s, trailing a tail about 60 pt
+    /// long (DESIGN.md §6.6).
     private func updatePulse() {
-        for stroke in [pulseGlow, pulseCore] { stroke.removeAnimation(forKey: "pulse") }
+        pulseSpark.removeAnimation(forKey: "pulse")
         guard let tracePath, !tracePath.strings.isEmpty, !reduceMotion else {
             withoutAnimation { pulseLayer.isHidden = true }
+            pulsePath = nil
             return
         }
-        updatePulsePath()
         let color = stringNodes[tracePath.strings[0]].map { canvasAppearance.gradient(for: $0.string.color).from } ?? canvasAppearance.pin.from
+        let size: CGFloat = 9
+        let copies = 14
         withoutAnimation {
             pulseLayer.isHidden = false
-            // A wide translucent stroke reads as glow without an offscreen shadow pass.
-            pulseGlow.strokeColor = color.opacity(0.4).cgColor
-            pulseGlow.lineWidth = 12
-            pulseCore.strokeColor = color.mixed(with: .white, 0.7).cgColor
-            pulseCore.lineWidth = 4
+            pulseLayer.instanceCount = copies
+            pulseLayer.instanceDelay = 60.0 / 600 / Double(copies)
+            pulseLayer.instanceAlphaOffset = -1 / Float(copies)
+            pulseLayer.instanceTransform = CATransform3DMakeScale(0.95, 0.95, 1)
+            pulseSpark.bounds = CGRect(x: 0, y: 0, width: size, height: size)
+            pulseSpark.cornerRadius = size / 2
+            pulseSpark.backgroundColor = color.mixed(with: .white, 0.75).cgColor
+            pulseSpark.shadowPath = CGPath(ellipseIn: pulseSpark.bounds, transform: nil)
+            pulseSpark.shadowColor = color.cgColor
+            pulseSpark.shadowOpacity = 1
+            pulseSpark.shadowRadius = 5
+            pulseSpark.shadowOffset = .zero
         }
-        let length = max(pulseLength, 60)
-        let travel = CFTimeInterval(length / 600)
-        let segment = CFTimeInterval(min(60 / length, 0.5))
-        let head = CABasicAnimation(keyPath: "strokeEnd")
-        head.fromValue = 0
-        head.toValue = 1
-        head.duration = travel
-        head.fillMode = .both
-        let tail = CABasicAnimation(keyPath: "strokeStart")
-        tail.fromValue = 0
-        tail.toValue = 1
-        tail.beginTime = travel * segment
-        tail.duration = travel
-        tail.fillMode = .both
-        let pulse = CAAnimationGroup()
-        pulse.animations = [head, tail]
-        pulse.duration = travel * (1 + segment) + 0.35
-        pulse.repeatCount = .infinity
-        for stroke in [pulseGlow, pulseCore] { stroke.add(pulse, forKey: "pulse") }
+        pulseStart = pulseLayer.convertTime(CACurrentMediaTime(), from: nil)
+        updatePulsePath()
     }
 
-    /// Joins the traced strings end to end, each drawn in the direction of travel.
+    /// Joins the traced strings end to end, each drawn in the direction of travel, and sends
+    /// the spark along it. When the path moves (a card is dragged) the spark keeps its place.
     func updatePulsePath() {
-        guard let tracePath else { return }
+        guard let tracePath, !pulseLayer.isHidden else { return }
         let path = CGMutablePath()
         var total: CGFloat = 0
+        var start: CGPoint?
         for (index, id) in tracePath.strings.enumerated() {
             guard let node = stringNodes[id], index < tracePath.cards.count else { continue }
             let curve = node.string.from == tracePath.cards[index] ? node.curve : node.curve.reversed
             if path.isEmpty {
                 path.move(to: curve.a)
+                start = curve.a
             } else if path.currentPoint != curve.a {
                 path.addLine(to: curve.a)
             }
             path.addCurve(to: curve.b, control1: curve.c1, control2: curve.c2)
             total += node.length
         }
+        pulsePath = path
         pulseLength = total
+        guard let start else { return }
+
+        let travel = CFTimeInterval(max(total, 60) / 600)
+        let move = CAKeyframeAnimation(keyPath: "position")
+        move.path = path
+        move.calculationMode = .paced
+        move.duration = travel
+        move.fillMode = .both
+        // Fade out at the far pin, then set off again.
+        let fade = CAKeyframeAnimation(keyPath: "opacity")
+        fade.values = [1, 1, 0]
+        fade.keyTimes = [0, 0.92, 1]
+        fade.duration = travel
+        fade.fillMode = .both
+        let pulse = CAAnimationGroup()
+        pulse.animations = [move, fade]
+        pulse.duration = travel + 0.35
+        pulse.repeatCount = .infinity
+        pulse.beginTime = pulseStart
+        // The tail's copies start a little late; until then they wait at the first pin.
+        pulse.fillMode = .backwards
         withoutAnimation {
-            pulseGlow.path = path
-            pulseCore.path = path
+            pulseSpark.position = start
+            pulseSpark.add(pulse, forKey: "pulse")
         }
     }
 

@@ -76,12 +76,13 @@ public final class BoardCanvasView: NSView {
     var tracePath: GraphPath?
     /// Fades everything that Focus or Trace doesn't highlight.
     let dimLayer = CALayer()
-    /// The glow that travels along a traced path (a soft wide stroke under a bright core),
-    /// and the path's length.
-    let pulseLayer = CALayer()
-    let pulseGlow = CAShapeLayer()
-    let pulseCore = CAShapeLayer()
+    /// The glow that travels along a traced path: a spark, repeated with a small delay and
+    /// fading, so it trails a comet tail. Plus the path it follows and when it set off.
+    let pulseLayer = CAReplicatorLayer()
+    let pulseSpark = CALayer()
+    var pulsePath: CGPath?
     var pulseLength: CGFloat = 0
+    var pulseStart: CFTimeInterval = 0
     /// What the mode banner says while Focus or Trace is on.
     var highlightStatus: CanvasModeStatus?
     var reduceMotion: Bool { Motion.isReduced }
@@ -129,11 +130,7 @@ public final class BoardCanvasView: NSView {
         cardsLayer.addSublayer(dimLayer)
         pulseLayer.zPosition = 1_000_000
         pulseLayer.isHidden = true
-        for stroke in [pulseGlow, pulseCore] {
-            stroke.fillColor = nil
-            stroke.lineCap = .round
-            pulseLayer.addSublayer(stroke)
-        }
+        pulseLayer.addSublayer(pulseSpark)
         stringsLayer.addSublayer(pulseLayer)
         worldLayer.addSublayer(cardsLayer)
         worldLayer.addSublayer(stringsLayer)

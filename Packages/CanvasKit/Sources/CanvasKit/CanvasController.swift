@@ -113,12 +113,6 @@ public final class CanvasController {
         view.continueConnecting(to: CGPoint(x: card.frame.midX - 30, y: card.frame.y + 40))
     }
 
-    /// Stops the Trace pulse with the whole path lit, to check how it's drawn.
-    public func debugShowWholePulse() {
-        guard let view else { return }
-        for stroke in [view.pulseGlow, view.pulseCore] { stroke.removeAllAnimations() }
-    }
-
     /// Selects the string at `index` and zooms in on its middle.
     public func debugSelectString(at index: Int, zoom: CGFloat) {
         guard let view, store.board.strings.indices.contains(index) else { return }

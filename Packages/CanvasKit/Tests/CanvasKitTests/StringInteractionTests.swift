@@ -128,9 +128,9 @@ struct StringInteractionTests {
         #expect(test.view.stringNodes.values.allSatisfy { $0.emphasis == .glowing })
         // The pulse runs along both strings, from the first card's pin to the last one's.
         #expect(!test.view.pulseLayer.isHidden)
-        #expect(test.view.pulseCore.animation(forKey: "pulse") != nil)
+        #expect(test.view.pulseSpark.animation(forKey: "pulse") != nil)
         #expect(test.view.pulseLength > 800)
-        let box = try #require(test.view.pulseCore.path?.boundingBoxOfPath)
+        let box = try #require(test.view.pulsePath?.boundingBoxOfPath)
         #expect(abs(box.minX - test.pin(0).x) < 1 && abs(box.maxX - test.pin(2).x) < 1)
 
         test.view.escape()
