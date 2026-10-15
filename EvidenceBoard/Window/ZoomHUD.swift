@@ -49,7 +49,7 @@ private struct HUDButton: View {
             Image(systemName: systemImage)
                 .font(.system(size: 11, weight: .semibold))
                 .frame(width: 26, height: 22)
-                .background(.white.opacity(isHovered ? 0.08 : 0), in: Capsule())
+                .background(.primary.opacity(isHovered ? 0.08 : 0), in: Capsule())
                 .contentShape(Capsule())
         }
         .buttonStyle(.plain)

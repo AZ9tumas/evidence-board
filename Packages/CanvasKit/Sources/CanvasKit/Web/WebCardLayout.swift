@@ -96,7 +96,9 @@ struct WebCardLayout {
     init(content: WebCardContent, width requestedWidth: CGFloat, appearance: CanvasAppearance) {
         let width = min(max(requestedWidth, Self.widthRange.lowerBound), Self.widthRange.upperBound)
         size = CGSize(width: width, height: 0)
-        let style = WebCardTypography(appearance: appearance, palette: content.palette, onMesh: true)
+        let style = WebCardTypography(
+            appearance: appearance, palette: content.palette, fullMesh: [.compact, .fallback].contains(content.variant)
+        )
         if content.isLoading {
             layoutSkeleton(width: width)
             return

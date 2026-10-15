@@ -63,6 +63,8 @@ final class CardNode {
     private var isEditing = false
     /// Above the Focus/Trace dimming layer.
     private var isRaised = false
+    /// The theme's shadow strength (the alpha of its shadow color).
+    private var shadowStrength: Float = 1
 
     /// The decoded image (uncropped), how big a decode was asked for, and the crop shown
     /// while reframing.
@@ -177,10 +179,13 @@ final class CardNode {
         applyTransform()
 
         // Explicit shadow paths keep Core Animation from rendering shadows off screen every frame.
+        let shadowColor = appearance.shadow.opacity(1).cgColor
         for layer in shadowLayers {
             layer.frame = bounds
             layer.shadowPath = outline
+            layer.shadowColor = shadowColor
         }
+        shadowStrength = Float(appearance.shadow.alpha)
         applyShadows()
 
         body.frame = bounds
@@ -470,7 +475,7 @@ final class CardNode {
             layer.isHidden = !visible
             layer.shadowOffset = CGSize(width: 0, height: shadow.offset * lift.offset)
             layer.shadowRadius = shadow.blur * lift.blur / 2
-            layer.shadowOpacity = shadow.opacity
+            layer.shadowOpacity = shadow.opacity * shadowStrength
         }
     }
 

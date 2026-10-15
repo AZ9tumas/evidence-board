@@ -1,4 +1,5 @@
 import SwiftUI
+import BoardKit
 import CanvasKit
 
 /// Menu bar commands for the focused board window. Cut, Copy, Paste, Delete and Select All
@@ -43,6 +44,19 @@ struct BoardCommands: Commands {
                 .disabled(canvas?.linkSelectionCount != 1 || canvas?.selectionCount != 1)
             Button("Copy Link") { canvas?.copySelectedLinks() }
                 .disabled(!hasLinkSelection)
+            Divider()
+            Picker("Theme", selection: Binding(
+                get: { canvas?.theme ?? .system },
+                set: { canvas?.setTheme($0) }
+            )) {
+                ForEach(ThemeID.allCases, id: \.self) { theme in
+                    Text(theme.title).tag(theme)
+                }
+            }
+            .disabled(canvas == nil)
+            Button("Next Theme") { canvas?.cycleTheme() }
+                .keyboardShortcut("t", modifiers: [.command, .option])
+                .disabled(canvas == nil)
         }
 
         CommandMenu("Arrange") {

@@ -110,6 +110,22 @@ struct BoardStoreTests {
         #expect(store.graph.shortestPath(from: cards[0].id, to: cards[2].id)?.cards == [cards[0].id, cards[3].id, cards[2].id])
     }
 
+    @Test func setThemeIsReversibleAndNotifies() throws {
+        let (store, _) = Self.sampleStore()
+        let recorder = Recorder()
+        store.addObserver { recorder.record($0) }
+        #expect(store.board.theme == .system)
+
+        let inverse = try #require(store.apply(.setTheme(.cork)))
+        #expect(store.board.theme == .cork)
+        #expect(recorder.received.last?.themeChanged == true)
+        #expect(store.apply(.setTheme(.cork)) == nil)
+
+        store.apply(inverse)
+        #expect(store.board.theme == .system)
+        #expect(store.snapshot().theme == .system)
+    }
+
     @Test func noOpCommandsReturnNilAndDoNotNotify() {
         let (store, cards) = Self.sampleStore()
         let notifications = Recorder()

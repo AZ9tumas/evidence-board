@@ -176,6 +176,11 @@ extension BoardCanvasView: NSMenuItemValidation {
         boardEditor.perform(.updateCards(updated), actionName: actionName)
     }
 
+    func setTheme(_ theme: ThemeID) {
+        commitPendingEdits()
+        boardEditor.perform(.setTheme(theme), actionName: "Change Theme")
+    }
+
     /// Lays out `count` sample text cards around the view center, for checking performance.
     func addTestCards(count: Int) {
         let sentences = [

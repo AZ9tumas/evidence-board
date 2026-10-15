@@ -9,9 +9,15 @@ struct WebCardTypography {
     let tertiary: NSColor
     let accent: NSColor
 
-    init(appearance: CanvasAppearance, palette: LinkPalette, onMesh: Bool) {
-        let lightText = !onMesh || WebCardArt.prefersLightText(on: WebCardArt.meshBackdrop(palette: palette, appearance: appearance))
-        let ink = lightText ? appearance.text : RGBA(0x15171C)
+    static let lightInk = RGBA(0xF2F4FA)
+    static let darkInk = RGBA(0x15171C)
+
+    /// `fullMesh` is true for compact and fallback cards, whose whole body is the palette's
+    /// mesh; the others sit on the theme's card color with a hint of it.
+    init(appearance: CanvasAppearance, palette: LinkPalette, fullMesh: Bool) {
+        let backdrop = WebCardArt.meshBackdrop(palette: palette, appearance: appearance, full: fullMesh)
+        let lightText = WebCardArt.prefersLightText(on: backdrop)
+        let ink = lightText ? Self.lightInk : Self.darkInk
         primary = ink.nsColor
         secondary = ink.opacity(0.72).nsColor
         tertiary = ink.opacity(0.52).nsColor

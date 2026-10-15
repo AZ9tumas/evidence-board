@@ -21,6 +21,8 @@ public enum BoardCommand: Sendable, Equatable {
     /// Adds assets that aren't on the board yet.
     case addAssets([AssetID: Asset])
     case removeAssets(Set<AssetID>)
+    /// Changes the board's theme.
+    case setTheme(ThemeID)
     /// Several commands applied in order, undone in reverse.
     case batch([BoardCommand])
 }
@@ -34,11 +36,13 @@ public struct BoardChanges: Sendable, Equatable {
     public var updatedStrings: Set<UUID> = []
     public var removedStrings: Set<UUID> = []
     public var assetsChanged = false
+    public var themeChanged = false
 
     public init() {}
 
     public var isEmpty: Bool {
         insertedCards.isEmpty && updatedCards.isEmpty && removedCards.isEmpty
             && insertedStrings.isEmpty && updatedStrings.isEmpty && removedStrings.isEmpty && !assetsChanged
+            && !themeChanged
     }
 }

@@ -20,6 +20,8 @@ public final class CanvasController {
     public private(set) var modeStatus: CanvasModeStatus?
     /// A short message that fades after a moment, such as "these cards aren't connected".
     public private(set) var notice: String?
+    /// The board's theme, as saved in the file. `.system` follows the Mac's appearance.
+    public private(set) var theme: ThemeID
 
     @ObservationIgnored
     private var noticeTask: Task<Void, Never>?
@@ -33,6 +35,7 @@ public final class CanvasController {
         self.store = store
         self.zoomPercent = Self.percent(store.viewport.zoom)
         self.isBoardEmpty = store.board.cards.isEmpty
+        self.theme = store.board.theme
     }
 
     public var hasSelection: Bool { selectionCount > 0 }
@@ -67,6 +70,18 @@ public final class CanvasController {
 
     /// Insert ▸ Image…: picks image or PDF files and pins them to the board.
     public func insertImage() { view?.presentImagePicker() }
+
+    // MARK: Theme
+
+    /// Switches the board to `theme`, as one undoable step.
+    public func setTheme(_ theme: ThemeID) { view?.setTheme(theme) }
+
+    /// ⌥⌘T: Automatic, Noir, Cork, Blueprint, Daylight, and around again.
+    public func cycleTheme() {
+        let all = ThemeID.allCases
+        let next = all[((all.firstIndex(of: theme) ?? 0) + 1) % all.count]
+        setTheme(next)
+    }
 
     // MARK: Links
 
@@ -171,6 +186,10 @@ public final class CanvasController {
         if count != selectionCount { selectionCount = count }
         if strings != stringSelectionCount { stringSelectionCount = strings }
         if links != linkSelectionCount { linkSelectionCount = links }
+    }
+
+    func themeDidChange(_ newTheme: ThemeID) {
+        if newTheme != theme { theme = newTheme }
     }
 
     func toolDidChange(_ newTool: CanvasTool) {

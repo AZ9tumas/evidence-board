@@ -31,9 +31,9 @@ enum WebCardArt {
         ]
     }
 
-    /// The color text mostly sits on: the middle and bottom of a full mesh.
-    static func meshBackdrop(palette: LinkPalette, appearance: CanvasAppearance) -> RGBA {
-        let colors = meshColors(palette: palette, appearance: appearance, full: true)
+    /// The color text mostly sits on: the middle and bottom of the mesh.
+    static func meshBackdrop(palette: LinkPalette, appearance: CanvasAppearance, full: Bool) -> RGBA {
+        let colors = meshColors(palette: palette, appearance: appearance, full: full)
         let lower = Array(colors[3...])
         let count = Double(lower.count)
         return RGBA(

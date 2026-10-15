@@ -67,6 +67,16 @@ public struct GradientPair: Sendable, Hashable {
     var cgColors: [CGColor] { [from.cgColor, to.cgColor] }
 }
 
+/// What the board's background is textured with.
+public enum BoardTexture: Sendable, Hashable {
+    /// A dot grid (Noir, Daylight).
+    case dots
+    /// A drafting grid with a heavier line every fifth (Blueprint).
+    case lines
+    /// Cork grain (Cork).
+    case grain
+}
+
 /// The color tokens the canvas draws with. The app builds one from its active theme.
 public struct CanvasAppearance: Sendable, Hashable {
     public var background: GradientPair
@@ -93,6 +103,12 @@ public struct CanvasAppearance: Sendable, Hashable {
     /// The glass capsule behind string labels, and its text.
     public var labelFill: GradientPair
     public var labelText: RGBA
+    /// The background texture, drawn in `gridDot`.
+    public var texture: BoardTexture
+    /// Color of card shadows. Its alpha scales how strong they are.
+    public var shadow: RGBA
+    /// The theme's own string color, for strings left at the default (Evidence Red).
+    public var string: GradientPair?
 
     public init(
         background: GradientPair,
@@ -112,7 +128,10 @@ public struct CanvasAppearance: Sendable, Hashable {
         photoPaper: GradientPair,
         captionInk: RGBA,
         labelFill: GradientPair = GradientPair(RGBA(0x2A3046, alpha: 0.88), RGBA(0x1A1E2E, alpha: 0.88)),
-        labelText: RGBA = RGBA(0xF2F4FA)
+        labelText: RGBA = RGBA(0xF2F4FA),
+        texture: BoardTexture = .dots,
+        shadow: RGBA = .black,
+        string: GradientPair? = nil
     ) {
         self.background = background
         self.vignette = vignette
@@ -132,6 +151,15 @@ public struct CanvasAppearance: Sendable, Hashable {
         self.captionInk = captionInk
         self.labelFill = labelFill
         self.labelText = labelText
+        self.texture = texture
+        self.shadow = shadow
+        self.string = string
+    }
+
+    /// Light cards on a light board (Daylight) or paper cards (Cork).
+    var hasLightCards: Bool {
+        let fill = cardFill.from
+        return 0.2126 * fill.red + 0.7152 * fill.green + 0.0722 * fill.blue > 0.55
     }
 
     func gradient(for tint: Tint) -> GradientPair {
@@ -141,6 +169,7 @@ public struct CanvasAppearance: Sendable, Hashable {
     func gradient(for color: StringColor) -> GradientPair {
         switch color {
         case .tint(let tint):
+            if tint == .red, let string { return string }
             return gradient(for: tint)
         case .hex(let hex):
             let rgba = RGBA(hex: hex) ?? pin.from

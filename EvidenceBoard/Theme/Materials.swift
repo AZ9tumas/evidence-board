@@ -3,30 +3,47 @@ import SwiftUI
 extension View {
     /// The floating glass used for HUDs and banners: Liquid Glass on macOS 26, a frosted
     /// material with a lit edge before that.
-    @ViewBuilder
     func glassCapsule() -> some View {
+        modifier(GlassBackground(shape: Capsule()))
+    }
+
+    /// The same glass in a rounded rectangle, for panels such as the minimap.
+    func glassPanel(cornerRadius: CGFloat) -> some View {
+        modifier(GlassBackground(shape: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)))
+    }
+}
+
+private struct GlassBackground<S: InsettableShape>: ViewModifier {
+    let shape: S
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
         #if compiler(>=6.2)
         if #available(macOS 26.0, *) {
-            glassEffect(.regular, in: Capsule())
+            content.glassEffect(.regular, in: shape)
         } else {
-            frostedCapsule()
+            frosted(content)
         }
         #else
-        frostedCapsule()
+        frosted(content)
         #endif
     }
 
-    private func frostedCapsule() -> some View {
-        background(.ultraThinMaterial, in: Capsule())
+    private func frosted(_ content: Content) -> some View {
+        let dark = colorScheme == .dark
+        return content
+            .background(.ultraThinMaterial, in: shape)
             .overlay {
-                Capsule().strokeBorder(
+                shape.strokeBorder(
                     LinearGradient(
-                        colors: [.white.opacity(0.18), .white.opacity(0.04)],
+                        colors: dark
+                            ? [.white.opacity(0.18), .white.opacity(0.04)]
+                            : [.white.opacity(0.9), .black.opacity(0.08)],
                         startPoint: .top, endPoint: .bottom
                     ),
                     lineWidth: 1
                 )
             }
-            .shadow(color: .black.opacity(0.35), radius: 12, y: 6)
+            .shadow(color: .black.opacity(dark ? 0.35 : 0.12), radius: 12, y: 6)
     }
 }

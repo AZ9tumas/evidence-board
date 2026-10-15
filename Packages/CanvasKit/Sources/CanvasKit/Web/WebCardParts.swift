@@ -97,6 +97,8 @@ final class WebCardParts {
             layer.cornerCurve = .continuous
             return layer
         }
+        let sheen = appearance.hasLightCards ? 0.55 : 0.09
+        shimmer.colors = [RGBA.white.opacity(0).cgColor, RGBA.white.opacity(sheen).cgColor, RGBA.white.opacity(0).cgColor]
         shimmer.frame = CGRect(x: -bounds.width, y: 0, width: bounds.width, height: bounds.height)
         if shimmer.animation(forKey: "sweep") == nil, !Motion.isReduced {
             let sweep = CABasicAnimation(keyPath: "position.x")

@@ -231,6 +231,13 @@ public final class BoardStore {
             changes.assetsChanged = true
             return .addAssets(removed)
 
+        case .setTheme(let theme):
+            guard board.theme != theme else { return .batch([]) }
+            let previous = board.theme
+            board.theme = theme
+            changes.themeChanged = true
+            return .setTheme(previous)
+
         case .batch(let commands):
             let inverses = commands.map { perform($0, changes: &changes) }
             return .batch(inverses.reversed())

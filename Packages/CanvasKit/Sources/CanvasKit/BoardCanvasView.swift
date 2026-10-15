@@ -12,6 +12,11 @@ public final class BoardCanvasView: NSView {
     public var canvasAppearance: CanvasAppearance {
         didSet {
             guard canvasAppearance != oldValue else { return }
+            // A theme switch cross-fades the whole board (DESIGN.md §6.6).
+            let fade = CATransition()
+            fade.type = .fade
+            fade.duration = Motion.isReduced ? 0.15 : 0.4
+            rootLayer.add(fade, forKey: "theme")
             applyAppearance()
         }
     }
@@ -27,6 +32,8 @@ public final class BoardCanvasView: NSView {
     let backgroundLayer = CAGradientLayer()
     let vignetteLayer = CAGradientLayer()
     let grid = DotGrid()
+    let lineGrid = LineGrid()
+    let grain = GrainTexture()
     let worldLayer = CALayer()
     let cardsLayer = CALayer()
     let stringsLayer = CALayer()
@@ -150,6 +157,8 @@ public final class BoardCanvasView: NSView {
 
         rootLayer.addSublayer(backgroundLayer)
         rootLayer.addSublayer(vignetteLayer)
+        rootLayer.addSublayer(grain.layer)
+        rootLayer.addSublayer(lineGrid.layer)
         rootLayer.addSublayer(grid.layer)
         rootLayer.addSublayer(worldLayer)
         rootLayer.addSublayer(overlay.layer)
@@ -223,6 +232,8 @@ public final class BoardCanvasView: NSView {
                 item.contentsScale = scale
             }
             grid.setContentsScale(scale)
+            lineGrid.setContentsScale(scale)
+            if canvasAppearance.texture == .grain { grain.setColor(canvasAppearance.gridDot, scale: scale) }
             for node in cardNodes.values { node.setContentsScale(scale) }
             for node in stringNodes.values {
                 node.setContentsScale(scale)
@@ -249,10 +260,17 @@ public final class BoardCanvasView: NSView {
             dimLayer.backgroundColor = canvasAppearance.background.to.opacity(0.74).cgColor
             backgroundLayer.colors = canvasAppearance.background.cgColors
             vignetteLayer.colors = [RGBA.clear.cgColor, RGBA.clear.cgColor, canvasAppearance.vignette.cgColor]
+            let texture = canvasAppearance.texture
+            grid.layer.isHidden = texture != .dots
+            lineGrid.layer.isHidden = texture != .lines
+            grain.layer.isHidden = texture != .grain
             grid.setColor(canvasAppearance.gridDot)
+            lineGrid.setColor(canvasAppearance.gridDot)
+            if texture == .grain { grain.setColor(canvasAppearance.gridDot, scale: backingScale) }
             overlay.setAppearance(canvasAppearance)
         }
         rebuildContent()
+        applyCamera()
     }
 
     /// Recreates every card and string layer. Used on load and when the theme changes;
@@ -399,6 +417,7 @@ public final class BoardCanvasView: NSView {
     // MARK: - Store changes
 
     func storeDidChange(_ changes: BoardChanges) {
+        if changes.themeChanged { controller?.themeDidChange(store.board.theme) }
         withoutAnimation {
             for id in changes.removedStrings { removeStringNode(id, animated: true) }
             for id in changes.removedCards { removeCardNode(id) }
@@ -604,7 +623,11 @@ public final class BoardCanvasView: NSView {
         guard size.width > 0, size.height > 0 else { return }
         withoutAnimation {
             worldLayer.sublayerTransform = CATransform3DMakeAffineTransform(camera.transform(in: size))
-            grid.update(camera: camera, viewSize: size)
+            switch canvasAppearance.texture {
+            case .dots: grid.update(camera: camera, viewSize: size)
+            case .lines: lineGrid.update(camera: camera, viewSize: size, backingScale: backingScale)
+            case .grain: grain.update(camera: camera, viewSize: size)
+            }
             let level = DetailLevel(zoom: camera.zoom)
             if level != detailLevel {
                 detailLevel = level

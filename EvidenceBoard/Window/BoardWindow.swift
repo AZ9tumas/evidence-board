@@ -5,15 +5,16 @@ import CanvasKit
 /// One document window: the canvas edge to edge, with floating glass HUDs on top.
 struct BoardWindow: View {
     private let store: BoardStore
-    private let theme: Theme
     @State private var canvas: CanvasController
     @State private var showsLoadBanner = true
+    private let system = SystemAppearance.shared
 
     init(store: BoardStore) {
         self.store = store
-        self.theme = Theme.resolve(store.board.theme)
         _canvas = State(initialValue: CanvasController(store: store))
     }
+
+    private var theme: Theme { Theme.resolve(canvas.theme, systemIsDark: system.isDark) }
 
     var body: some View {
         BoardCanvas(controller: canvas, appearance: theme.canvas)
@@ -53,7 +54,9 @@ struct BoardWindow: View {
             .task { await SnapshotScenario.run(on: canvas) }
             #endif
             .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
-            .preferredColorScheme(.dark)
+            .background(WindowAppearance(isDark: theme.isDark))
+            .environment(\.colorScheme, theme.colorScheme)
+            .animation(.easeInOut(duration: 0.4), value: theme.id)
             .frame(minWidth: 640, minHeight: 420)
     }
 }
@@ -212,6 +215,13 @@ private enum SnapshotScenario {
             canvas.addTestWebCards()
             try? await Task.sleep(for: .seconds(2))
             canvas.debugLookAtCards(at: [0, 1], zoom: 1.5)
+        case "cork", "blueprint", "daylight", "noir":
+            canvas.setTheme(ThemeID(rawValue: scenario) ?? .system)
+        case "webdaylight", "webcork", "webblueprint":
+            canvas.setTheme(ThemeID(rawValue: String(scenario.dropFirst(3))) ?? .system)
+            canvas.addTestWebCards()
+            try? await Task.sleep(for: .seconds(2))
+            canvas.zoomToFit()
         case "webzoom2":
             canvas.addTestWebCards()
             try? await Task.sleep(for: .seconds(2))
