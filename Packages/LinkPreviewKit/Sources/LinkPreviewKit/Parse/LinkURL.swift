@@ -8,6 +8,11 @@ public enum LinkURL {
         "ref_src", "ref_url", "_hsenc", "_hsmi", "mkt_tok", "spm", "vero_id", "oly_anon_id", "oly_enc_id",
     ]
 
+    static let commonTopLevelDomains: Set<String> = [
+        "com", "org", "net", "edu", "gov", "io", "dev", "app", "co", "ai", "me", "info", "biz", "us", "uk", "de",
+        "fr", "jp", "ca", "au", "nl", "se", "no", "es", "it", "ch", "in", "br", "tv", "gg", "xyz", "news", "blog",
+    ]
+
     /// The URL in `text` when the text is a single web address, like `https://example.com/a`
     /// or `example.com/a`. Anything else, including `file:` and `javascript:` links, is `nil`.
     public static func webURL(from text: String) -> URL? {
@@ -26,6 +31,9 @@ public enum LinkURL {
         guard labels.count >= 2, let tld = labels.last, tld.count >= 2, tld.allSatisfy(\.isLetter),
               labels.allSatisfy({ !$0.isEmpty && $0.allSatisfy { $0.isLetter || $0.isNumber || $0 == "-" } })
         else { return nil }
+        // "readme.md" is a file name as often as a domain: without a scheme, ask for "www.",
+        // a path or a common top-level domain.
+        guard hostOnly.hasPrefix("www.") || lowered.contains("/") || commonTopLevelDomains.contains(String(tld)) else { return nil }
         return normalize(URL(string: "https://" + trimmed))
     }
 

@@ -15,6 +15,7 @@ struct LinkURLTests {
         #expect(LinkURL.webURL(from: "two words.com") == nil)
         #expect(LinkURL.webURL(from: "not a url") == nil)
         #expect(LinkURL.webURL(from: "readme.md") == nil)
+        #expect(LinkURL.webURL(from: "readme.md/raw")?.host == "readme.md")
         #expect(LinkURL.webURL(from: "") == nil)
     }
 
@@ -211,7 +212,7 @@ struct PreviewCacheTests {
             preview.imageSize = PixelSize(width: 10, height: 10)
             await cache.store(preview)
         }
-        await cache.prune(now: start)
+        await cache.prune()
         let remaining = try FileManager.default.contentsOfDirectory(atPath: directory.path).filter { $0.hasSuffix(".image") }
         #expect(remaining.count < 4)
         #expect(remaining.count >= 1)

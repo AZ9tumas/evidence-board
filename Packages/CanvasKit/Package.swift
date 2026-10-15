@@ -9,9 +9,10 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../BoardKit"),
+        .package(path: "../LinkPreviewKit"),
     ],
     targets: [
-        .target(name: "CanvasKit", dependencies: ["BoardKit"]),
+        .target(name: "CanvasKit", dependencies: ["BoardKit", "LinkPreviewKit"]),
         .testTarget(name: "CanvasKitTests", dependencies: ["CanvasKit"]),
     ]
 )
