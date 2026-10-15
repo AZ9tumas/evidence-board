@@ -16,7 +16,9 @@ public struct Asset: Sendable, Equatable, Codable {
         self.pixelWidth = pixelWidth
         self.pixelHeight = pixelHeight
         self.byteCount = data.count
-        self.base64 = data.base64EncodedString()
+        var base64 = data.base64EncodedString()
+        base64.makeContiguousUTF8()
+        self.base64 = base64
     }
 
     /// The raw bytes, or `nil` if the base64 is corrupt.

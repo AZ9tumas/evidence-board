@@ -9,7 +9,45 @@
 /* Begin PBXBuildFile section */
 		E0B0A0000000000000000030 /* BoardKit in Frameworks */ = {isa = PBXBuildFile; productRef = E0B0A0000000000000000040 /* BoardKit */; };
 		E0B0A0000000000000000031 /* CanvasKit in Frameworks */ = {isa = PBXBuildFile; productRef = E0B0A0000000000000000041 /* CanvasKit */; };
+		E0B0A0000000000000000090 /* BoardKit in Frameworks */ = {isa = PBXBuildFile; productRef = E0B0A000000000000000008C /* BoardKit */; };
+		E0B0A0000000000000000091 /* CanvasKit in Frameworks */ = {isa = PBXBuildFile; productRef = E0B0A000000000000000008D /* CanvasKit */; };
+		E0B0A0000000000000000092 /* BoardKit in Frameworks */ = {isa = PBXBuildFile; productRef = E0B0A000000000000000008E /* BoardKit */; };
+		E0B0A0000000000000000093 /* CanvasKit in Frameworks */ = {isa = PBXBuildFile; productRef = E0B0A000000000000000008F /* CanvasKit */; };
+		E0B0A0000000000000000095 /* EvidenceBoardThumbnail.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E0B0A0000000000000000080 /* EvidenceBoardThumbnail.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E0B0A0000000000000000096 /* EvidenceBoardPreview.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E0B0A0000000000000000081 /* EvidenceBoardPreview.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E0B0A0000000000000000099 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E0B0A0000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E0B0A0000000000000000084;
+			remoteInfo = EvidenceBoardThumbnail;
+		};
+		E0B0A000000000000000009A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E0B0A0000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E0B0A0000000000000000085;
+			remoteInfo = EvidenceBoardPreview;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E0B0A0000000000000000094 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E0B0A0000000000000000095 /* EvidenceBoardThumbnail.appex in Embed Foundation Extensions */,
+				E0B0A0000000000000000096 /* EvidenceBoardPreview.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		E0B0A0000000000000000010 /* EvidenceBoard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EvidenceBoard.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -18,12 +56,27 @@
 		E0B0A0000000000000000014 /* BoardKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = BoardKit; sourceTree = "<group>"; };
 		E0B0A0000000000000000015 /* CanvasKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = CanvasKit; sourceTree = "<group>"; };
 		E0B0A0000000000000000016 /* LinkPreviewKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = LinkPreviewKit; sourceTree = "<group>"; };
+		E0B0A0000000000000000080 /* EvidenceBoardThumbnail.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EvidenceBoardThumbnail.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E0B0A0000000000000000081 /* EvidenceBoardPreview.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EvidenceBoardPreview.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E0B0A00000000000000000A1 /* ThumbnailExtension.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ThumbnailExtension.plist; sourceTree = "<group>"; };
+		E0B0A00000000000000000A2 /* PreviewExtension.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PreviewExtension.plist; sourceTree = "<group>"; };
+		E0B0A00000000000000000A3 /* QuickLook.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuickLook.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		E0B0A0000000000000000011 /* EvidenceBoard */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = EvidenceBoard;
+			sourceTree = "<group>";
+		};
+		E0B0A0000000000000000082 /* Thumbnail */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Thumbnail;
+			sourceTree = "<group>";
+		};
+		E0B0A0000000000000000083 /* Preview */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Preview;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -38,6 +91,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E0B0A0000000000000000087 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E0B0A0000000000000000090 /* BoardKit in Frameworks */,
+				E0B0A0000000000000000091 /* CanvasKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E0B0A000000000000000008A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E0B0A0000000000000000092 /* BoardKit in Frameworks */,
+				E0B0A0000000000000000093 /* CanvasKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -45,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				E0B0A0000000000000000011 /* EvidenceBoard */,
+				E0B0A00000000000000000A4 /* QuickLook */,
 				E0B0A0000000000000000005 /* Packages */,
 				E0B0A0000000000000000004 /* Config */,
 				E0B0A0000000000000000003 /* Products */,
@@ -55,6 +127,8 @@
 			isa = PBXGroup;
 			children = (
 				E0B0A0000000000000000010 /* EvidenceBoard.app */,
+				E0B0A0000000000000000080 /* EvidenceBoardThumbnail.appex */,
+				E0B0A0000000000000000081 /* EvidenceBoardPreview.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -64,6 +138,9 @@
 			children = (
 				E0B0A0000000000000000012 /* Info.plist */,
 				E0B0A0000000000000000013 /* EvidenceBoard.entitlements */,
+				E0B0A00000000000000000A1 /* ThumbnailExtension.plist */,
+				E0B0A00000000000000000A2 /* PreviewExtension.plist */,
+				E0B0A00000000000000000A3 /* QuickLook.entitlements */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -78,6 +155,15 @@
 			path = Packages;
 			sourceTree = "<group>";
 		};
+		E0B0A00000000000000000A4 /* QuickLook */ = {
+			isa = PBXGroup;
+			children = (
+				E0B0A0000000000000000082 /* Thumbnail */,
+				E0B0A0000000000000000083 /* Preview */,
+			);
+			path = QuickLook;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -88,10 +174,13 @@
 				E0B0A0000000000000000021 /* Sources */,
 				E0B0A0000000000000000022 /* Frameworks */,
 				E0B0A0000000000000000023 /* Resources */,
+				E0B0A0000000000000000094 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E0B0A0000000000000000097 /* PBXTargetDependency */,
+				E0B0A0000000000000000098 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				E0B0A0000000000000000011 /* EvidenceBoard */,
@@ -105,6 +194,54 @@
 			productReference = E0B0A0000000000000000010 /* EvidenceBoard.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E0B0A0000000000000000084 /* EvidenceBoardThumbnail */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E0B0A000000000000000009B /* Build configuration list for PBXNativeTarget "EvidenceBoardThumbnail" */;
+			buildPhases = (
+				E0B0A0000000000000000086 /* Sources */,
+				E0B0A0000000000000000087 /* Frameworks */,
+				E0B0A0000000000000000088 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E0B0A0000000000000000082,
+			);
+			name = EvidenceBoardThumbnail;
+			packageProductDependencies = (
+				E0B0A000000000000000008C /* BoardKit */,
+				E0B0A000000000000000008D /* CanvasKit */,
+			);
+			productName = EvidenceBoardThumbnail;
+			productReference = E0B0A0000000000000000080 /* EvidenceBoardThumbnail.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		E0B0A0000000000000000085 /* EvidenceBoardPreview */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E0B0A000000000000000009C /* Build configuration list for PBXNativeTarget "EvidenceBoardPreview" */;
+			buildPhases = (
+				E0B0A0000000000000000089 /* Sources */,
+				E0B0A000000000000000008A /* Frameworks */,
+				E0B0A000000000000000008B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E0B0A0000000000000000083,
+			);
+			name = EvidenceBoardPreview;
+			packageProductDependencies = (
+				E0B0A000000000000000008E /* BoardKit */,
+				E0B0A000000000000000008F /* CanvasKit */,
+			);
+			productName = EvidenceBoardPreview;
+			productReference = E0B0A0000000000000000081 /* EvidenceBoardPreview.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -116,6 +253,12 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					E0B0A0000000000000000020 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					E0B0A0000000000000000084 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					E0B0A0000000000000000085 = {
 						CreatedOnToolsVersion = 16.0;
 					};
 				};
@@ -140,12 +283,28 @@
 			projectRoot = "";
 			targets = (
 				E0B0A0000000000000000020 /* EvidenceBoard */,
+				E0B0A0000000000000000084 /* EvidenceBoardThumbnail */,
+				E0B0A0000000000000000085 /* EvidenceBoardPreview */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		E0B0A0000000000000000023 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E0B0A0000000000000000088 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E0B0A000000000000000008B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -162,7 +321,34 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E0B0A0000000000000000086 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E0B0A0000000000000000089 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E0B0A0000000000000000097 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E0B0A0000000000000000084 /* EvidenceBoardThumbnail */;
+			targetProxy = E0B0A0000000000000000099 /* PBXContainerItemProxy */;
+		};
+		E0B0A0000000000000000098 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E0B0A0000000000000000085 /* EvidenceBoardPreview */;
+			targetProxy = E0B0A000000000000000009A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		E0B0A0000000000000000070 /* Debug */ = {
@@ -345,6 +531,114 @@
 			};
 			name = Release;
 		};
+		E0B0A000000000000000009D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/QuickLook.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Config/ThumbnailExtension.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Evidence Board Thumbnail";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.evidenceboard.app.thumbnail;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		E0B0A000000000000000009E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/QuickLook.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Config/ThumbnailExtension.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Evidence Board Thumbnail";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.evidenceboard.app.thumbnail;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		E0B0A000000000000000009F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/QuickLook.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Config/PreviewExtension.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Evidence Board Preview";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.evidenceboard.app.preview;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		E0B0A00000000000000000A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/QuickLook.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Config/PreviewExtension.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Evidence Board Preview";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.evidenceboard.app.preview;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -362,6 +656,24 @@
 			buildConfigurations = (
 				E0B0A0000000000000000072 /* Debug */,
 				E0B0A0000000000000000073 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E0B0A000000000000000009B /* Build configuration list for PBXNativeTarget "EvidenceBoardThumbnail" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E0B0A000000000000000009D /* Debug */,
+				E0B0A000000000000000009E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E0B0A000000000000000009C /* Build configuration list for PBXNativeTarget "EvidenceBoardPreview" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E0B0A000000000000000009F /* Debug */,
+				E0B0A00000000000000000A0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -389,6 +701,22 @@
 			productName = BoardKit;
 		};
 		E0B0A0000000000000000041 /* CanvasKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CanvasKit;
+		};
+		E0B0A000000000000000008C /* BoardKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = BoardKit;
+		};
+		E0B0A000000000000000008D /* CanvasKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CanvasKit;
+		};
+		E0B0A000000000000000008E /* BoardKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = BoardKit;
+		};
+		E0B0A000000000000000008F /* CanvasKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CanvasKit;
 		};

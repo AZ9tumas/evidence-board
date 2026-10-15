@@ -1,5 +1,5 @@
 # Launches the app on a macOS runner in a few states (empty board, sample board, selection,
-# editing, 500 extra cards, photos, reframing, connecting, Trace, Focus, web cards, themes, search, minimap) and publishes screenshots as neutral
+# editing, 500 extra cards, photos, reframing, connecting, Trace, Focus, web cards, themes, search, minimap, Quick Look) and publishes screenshots as neutral
 # check runs ("snapshot img<n> part<i>/<total>", base64 JPEG in the output text), so
 # the canvas can be checked visually without a Mac. Runs on demand, or on pushes whose
 # commit message contains [snapshot]. Fetch them with Tools/fetch-snapshots.py.
@@ -70,6 +70,19 @@ jobs:
           capture /tmp/Empty.evboard webcork
           capture /tmp/Harbor.evboard search
           capture /tmp/Harbor.evboard minimap
+          capture /tmp/Harbor.evboard renderer
+          # Quick Look: register the extensions and ask Finder's machinery for a thumbnail. The
+          # build is unsigned, so the system may refuse them; then there's no extra shot.
+          pluginkit -a "$app/Contents/PlugIns/EvidenceBoardThumbnail.appex" || true
+          pluginkit -a "$app/Contents/PlugIns/EvidenceBoardPreview.appex" || true
+          pluginkit -m -v -p com.apple.quicklook.thumbnail 2>&1 | grep -i evidence || echo "thumbnail extension not registered"
+          mkdir -p /tmp/ql
+          qlmanage -t -s 900 -o /tmp/ql /tmp/Harbor.evboard 2>&1 | tail -n 3 || true
+          if [ -f /tmp/ql/Harbor.evboard.png ]; then
+            shot=$((shot + 1))
+            sips -Z 900 -s format jpeg -s formatOptions 70 /tmp/ql/Harbor.evboard.png --out "/tmp/shot$shot.jpg" >/dev/null
+            echo "shot $shot: Quick Look thumbnail"
+          fi
           echo "$shot" > /tmp/shot-count
       - name: Publish images
         env:

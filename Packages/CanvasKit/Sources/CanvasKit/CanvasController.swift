@@ -211,6 +211,12 @@ public final class CanvasController {
         view.continueConnecting(to: CGPoint(x: card.frame.midX - 30, y: card.frame.y + 40))
     }
 
+    /// The board as Finder's thumbnails and Quick Look draw it.
+    public func debugRenderBoard(maxSize: CGSize) -> CGImage? {
+        guard let view else { return nil }
+        return BoardRenderer.image(of: store.board, appearance: view.canvasAppearance, maxSize: maxSize, scale: 2)
+    }
+
     /// Centers the view on the cards at `indices` (file order) at `zoom`.
     public func debugLookAtCards(at indices: [Int], zoom: CGFloat) {
         guard let view else { return }

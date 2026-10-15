@@ -178,3 +178,52 @@ struct AccessibilityTests {
         #expect(store.board.strings.contains { $0.from == cards[1].id && $0.to == cards[2].id })
     }
 }
+
+/// The picture Finder thumbnails and Quick Look previews are made from.
+@MainActor
+@Suite("Board renderer")
+struct BoardRendererTests {
+    static let sampleURL = URL(filePath: #filePath)
+        .deletingLastPathComponent() // CanvasKitTests
+        .deletingLastPathComponent() // Tests
+        .deletingLastPathComponent() // CanvasKit
+        .deletingLastPathComponent() // Packages
+        .deletingLastPathComponent() // repository
+        .appending(path: "docs/examples/harbor-case.evboard")
+
+    /// How many distinct colors a coarse sample of the picture has.
+    static func colorCount(_ image: CGImage) -> Int {
+        let side = 64
+        var pixels = [UInt8](repeating: 0, count: side * side * 4)
+        guard let context = CGContext(
+            data: &pixels, width: side, height: side, bitsPerComponent: 8, bytesPerRow: side * 4,
+            space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else { return 0 }
+        context.draw(image, in: CGRect(x: 0, y: 0, width: side, height: side))
+        var colors = Set<UInt32>()
+        for index in stride(from: 0, to: pixels.count, by: 4) {
+            colors.insert(UInt32(pixels[index] >> 4) << 8 | UInt32(pixels[index + 1] >> 4) << 4 | UInt32(pixels[index + 2] >> 4))
+        }
+        return colors.count
+    }
+
+    @Test(arguments: ["noir", "cork", "blueprint", "daylight"])
+    func drawsTheSampleBoard(_ theme: String) throws {
+        let board = try BoardCodec.decode(Data(contentsOf: Self.sampleURL)).board
+        let appearance = CanvasAppearance.forTheme(ThemeID(rawValue: theme) ?? .noir, dark: true)
+        let image = try #require(BoardRenderer.image(of: board, appearance: appearance, maxSize: CGSize(width: 512, height: 512), scale: 2))
+        #expect(max(image.width, image.height) == 1024)
+        // Cards, photos, strings and text, not just the background.
+        #expect(Self.colorCount(image) > 40)
+        let png = try #require(BoardRenderer.pngData(of: board, appearance: appearance, maxSize: CGSize(width: 256, height: 256), scale: 1))
+        #expect(png.starts(with: [0x89, 0x50, 0x4E, 0x47]))
+    }
+
+    @Test func tinyThumbnailsAndEmptyBoardsStillDraw() throws {
+        let board = try BoardCodec.decode(Data(contentsOf: Self.sampleURL)).board
+        let tiny = try #require(BoardRenderer.image(of: board, appearance: .noir, maxSize: CGSize(width: 32, height: 32), scale: 1))
+        #expect(max(tiny.width, tiny.height) == 32)
+        let empty = try #require(BoardRenderer.image(of: Board.new(), appearance: .daylight, maxSize: CGSize(width: 400, height: 300), scale: 2))
+        #expect(empty.width == 800 && empty.height == 600)
+    }
+}

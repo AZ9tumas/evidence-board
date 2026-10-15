@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import BoardKit
 import CanvasKit
@@ -188,6 +189,8 @@ private struct NoticeBanner: View {
 /// `EB_SNAPSHOT_SCENARIO` environment variable. Debug builds only.
 @MainActor
 private enum SnapshotScenario {
+    static var keep: NSWindow?
+
     static func run(on canvas: CanvasController) async {
         guard let scenario = ProcessInfo.processInfo.environment["EB_SNAPSHOT_SCENARIO"] else { return }
         try? await Task.sleep(for: .seconds(1))
@@ -230,6 +233,19 @@ private enum SnapshotScenario {
             canvas.addTestWebCards()
             try? await Task.sleep(for: .seconds(2))
             canvas.debugLookAtCards(at: [0, 1], zoom: 1.5)
+        case "renderer":
+            // What the Quick Look extensions draw, in a window over the board.
+            guard let image = canvas.debugRenderBoard(maxSize: CGSize(width: 760, height: 520)) else { break }
+            let size = CGSize(width: image.width / 2, height: image.height / 2)
+            let panel = NSPanel(contentRect: CGRect(origin: .zero, size: size), styleMask: [.titled, .utilityWindow], backing: .buffered, defer: false)
+            panel.title = "Quick Look rendering"
+            let imageView = NSImageView(image: NSImage(cgImage: image, size: size))
+            imageView.frame = CGRect(origin: .zero, size: size)
+            panel.contentView = imageView
+            panel.center()
+            panel.isReleasedWhenClosed = false
+            panel.orderFrontRegardless()
+            SnapshotScenario.keep = panel
         case "search":
             canvas.beginSearch()
             canvas.searchQuery = "night"

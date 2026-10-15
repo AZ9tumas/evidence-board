@@ -56,7 +56,11 @@ public enum BoardCodec {
         let token = "@@evboard-asset-\(UUID().uuidString)-"
         var payloads: [String] = []
         for id in board.assets.keys.sorted() {
-            guard let base64 = board.assets[id]?.base64, base64.utf8.count >= 4096, isPlainBase64(base64) else { continue }
+            guard var base64 = board.assets[id]?.base64 else { continue }
+            // Foundation may hand back bridged strings; native UTF-8 makes the checks and copies
+            // below memory-speed.
+            base64.makeContiguousUTF8()
+            guard base64.utf8.count >= 4096, isPlainBase64(base64) else { continue }
             board.assets[id]?.base64 = token + String(payloads.count) + "@@"
             payloads.append(base64)
         }
