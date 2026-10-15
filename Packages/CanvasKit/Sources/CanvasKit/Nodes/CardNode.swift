@@ -257,6 +257,8 @@ final class CardNode {
     /// and the whole image faded around the card. `nil` ends reframing.
     func setFraming(_ crop: CGRect?) {
         framingCrop = crop
+        // Above every other card, so the faded rest of the image isn't hidden under them.
+        root.zPosition = crop == nil && !isLifted ? CGFloat(card.z) : 1_000_000
         applyImage()
     }
 

@@ -6,7 +6,7 @@ A native macOS app for building detective-style evidence boards. You place **tex
 - 🧾 **File format schema:** [`docs/schema/evidenceboard.schema.json`](docs/schema/evidenceboard.schema.json)
 - 🗂 **Sample board:** [`docs/examples/harbor-case.evboard`](docs/examples/harbor-case.evboard)
 
-![The sample board in the M1 build, with the note card selected](docs/images/m1-harbor.jpg)
+![The sample board in the M2 build: text cards, a polaroid with its caption, and string](docs/images/m2-harbor.jpg)
 
 ## Highlights
 
