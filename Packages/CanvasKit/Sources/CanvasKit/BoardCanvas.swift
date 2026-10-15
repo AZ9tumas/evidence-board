@@ -1,5 +1,11 @@
 import SwiftUI
 
+/// Steps of the app's launch inside the canvas, for the launch budget (DESIGN.md §11). The
+/// app points this at its launch timer; nil otherwise.
+public enum CanvasLaunchMarks {
+    nonisolated(unsafe) public static var mark: (@Sendable (String) -> Void)?
+}
+
 /// Hosts the board canvas in SwiftUI.
 public struct BoardCanvas: NSViewRepresentable {
     private let controller: CanvasController
@@ -11,8 +17,10 @@ public struct BoardCanvas: NSViewRepresentable {
     }
 
     public func makeNSView(context: Context) -> BoardCanvasHostView {
+        CanvasLaunchMarks.mark?("canvas: making view")
         let canvas = BoardCanvasView(store: controller.store, appearance: appearance)
         controller.attach(canvas)
+        CanvasLaunchMarks.mark?("canvas: view made")
         return BoardCanvasHostView(canvas: canvas)
     }
 

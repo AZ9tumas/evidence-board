@@ -12,11 +12,16 @@ enum LaunchTiming {
     nonisolated(unsafe) private static var marks: [(String, Double)] = []
     nonisolated(unsafe) private static var recorded = false
 
-    /// Notes that the launch got to `step`. Safe from any thread.
+    static var isTiming: Bool { path != nil }
+
+    /// Notes that the launch got to `step`, the first time it does. Safe from any thread.
     static func mark(_ step: String) {
         guard path != nil, let start = processStart else { return }
         let milliseconds = Date().timeIntervalSince(start) * 1000
-        lock.withLock { marks.append((step, milliseconds)) }
+        lock.withLock {
+            guard !marks.contains(where: { $0.0 == step }) else { return }
+            marks.append((step, milliseconds))
+        }
     }
 
     @MainActor
@@ -30,7 +35,7 @@ enum LaunchTiming {
         // The frame is committed at the end of this pass through the run loop.
         DispatchQueue.main.async {
             let milliseconds = Date().timeIntervalSince(start) * 1000
-            let steps = lock.withLock { marks }.map { String(format: "%@: %.0f ms", $0.0, $0.1) }
+            let steps = lock.withLock { marks }.sorted { $0.1 < $1.1 }.map { String(format: "%@: %.0f ms", $0.0, $0.1) }
             let text = ([String(format: "%.0f", milliseconds)] + steps + [String(format: "first frame: %.0f ms", milliseconds)])
                 .joined(separator: "\n")
             try? (text + "\n").write(toFile: path, atomically: true, encoding: .utf8)

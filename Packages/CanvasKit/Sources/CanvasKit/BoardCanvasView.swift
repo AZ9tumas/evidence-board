@@ -214,11 +214,18 @@ public final class BoardCanvasView: NSView {
     public override func layout() {
         super.layout()
         layoutLayers()
+        if !hasLaidOut {
+            hasLaidOut = true
+            CanvasLaunchMarks.mark?("canvas: first layout")
+        }
     }
+
+    private var hasLaidOut = false
 
     public override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         guard window != nil else { return }
+        CanvasLaunchMarks.mark?("canvas: in window")
         updateContentsScale()
         Task { @MainActor [weak self] in
             guard let self, let window = self.window, window.firstResponder === window else { return }

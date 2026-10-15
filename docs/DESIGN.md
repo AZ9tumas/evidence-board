@@ -859,7 +859,7 @@ Other rules:
 ### 10.6 Culling and hit testing
 
 - **SpatialGrid**: a uniform grid (512 pt cells) over each card's *rotated* bounding box, updated on every change. It's simpler than an R-tree and just as fast at these sizes. Huge cards go in an overflow list, and very large queries scan occupied cells instead of empty ones.
-- **Visible set** = query(viewport rect expanded by 25%). Only visible cards get content bitmaps. Card chrome layers exist for every card: Core Animation skips off-screen layers when compositing, and 500 cards of chrome is cheap. Layer pooling was kept in reserve for M6; the M6 budgets (§11) pass without it, so it isn't built. Mid-gesture, only cards that just came into view join the render queue, which draws for 1.5 ms of a moving frame (5 ms at rest) and is re-sorted, nearest first, once the camera settles.
+- **Visible set** = query(viewport rect expanded by 25%). Only visible cards get content bitmaps. Card chrome layers exist for every card: Core Animation skips off-screen layers when compositing, and 500 cards of chrome is cheap. Layer pooling was kept in reserve for M6; the M6 budgets (§11) pass without it, so it isn't built. Mid-gesture, only cards that just came into view join the render queue, which is re-sorted, nearest first, once the camera settles. Text bitmaps are drawn on background threads (up to 4 at once, two cores left free): the main thread only describes a bitmap (a value: text, size, scale, theme) and puts finished ones on their cards, for at most 1 ms of a moving frame (4 ms at rest). Each card node has a bitmap version, so one drawn for a card that has since changed, scrolled away or been rebuilt for a new theme is thrown away. Typing and live resizing still draw on the main thread, right away.
 - Strings are visible if their Bézier bounding box intersects the viewport.
 - **Hit testing**: grid point query, then exact test in card-local (unrotated) space, topmost by `z`. For strings: a coarse bounding-box check, then distance to a pre-flattened polyline (16 segments), within 6 pt screen distance.
 
@@ -948,7 +948,7 @@ Instruments templates are checked into `Tools/Instruments/` (Time Profiler, Core
 | Work scheduled at rest (display links, physics, pulses, fetches) | none | none |
 | Launch to first board frame (Debug build, snapshot workflow) | < 400 ms | see the snapshot run summary |
 
-Dragging is the tightest: re-routing 200 strings every frame. It's the first place to look if a real Mac drops frames.
+Two changes got these numbers: strings re-route geometry-only while cards are dragged (their shadow, a stroked copy of the curve, comes back when the drag ends; drag went from 7–10 ms to about 2 ms), and text bitmaps moved off the main thread (§10.6; pan and zoom frames were up to 3.8 ms, mostly one bitmap being drawn).
 
 The link-preview budget needs the network and isn't measured in CI. Saving got its speed from writing image data straight into the JSON (it's plain base64, so it needs no escaping) instead of passing megabytes of text through the encoder.
 
