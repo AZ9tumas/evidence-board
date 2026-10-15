@@ -8,6 +8,8 @@ struct BoardWindow: View {
     @State private var canvas: CanvasController
     @State private var showsLoadBanner = true
     @AppStorage("alwaysShowMinimap") private var alwaysShowMinimap = false
+    @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     private let system = SystemAppearance.shared
 
     init(store: BoardStore) {
@@ -18,7 +20,10 @@ struct BoardWindow: View {
     private var theme: Theme { Theme.resolve(canvas.theme, systemIsDark: system.isDark) }
 
     var body: some View {
-        BoardCanvas(controller: canvas, appearance: theme.canvas)
+        BoardCanvas(
+            controller: canvas,
+            appearance: theme.canvas.adjusted(increaseContrast: contrast == .increased, reduceTransparency: reduceTransparency)
+        )
             .ignoresSafeArea()
             .overlay {
                 if canvas.isBoardEmpty {

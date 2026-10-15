@@ -109,6 +109,8 @@ public struct CanvasAppearance: Sendable, Hashable {
     public var shadow: RGBA
     /// The theme's own string color, for strings left at the default (Evidence Red).
     public var string: GradientPair?
+    /// Points added to every string's thickness (Increase Contrast).
+    public var stringBoost: Double = 0
 
     public init(
         background: GradientPair,
@@ -154,6 +156,23 @@ public struct CanvasAppearance: Sendable, Hashable {
         self.texture = texture
         self.shadow = shadow
         self.string = string
+    }
+
+    /// This appearance with the system's accessibility display settings applied
+    /// (DESIGN.md §14): Increase Contrast draws card edges at 40% and strings a point
+    /// thicker; Reduce Transparency makes glass cards, paper and labels opaque.
+    public func adjusted(increaseContrast: Bool, reduceTransparency: Bool) -> CanvasAppearance {
+        var adjusted = self
+        if increaseContrast {
+            adjusted.cardStroke = GradientPair(cardStroke.from.opacity(0.4), cardStroke.to.opacity(0.4))
+            adjusted.stringBoost = 1
+        }
+        if increaseContrast || reduceTransparency {
+            adjusted.cardFill = GradientPair(cardFill.from.opacity(1), cardFill.to.opacity(1))
+            adjusted.paperFill = GradientPair(paperFill.from.opacity(1), paperFill.to.opacity(1))
+            adjusted.labelFill = GradientPair(labelFill.from.opacity(1), labelFill.to.opacity(1))
+        }
+        return adjusted
     }
 
     /// Light cards on a light board (Daylight) or paper cards (Cork).

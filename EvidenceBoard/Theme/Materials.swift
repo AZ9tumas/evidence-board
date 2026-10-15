@@ -16,8 +16,21 @@ extension View {
 private struct GlassBackground<S: InsettableShape>: ViewModifier {
     let shape: S
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     func body(content: Content) -> some View {
+        if reduceTransparency {
+            // Reduce Transparency: solid panels with a clear edge (DESIGN.md §14).
+            content
+                .background(Color(nsColor: .windowBackgroundColor), in: shape)
+                .overlay { shape.strokeBorder(Color.primary.opacity(0.25), lineWidth: 1) }
+        } else {
+            glass(content)
+        }
+    }
+
+    @ViewBuilder
+    private func glass(_ content: Content) -> some View {
         #if compiler(>=6.2)
         if #available(macOS 26.0, *) {
             content.glassEffect(.regular, in: shape)

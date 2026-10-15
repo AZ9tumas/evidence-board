@@ -76,9 +76,15 @@ public enum BoardCodec {
         return board
     }
 
-    private static let base64Alphabet: [Bool] = (0...255).map { byte in
-        (65...90).contains(byte) || (97...122).contains(byte) || (48...57).contains(byte) || byte == 43 || byte == 47 || byte == 61
-    }
+    private static let base64Alphabet: [Bool] = {
+        var table = [Bool](repeating: false, count: 256)
+        let ranges: [ClosedRange<UInt8>] = [UInt8(ascii: "A")...UInt8(ascii: "Z"), UInt8(ascii: "a")...UInt8(ascii: "z"), UInt8(ascii: "0")...UInt8(ascii: "9")]
+        for range in ranges {
+            for byte in range { table[Int(byte)] = true }
+        }
+        for byte in [UInt8(ascii: "+"), UInt8(ascii: "/"), UInt8(ascii: "=")] { table[Int(byte)] = true }
+        return table
+    }()
 
     /// Only base64 characters, so it can go into JSON as is.
     static func isPlainBase64(_ text: String) -> Bool {

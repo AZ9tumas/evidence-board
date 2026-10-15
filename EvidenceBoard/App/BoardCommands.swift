@@ -88,7 +88,7 @@ struct BoardCommands: Commands {
         CommandMenu("Strings") {
             Button("Connect Selected Cards") { canvas?.connectSelection() }
                 .keyboardShortcut("k", modifiers: .command)
-                .disabled(!(canvas?.hasCardPair ?? false))
+                .disabled(!(canvas?.canConnectSelection ?? false))
             Button(canvas?.tool == .connect ? "Stop Connecting (C)" : "Connect Tool (C)") { canvas?.toggleConnectTool() }
                 .disabled(canvas == nil)
             Divider()

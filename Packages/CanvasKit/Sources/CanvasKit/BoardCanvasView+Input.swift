@@ -38,6 +38,7 @@ extension BoardCanvasView {
         guard ids != selection || strings != selectedStrings else { return }
         selection = ids
         selectedStrings = strings
+        noteFocus(ids)
         selectionDidChange()
     }
 
@@ -49,7 +50,8 @@ extension BoardCanvasView {
         }
         controller?.selectionDidChange(
             count: selection.count, strings: selectedStrings.count,
-            links: selection.filter { store.card($0)?.kind == .web }.count
+            links: selection.filter { store.card($0)?.kind == .web }.count,
+            canConnect: selection.count == 2 || previouslyFocusedCard != nil
         )
     }
 
@@ -460,6 +462,12 @@ extension BoardCanvasView {
             }
         case 53: // escape
             escape()
+        case 48: // tab: the next card in reading order
+            focusNextCard(modifiers.contains(.shift) ? -1 : 1)
+        case 123 where modifiers == .option: focusCard(toward: CGVector(dx: -1, dy: 0))
+        case 124 where modifiers == .option: focusCard(toward: CGVector(dx: 1, dy: 0))
+        case 125 where modifiers == .option: focusCard(toward: CGVector(dx: 0, dy: 1))
+        case 126 where modifiers == .option: focusCard(toward: CGVector(dx: 0, dy: -1))
         case 123: nudgeSelection(dx: -step, dy: 0)
         case 124: nudgeSelection(dx: step, dy: 0)
         case 125: nudgeSelection(dx: 0, dy: step)

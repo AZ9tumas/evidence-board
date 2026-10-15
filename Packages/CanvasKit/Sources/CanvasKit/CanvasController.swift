@@ -62,8 +62,10 @@ public final class CanvasController {
     }
 
     public var hasSelection: Bool { selectionCount > 0 }
-    /// ⌘K and ⌘T work on exactly two cards.
+    /// ⌘T works on exactly two cards.
     public var hasCardPair: Bool { selectionCount == 2 }
+    /// ⌘K ties two selected cards, or one selected card to the card focused before it.
+    public private(set) var canConnectSelection = false
     public var hasLinkSelection: Bool { linkSelectionCount > 0 }
 
     // MARK: Commands
@@ -247,7 +249,8 @@ public final class CanvasController {
         if isEmpty != isBoardEmpty { isBoardEmpty = isEmpty }
     }
 
-    func selectionDidChange(count: Int, strings: Int, links: Int) {
+    func selectionDidChange(count: Int, strings: Int, links: Int, canConnect: Bool) {
+        if canConnect != canConnectSelection { canConnectSelection = canConnect }
         if count != selectionCount { selectionCount = count }
         if strings != stringSelectionCount { stringSelectionCount = strings }
         if links != linkSelectionCount { linkSelectionCount = links }

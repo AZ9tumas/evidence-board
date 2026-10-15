@@ -157,7 +157,7 @@ final class StringNode {
 
     private func applyGeometry() {
         let path = curve.path
-        let width = CGFloat(string.thickness)
+        let width = CGFloat(string.thickness + appearance.stringBoost)
         let box = curve.bounds.insetBy(dx: -(width * 2 + 12), dy: -(width * 2 + 12))
         for shape in [halo, thread, gradientMask, fibers] { shape.path = path }
         // Shape layers get real bounds whose origin is the box's, so their paths stay in world
@@ -246,7 +246,7 @@ final class StringNode {
     }
 
     private func applyStyle() {
-        let width = CGFloat(string.thickness)
+        let width = CGFloat(string.thickness + appearance.stringBoost)
         let colors = appearance.gradient(for: string.color)
         let dimmed = emphasis == .dimmed
         let full = detail == .full && !dimmed

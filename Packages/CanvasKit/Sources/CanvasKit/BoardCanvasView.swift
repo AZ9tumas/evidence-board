@@ -84,6 +84,9 @@ public final class BoardCanvasView: NSView {
     var droopSprings: [UUID: Spring] = [:]
     let physics = FrameTicker()
     var labelEditor: StringLabelEditor?
+    /// VoiceOver's elements for cards and strings, and the cards focused most recently.
+    let accessibilityCache = AccessibilityCache()
+    var focusHistory: [UUID] = []
     /// Web cards whose previews are being fetched.
     var previewTasks: [UUID: Task<Void, Never>] = [:]
     /// Space was pressed and nothing else happened yet: on release it peeks a web card.
@@ -434,6 +437,7 @@ public final class BoardCanvasView: NSView {
 
     func storeDidChange(_ changes: BoardChanges) {
         if changes.themeChanged { controller?.themeDidChange(store.board.theme) }
+        defer { accessibilityBoardDidChange(changes) }
         withoutAnimation {
             for id in changes.removedStrings { removeStringNode(id, animated: true) }
             for id in changes.removedCards { removeCardNode(id) }

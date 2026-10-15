@@ -237,6 +237,11 @@ extension BoardCanvasView {
 
     /// ⌘K: ties the two selected cards together, older card first.
     func connectSelection() {
+        // With one card selected, ⌘K ties it to the card focused before it (DESIGN.md §14).
+        if selection.count == 1, let current = selection.first, let previous = previouslyFocusedCard {
+            connect(previous, to: current)
+            return
+        }
         let cards = store.board.cards.filter { selection.contains($0.id) }
         guard cards.count == 2 else {
             NSSound.beep()
