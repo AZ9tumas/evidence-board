@@ -5,8 +5,13 @@ import QuartzCore
 /// newly visible cards never causes a dropped frame.
 @MainActor
 final class RenderQueue: NSObject {
-    /// Main-thread time per frame spent drawing bitmaps.
-    private static let budget: CFTimeInterval = 0.005
+    /// Main-thread time per frame spent drawing bitmaps: less while the camera moves, so a
+    /// pan or zoom frame stays within its 4 ms budget (DESIGN.md §11).
+    static let budget: CFTimeInterval = 0.005
+    static let movingBudget: CFTimeInterval = 0.0025
+
+    /// Whether the camera is moving right now.
+    var isMoving: () -> Bool = { false }
 
     private weak var view: NSView?
     private var pending: [UUID] = []
@@ -38,7 +43,12 @@ final class RenderQueue: NSObject {
     }
 
     @objc private func step(_ link: CADisplayLink) {
-        let deadline = CACurrentMediaTime() + Self.budget
+        runSlice()
+    }
+
+    /// Draws for one frame's slice of time.
+    func runSlice() {
+        let deadline = CACurrentMediaTime() + (isMoving() ? Self.movingBudget : Self.budget)
         var index = 0
         while index < pending.count, CACurrentMediaTime() < deadline {
             render(pending[index])

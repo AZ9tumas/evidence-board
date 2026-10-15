@@ -22,6 +22,44 @@ jobs:
       - name: Test LinkPreviewKit
         if: ${{ !cancelled() }}
         run: swift test --package-path Packages/LinkPreviewKit
+      - name: Codec budgets (release)
+        if: ${{ !cancelled() }}
+        run: |
+          EB_PERF=1 swift test -c release -Xswiftc -enable-testing --package-path Packages/BoardKit \
+            --filter CodecPerformanceTests 2>&1 | tee codec-perf.log
+          exit ${PIPESTATUS[0]}
+        shell: bash
+
+  budgets:
+    name: Performance budgets (macOS)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - name: Codec budgets (release)
+        run: |
+          EB_PERF=1 swift test -c release -Xswiftc -enable-testing --package-path Packages/BoardKit \
+            --filter CodecPerformanceTests 2>&1 | tee codec-perf.log
+          exit ${PIPESTATUS[0]}
+      - name: Canvas budgets (release)
+        if: ${{ !cancelled() }}
+        run: |
+          EB_PERF=1 swift test -c release -Xswiftc -enable-testing --package-path Packages/CanvasKit \
+            --filter PerformanceTests 2>&1 | tee canvas-perf.log
+          exit ${PIPESTATUS[0]}
+      - name: Budget table
+        if: ${{ !cancelled() }}
+        run: |
+          {
+            echo "### Performance budgets (DESIGN.md §11)"
+            echo "| Budget | Measured | Target | Result |"
+            echo "|---|---|---|---|"
+            grep -h '^BUDGET|' codec-perf.log canvas-perf.log | cut -d'|' -f2- | sed 's/^/| /; s/$/ |/'
+            echo
+            grep -h '^BUDGET-INFO|' codec-perf.log canvas-perf.log | cut -d'|' -f2- | sed 's/|/: /; s/^/- /'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
   macos:
     name: App (macOS)

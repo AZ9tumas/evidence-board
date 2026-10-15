@@ -60,7 +60,16 @@ public final class BoardCanvasView: NSView {
     var renderTier: CGFloat
     var tierSettleTask: Task<Void, Never>?
     var visibleIDs: Set<UUID> = []
-    lazy var renderQueue = RenderQueue(view: self) { [weak self] id in self?.renderText(of: id) }
+    lazy var renderQueue: RenderQueue = {
+        let queue = RenderQueue(view: self) { [weak self] id in self?.renderText(of: id) }
+        queue.isMoving = { [weak self] in
+            guard let self else { return false }
+            return CACurrentMediaTime() - self.lastCameraMove < 0.2
+        }
+        return queue
+    }()
+    /// When the camera last moved, so drawing yields to panning and zooming.
+    var lastCameraMove: CFTimeInterval = 0
     let imageStore = ImageStore()
     var captionEditor: CaptionEditor?
     /// The photo being reframed, if any.
@@ -631,6 +640,7 @@ public final class BoardCanvasView: NSView {
     func applyCamera() {
         let size = bounds.size
         guard size.width > 0, size.height > 0 else { return }
+        lastCameraMove = CACurrentMediaTime()
         withoutAnimation {
             worldLayer.sublayerTransform = CATransform3DMakeAffineTransform(camera.transform(in: size))
             switch canvasAppearance.texture {
