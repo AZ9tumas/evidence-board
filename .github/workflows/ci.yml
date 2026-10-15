@@ -19,6 +19,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test BoardKit
         run: swift test --package-path Packages/BoardKit
+      - name: Test LinkPreviewKit
+        if: ${{ !cancelled() }}
+        run: swift test --package-path Packages/LinkPreviewKit
 
   macos:
     name: App (macOS)
@@ -32,6 +35,9 @@ jobs:
         run: xcodebuild -version && swift --version
       - name: Test BoardKit
         run: swift test --package-path Packages/BoardKit
+      - name: Test LinkPreviewKit
+        if: ${{ !cancelled() }}
+        run: swift test --package-path Packages/LinkPreviewKit
       - name: Test CanvasKit
         if: ${{ !cancelled() }}
         run: swift test --package-path Packages/CanvasKit
