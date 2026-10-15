@@ -107,7 +107,11 @@ extension BoardCanvasView {
         }
 
         // Pull a string out of a pin, or out of any card with the Connect tool.
-        if !additive, let source = tool == .connect ? (pinCard(at: point) ?? card(at: point)) : pinCard(at: point) {
+        var source = pinCard(at: point)
+        if source == nil, tool == .connect {
+            source = card(at: point)
+        }
+        if !additive, let source {
             beginConnecting(from: source)
             return
         }

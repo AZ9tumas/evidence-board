@@ -409,11 +409,14 @@ extension BoardCanvasView {
     }
 
     func updateModeStatus() {
-        let status = highlightStatus ?? (tool == .connect ? CanvasModeStatus(
-            symbol: "point.topleft.down.to.point.bottomright.curvepath",
-            title: "Connect",
-            hint: "Drag from one card to another · V or Esc to finish"
-        ) : nil)
+        var status = highlightStatus
+        if status == nil, tool == .connect {
+            status = CanvasModeStatus(
+                symbol: "point.topleft.down.to.point.bottomright.curvepath",
+                title: "Connect",
+                hint: "Drag from one card to another · V or Esc to finish"
+            )
+        }
         controller?.modeDidChange(status)
     }
 
