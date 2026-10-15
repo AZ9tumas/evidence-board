@@ -247,11 +247,11 @@ enum LinkURLText {
 }
 
 /// A card for VoiceOver. Its methods are called on the main thread.
-final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityCustomRotorItemSearchDelegate, @unchecked Sendable {
+@MainActor
+final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityCustomRotorItemSearchDelegate {
     let cardID: UUID
     private weak var canvas: BoardCanvasView?
 
-    @MainActor
     init(cardID: UUID, canvas: BoardCanvasView) {
         self.cardID = cardID
         self.canvas = canvas
@@ -260,14 +260,14 @@ final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityCus
         setAccessibilityParent(canvas)
     }
 
-    override func accessibilityLabel() -> String? {
+    nonisolated override func accessibilityLabel() -> String? {
         onMain { [self] in
             guard let canvas, let card = canvas.liveCard(cardID) else { return nil }
             return canvas.spokenLabel(of: card)
         }
     }
 
-    override func accessibilityRoleDescription() -> String? {
+    nonisolated override func accessibilityRoleDescription() -> String? {
         onMain { [self] in
             switch canvas?.liveCard(cardID)?.content {
             case .text: "text card"
@@ -278,25 +278,25 @@ final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityCus
         }
     }
 
-    override func accessibilityFrame() -> NSRect {
+    nonisolated override func accessibilityFrame() -> NSRect {
         onMain { [self] in
             guard let canvas, let card = canvas.liveCard(cardID) else { return .zero }
             return canvas.screenRect(ofWorld: CanvasGeometry.boundingBox(of: card))
         }
     }
 
-    override func isAccessibilitySelected() -> Bool {
+    nonisolated override func isAccessibilitySelected() -> Bool {
         onMain { [self] in canvas?.selection.contains(cardID) ?? false }
     }
 
-    override func accessibilityPerformPress() -> Bool {
+    nonisolated override func accessibilityPerformPress() -> Bool {
         onMain { [self] in
             canvas?.focusCard(cardID)
             return canvas != nil
         }
     }
 
-    override func setAccessibilityFocused(_ focused: Bool) {
+    nonisolated override func setAccessibilityFocused(_ focused: Bool) {
         super.setAccessibilityFocused(focused)
         guard focused else { return }
         onMain { [self] in
@@ -304,11 +304,10 @@ final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityCus
         }
     }
 
-    override func accessibilityCustomActions() -> [NSAccessibilityCustomAction]? {
+    nonisolated override func accessibilityCustomActions() -> [NSAccessibilityCustomAction]? {
         onMain { [self] in customActions() }
     }
 
-    @MainActor
     private func customActions() -> [NSAccessibilityCustomAction]? {
         guard let canvas, let card = canvas.liveCard(cardID) else { return nil }
         let id = cardID
@@ -341,12 +340,12 @@ final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityCus
 
     // MARK: Connections rotor
 
-    override func accessibilityCustomRotors() -> [NSAccessibilityCustomRotor] {
+    nonisolated override func accessibilityCustomRotors() -> [NSAccessibilityCustomRotor] {
         [NSAccessibilityCustomRotor(label: "Connections", itemSearchDelegate: self)]
     }
 
     /// The strings tied to this card, in file order.
-    var connections: [StringAccessibilityElement] {
+    nonisolated var connections: [StringAccessibilityElement] {
         onMain { [self] in
             guard let canvas else { return [] }
             return canvas.store.board.strings
@@ -355,7 +354,7 @@ final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityCus
         }
     }
 
-    func rotor(
+    nonisolated func rotor(
         _ rotor: NSAccessibilityCustomRotor, resultFor searchParameters: NSAccessibilityCustomRotor.SearchParameters
     ) -> NSAccessibilityCustomRotor.ItemResult? {
         let items = connections
@@ -375,25 +374,25 @@ final class CardAccessibilityElement: NSAccessibilityElement, NSAccessibilityCus
 }
 
 /// A string for VoiceOver. Its methods are called on the main thread.
-final class StringAccessibilityElement: NSAccessibilityElement, @unchecked Sendable {
+@MainActor
+final class StringAccessibilityElement: NSAccessibilityElement {
     let stringID: UUID
     private weak var canvas: BoardCanvasView?
 
     /// Rotor results must be `NSAccessibilityElement` protocol objects. The class implements
     /// everything that protocol asks for, but Swift can't state the conformance (the SDK's
     /// `accessibilityIdentifier` optionality differs), so it's declared to the runtime once.
-    private static let declaresElementProtocol: Bool = {
+    nonisolated private static let declaresElementProtocol: Bool = {
         guard let element = NSProtocolFromString("NSAccessibilityElement") else { return false }
         class_addProtocol(StringAccessibilityElement.self, element)
         return true
     }()
 
-    static func asRotorTarget(_ element: StringAccessibilityElement) -> NSAccessibilityElementProtocol? {
+    nonisolated static func asRotorTarget(_ element: StringAccessibilityElement) -> NSAccessibilityElementProtocol? {
         guard declaresElementProtocol else { return nil }
         return (element as AnyObject) as? NSAccessibilityElementProtocol
     }
 
-    @MainActor
     init(stringID: UUID, canvas: BoardCanvasView) {
         self.stringID = stringID
         self.canvas = canvas
@@ -403,21 +402,21 @@ final class StringAccessibilityElement: NSAccessibilityElement, @unchecked Senda
         setAccessibilityParent(canvas)
     }
 
-    override func accessibilityLabel() -> String? {
+    nonisolated override func accessibilityLabel() -> String? {
         onMain { [self] in
             guard let canvas, let string = canvas.store.string(stringID) else { return nil }
             return canvas.spokenLabel(of: string)
         }
     }
 
-    override func accessibilityFrame() -> NSRect {
+    nonisolated override func accessibilityFrame() -> NSRect {
         onMain { [self] in
             guard let canvas, let node = canvas.stringNodes[stringID] else { return .zero }
             return canvas.screenRect(ofWorld: node.curve.bounds.insetBy(dx: -4, dy: -4))
         }
     }
 
-    override func accessibilityPerformPress() -> Bool {
+    nonisolated override func accessibilityPerformPress() -> Bool {
         onMain { [self] in
             guard let canvas else { return false }
             canvas.select([], strings: [stringID])
@@ -425,11 +424,10 @@ final class StringAccessibilityElement: NSAccessibilityElement, @unchecked Senda
         }
     }
 
-    override func accessibilityCustomActions() -> [NSAccessibilityCustomAction]? {
+    nonisolated override func accessibilityCustomActions() -> [NSAccessibilityCustomAction]? {
         onMain { [self] in customActions() }
     }
 
-    @MainActor
     private func customActions() -> [NSAccessibilityCustomAction]? {
         guard let canvas, let string = canvas.store.string(stringID) else { return nil }
         let id = stringID
