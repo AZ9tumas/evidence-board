@@ -160,6 +160,14 @@ final class StringNode {
         let width = CGFloat(string.thickness)
         let box = curve.bounds.insetBy(dx: -(width * 2 + 12), dy: -(width * 2 + 12))
         for shape in [halo, thread, gradientMask, fibers] { shape.path = path }
+        // Shape layers get real bounds whose origin is the box's, so their paths stay in world
+        // coordinates but Core Animation knows where they draw.
+        let center = CGPoint(x: box.midX, y: box.midY)
+        let drawn: [CAShapeLayer] = [halo, thread, fibers, knots[0], knots[1], arrows[0], arrows[1]]
+        for shape in drawn {
+            shape.bounds = box
+            shape.position = center
+        }
 
         // The gradient runs from pin to pin. Its mask uses world coordinates inside the box.
         gradient.frame = box

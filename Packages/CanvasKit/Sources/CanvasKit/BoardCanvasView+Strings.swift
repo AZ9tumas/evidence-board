@@ -600,6 +600,17 @@ extension BoardCanvasView {
         pulsePoints = points
         pulseDistances = distances
         pulseLength = distances.last ?? 0
+        // Real bounds around the whole path, with world coordinates inside (see StringNode).
+        let box = CGRect(
+            x: points.map(\.x).min() ?? 0, y: points.map(\.y).min() ?? 0, width: 0, height: 0
+        ).union(CGRect(x: points.map(\.x).max() ?? 0, y: points.map(\.y).max() ?? 0, width: 0, height: 0))
+            .insetBy(dx: -16, dy: -16)
+        withoutAnimation {
+            for stroke in [pulseGlow, pulseCore] {
+                stroke.bounds = box
+                stroke.position = CGPoint(x: box.midX, y: box.midY)
+            }
+        }
         updatePulseFrame(at: CACurrentMediaTime())
     }
 
@@ -621,8 +632,11 @@ extension BoardCanvasView {
             path.addLine(to: pulsePoint(at: to))
         }
         withoutAnimation {
-            pulseGlow.path = path
-            pulseCore.path = path
+            // Hidden rather than given an empty path between runs.
+            for stroke in [pulseGlow, pulseCore] {
+                stroke.isHidden = path.isEmpty
+                if !path.isEmpty { stroke.path = path }
+            }
         }
     }
 
