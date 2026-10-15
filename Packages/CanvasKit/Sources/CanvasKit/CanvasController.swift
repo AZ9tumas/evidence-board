@@ -113,12 +113,6 @@ public final class CanvasController {
         view.continueConnecting(to: CGPoint(x: card.frame.midX - 30, y: card.frame.y + 40))
     }
 
-    /// Redraws the whole window. On the CI Mac, layer-only changes seem to reach the screen
-    /// only when the window redraws, so the snapshot workflow calls this to capture motion.
-    public func debugRedrawWindow() {
-        view?.window?.display()
-    }
-
     /// Selects the string at `index` and zooms in on its middle.
     public func debugSelectString(at index: Int, zoom: CGFloat) {
         guard let view, store.board.strings.indices.contains(index) else { return }

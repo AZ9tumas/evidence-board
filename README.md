@@ -6,7 +6,7 @@ A native macOS app for building detective-style evidence boards. You place **tex
 - 🧾 **File format schema:** [`docs/schema/evidenceboard.schema.json`](docs/schema/evidenceboard.schema.json)
 - 🗂 **Sample board:** [`docs/examples/harbor-case.evboard`](docs/examples/harbor-case.evboard)
 
-![The sample board in the M2 build: text cards, a polaroid with its caption, and string](docs/images/m2-harbor.jpg)
+![The sample board in the M3 build: text cards, a polaroid, and strings with gradients, labels, an arrow and a dashed thread](docs/images/m3-harbor.jpg)
 
 ## Highlights
 
@@ -80,6 +80,6 @@ Tools/                     Helper scripts
 
 **Base (M0):** the document app (New, Open, Save, autosave, Versions), the forgiving JSON codec, the Noir canvas, and the camera.
 
-Not verified yet: frame rate and memory on real hardware (they need a Mac and Instruments), and how the string physics feel on a real trackpad. Web cards still show placeholders until M4.
+Not verified yet: frame rate and memory on real hardware (they need a Mac and Instruments), how the string physics feel on a real trackpad, and the Trace glow moving along the path. The glow's position is tested, but CI screen captures never show it. Web cards still show placeholders until M4.
 
 See the roadmap in [`docs/DESIGN.md` §16](docs/DESIGN.md#16-roadmap).

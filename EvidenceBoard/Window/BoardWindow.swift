@@ -199,11 +199,6 @@ private enum SnapshotScenario {
         case "trace":
             canvas.debugSelectCards(at: [1, 4])
             canvas.traceSelection()
-            // Keep the window redrawing so the capture shows where the pulse is.
-            for _ in 0..<60 {
-                try? await Task.sleep(for: .milliseconds(200))
-                canvas.debugRedrawWindow()
-            }
         case "focus":
             canvas.debugSelectCards(at: [2])
             canvas.focusSelection()
