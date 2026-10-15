@@ -11,6 +11,9 @@ public enum BoardCommand: Sendable, Equatable {
     /// Adds strings whose two cards both exist.
     case insertStrings([BoardString], positions: [Int]? = nil)
     case removeStrings(Set<UUID>)
+    /// Replaces strings by ID: color, label, sag, direction and so on. A string that would
+    /// end up tied to a missing card, or to the same card at both ends, is left as it was.
+    case updateStrings([BoardString])
     /// Moves or resizes cards.
     case setFrames([UUID: Rect])
     /// Replaces cards by ID: text, style, tint, z, lock and so on. Unknown IDs are ignored.
@@ -28,6 +31,7 @@ public struct BoardChanges: Sendable, Equatable {
     public var updatedCards: Set<UUID> = []
     public var removedCards: Set<UUID> = []
     public var insertedStrings: Set<UUID> = []
+    public var updatedStrings: Set<UUID> = []
     public var removedStrings: Set<UUID> = []
     public var assetsChanged = false
 
@@ -35,6 +39,6 @@ public struct BoardChanges: Sendable, Equatable {
 
     public var isEmpty: Bool {
         insertedCards.isEmpty && updatedCards.isEmpty && removedCards.isEmpty
-            && insertedStrings.isEmpty && removedStrings.isEmpty && !assetsChanged
+            && insertedStrings.isEmpty && updatedStrings.isEmpty && removedStrings.isEmpty && !assetsChanged
     }
 }

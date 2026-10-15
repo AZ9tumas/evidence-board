@@ -27,7 +27,9 @@ public final class BoardStore {
     public private(set) var revision = 0
 
     private var cardIndex: [UUID: Int]
+    private var stringIndex: [UUID: Int]
     private var observers: [UUID: Observer] = [:]
+    private var cachedGraph: BoardGraph?
 
     private struct Mirror {
         var board: Board
@@ -44,6 +46,7 @@ public final class BoardStore {
         self.loadReport = loadReport
         self.viewport = board.viewport
         self.cardIndex = Self.makeIndex(board.cards)
+        self.stringIndex = Self.makeIndex(board.strings)
         self.mirror = Mutex(Mirror(board: board, viewport: board.viewport, modifiedAt: board.modifiedAt))
     }
 
@@ -72,6 +75,18 @@ public final class BoardStore {
         cardIndex[id] != nil
     }
 
+    public func string(_ id: UUID) -> BoardString? {
+        stringIndex[id].map { board.strings[$0] }
+    }
+
+    /// The board's strings as a graph, for Focus and Trace. Built on first use after a change.
+    public var graph: BoardGraph {
+        if let cachedGraph { return cachedGraph }
+        let graph = BoardGraph(strings: board.strings)
+        cachedGraph = graph
+        return graph
+    }
+
     /// The highest `z` on the board, or 0 when it's empty.
     public var maxZ: Int { board.cards.map(\.z).max() ?? 0 }
     public var minZ: Int { board.cards.map(\.z).min() ?? 0 }
@@ -97,6 +112,10 @@ public final class BoardStore {
         var changes = BoardChanges()
         let inverse = perform(command, changes: &changes)
         guard !changes.isEmpty else { return nil }
+        if !changes.insertedStrings.isEmpty || !changes.removedStrings.isEmpty || !changes.updatedStrings.isEmpty {
+            stringIndex = Self.makeIndex(board.strings)
+            cachedGraph = nil
+        }
         revision += 1
         let board = board
         let revision = revision
@@ -163,6 +182,19 @@ public final class BoardStore {
             changes.removedStrings.formUnion(removed.map { $0.element.id })
             return .insertStrings(removed.map { $0.element }, positions: removed.map { $0.offset })
 
+        case .updateStrings(let strings):
+            let positions = Self.makeIndex(board.strings)
+            var previous: [BoardString] = []
+            for string in strings {
+                guard let index = positions[string.id], board.strings[index] != string,
+                      string.from != string.to, cardIndex[string.from] != nil, cardIndex[string.to] != nil else { continue }
+                previous.append(board.strings[index])
+                board.strings[index] = string
+            }
+            guard !previous.isEmpty else { return .batch([]) }
+            changes.updatedStrings.formUnion(previous.map(\.id))
+            return .updateStrings(previous)
+
         case .setFrames(let frames):
             var previous: [UUID: Rect] = [:]
             for (id, frame) in frames {
@@ -205,7 +237,7 @@ public final class BoardStore {
         }
     }
 
-    private nonisolated static func makeIndex(_ cards: [Card]) -> [UUID: Int] {
-        Dictionary(cards.enumerated().map { ($0.element.id, $0.offset) }, uniquingKeysWith: { first, _ in first })
+    private nonisolated static func makeIndex<Item: Identifiable>(_ items: [Item]) -> [UUID: Int] where Item.ID == UUID {
+        Dictionary(items.enumerated().map { ($0.element.id, $0.offset) }, uniquingKeysWith: { first, _ in first })
     }
 }

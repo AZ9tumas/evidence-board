@@ -75,6 +75,41 @@ struct BoardStoreTests {
         #expect(store.board == original)
     }
 
+    @Test func updateStringsIsReversibleAndNotifies() throws {
+        let (store, cards) = Self.sampleStore()
+        let original = store.board
+        let recorder = Recorder()
+        store.addObserver { recorder.record($0) }
+
+        var string = store.board.strings[1]
+        string.label = "motive"
+        string.color = .tint(.azure)
+        string.arrow = .forward
+        string.sag = 0.1
+        let undo = try #require(store.apply(.updateStrings([string])))
+        #expect(store.string(string.id) == string)
+        #expect(recorder.received.last?.updatedStrings == [string.id])
+
+        // Re-tying a string to a missing card, or to one card twice, is refused.
+        var broken = string
+        broken.to = UUID()
+        var loop = string
+        loop.to = cards[1].id
+        #expect(store.apply(.updateStrings([broken, loop])) == nil)
+
+        store.apply(undo)
+        #expect(store.board == original)
+    }
+
+    @Test func graphFollowsEdits() throws {
+        let (store, cards) = Self.sampleStore()
+        #expect(store.graph.shortestPath(from: cards[0].id, to: cards[3].id)?.strings.count == 3)
+        store.apply(.insertStrings([BoardString(from: cards[3].id, to: cards[0].id)]))
+        #expect(store.graph.shortestPath(from: cards[0].id, to: cards[3].id)?.strings.count == 1)
+        store.apply(.removeCards([cards[1].id]))
+        #expect(store.graph.shortestPath(from: cards[0].id, to: cards[2].id)?.cards == [cards[0].id, cards[3].id, cards[2].id])
+    }
+
     @Test func noOpCommandsReturnNilAndDoNotNotify() {
         let (store, cards) = Self.sampleStore()
         let notifications = Recorder()
@@ -153,7 +188,7 @@ struct BoardStoreTests {
 
     static func randomCommand(for board: Board, using rng: inout SeededGenerator) -> BoardCommand {
         let ids = board.cards.map(\.id)
-        switch Int.random(in: 0..<6, using: &rng) {
+        switch Int.random(in: 0..<7, using: &rng) {
         case 0:
             return .insertCards([textCard("random", x: Double.random(in: -500...500, using: &rng), z: Int.random(in: 0...20, using: &rng))])
         case 1 where !ids.isEmpty:
@@ -171,6 +206,12 @@ struct BoardStoreTests {
             card.z += 1
             card.locked.toggle()
             return .updateCards([card])
+        case 6 where !board.strings.isEmpty:
+            var string = board.strings.randomElement(using: &rng)!
+            string.sag = Double.random(in: 0...1, using: &rng)
+            string.label = string.label == nil ? "label" : nil
+            (string.from, string.to) = (string.to, string.from)
+            return .updateStrings([string])
         default:
             return .batch([])
         }
