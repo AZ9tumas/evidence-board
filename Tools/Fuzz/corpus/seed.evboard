@@ -1,0 +1,28 @@
+{
+  "format": "evidenceboard", "formatVersion": 1, "id": "9C2B3D4E-1F20-4A5B-8C6D-7E8F9A0B1C2D",
+  "title": "Fuzz", "theme": "cork", "createdAt": "2026-10-14T09:12:44Z", "modifiedAt": "2026-10-14T09:12:44.5Z",
+  "viewport": { "x": 10, "y": -20, "zoom": 1.5 },
+  "cards": [
+    { "id": "11111111-1111-4111-8111-111111111111", "type": "text", "frame": { "x": 0, "y": 0, "width": 260, "height": 120 },
+      "rotation": 2, "z": 1, "tint": "amber", "locked": false, "createdAt": "2026-10-14T09:12:44Z", "modifiedAt": "2026-10-14T09:12:44Z",
+      "text": { "content": "Ferry left **11 minutes early**", "style": "note", "alignment": "leading", "autoHeight": true } },
+    { "id": "22222222-2222-4222-8222-222222222222", "type": "image", "frame": { "x": 400, "y": 0, "width": 240, "height": 280 },
+      "rotation": 0, "z": 2, "locked": true, "createdAt": "2026-10-14T09:12:44Z", "modifiedAt": "2026-10-14T09:12:44Z",
+      "image": { "asset": "sha256-abc", "caption": "Dock camera", "frameStyle": "polaroid", "crop": { "x": 0.1, "y": 0.1, "width": 0.5, "height": 0.5 } } },
+    { "id": "33333333-3333-4333-8333-333333333333", "type": "web", "frame": { "x": 800, "y": 0, "width": 360, "height": 340 },
+      "rotation": 0, "z": 3, "locked": false, "createdAt": "2026-10-14T09:12:44Z", "modifiedAt": "2026-10-14T09:12:44Z",
+      "web": { "url": "https://example.com/a", "snapshot": { "fetchedAt": "2026-10-14T09:20:00Z", "variant": "media",
+        "title": "Night logs", "description": "Three departures", "siteName": "Example", "author": "J. Rivera",
+        "publishedAt": "2026-10-12T00:00:00Z", "mediaDuration": 754, "image": "sha256-abc", "icon": null,
+        "palette": { "vibrant": "#3A7BFF", "muted": "#5C6A88", "darkVibrant": "#12306E", "darkMuted": "#1B2235", "light": "#E8EEFF" } } } }
+  ],
+  "strings": [
+    { "id": "44444444-4444-4444-8444-444444444444", "from": "11111111-1111-4111-8111-111111111111",
+      "to": "22222222-2222-4222-8222-222222222222", "color": "red", "thickness": 2, "sag": 0.5, "style": "dashed",
+      "arrow": "forward", "label": "same night" },
+    { "id": "55555555-5555-4555-8555-555555555555", "from": "22222222-2222-4222-8222-222222222222",
+      "to": "33333333-3333-4333-8333-333333333333", "color": "#FF00AA", "thickness": 3, "sag": 0.2 }
+  ],
+  "assets": { "sha256-abc": { "mime": "image/png", "pixelWidth": 1, "pixelHeight": 1,
+    "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" } }
+}

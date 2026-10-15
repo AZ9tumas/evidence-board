@@ -106,6 +106,8 @@ enum PerfBoards {
         let store = BoardStore(board: board)
         let view = BoardCanvasView(store: store, appearance: TextCardTests.appearance)
         let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 1440, height: 900), styleMask: [.borderless], backing: .buffered, defer: false)
+        // Swift owns the window; closing it must not release it a second time.
+        window.isReleasedWhenClosed = false
         window.contentView = view
         view.layoutSubtreeIfNeeded()
         return (view, window, store)
@@ -248,6 +250,8 @@ struct PerformanceTests {
         let store = BoardStore(board: loaded)
         let view = BoardCanvasView(store: store, appearance: TextCardTests.appearance)
         let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 1440, height: 900), styleMask: [.borderless], backing: .buffered, defer: false)
+        // Swift owns the window; closing it must not release it a second time.
+        window.isReleasedWhenClosed = false
         defer { window.close() }
         window.contentView = view
         view.layoutSubtreeIfNeeded()

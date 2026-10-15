@@ -29,6 +29,9 @@ jobs:
             --filter CodecPerformanceTests 2>&1 | tee codec-perf.log
           exit ${PIPESTATUS[0]}
         shell: bash
+      - name: Fuzz the loader (libFuzzer, 60 s)
+        if: ${{ !cancelled() }}
+        run: Tools/Fuzz/run.sh 60
 
   budgets:
     name: Performance budgets (macOS)

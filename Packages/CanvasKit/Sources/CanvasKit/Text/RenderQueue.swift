@@ -8,7 +8,7 @@ final class RenderQueue: NSObject {
     /// Main-thread time per frame spent drawing bitmaps: less while the camera moves, so a
     /// pan or zoom frame stays within its 4 ms budget (DESIGN.md §11).
     static let budget: CFTimeInterval = 0.005
-    static let movingBudget: CFTimeInterval = 0.0025
+    static let movingBudget: CFTimeInterval = 0.0015
 
     /// Whether the camera is moving right now.
     var isMoving: () -> Bool = { false }
@@ -35,6 +35,13 @@ final class RenderQueue: NSObject {
             link.add(to: .main, forMode: .common)
             self.link = link
         }
+    }
+
+    /// Adds `ids` after what's already waiting, for cards that came into view mid-gesture.
+    func enqueue(_ ids: [UUID]) {
+        guard !ids.isEmpty else { return }
+        let waiting = Set(pending)
+        schedule(pending + ids.filter { !waiting.contains($0) })
     }
 
     func stop() {

@@ -46,11 +46,79 @@ public enum BoardCodec {
 
     /// Serializes a board as pretty-printed JSON with sorted keys, so files diff cleanly.
     /// Assets no card refers to are left out.
+    ///
+    /// Image data is most of a big board, and it's plain base64 that needs no escaping. So the
+    /// encoder writes a short placeholder for each large asset and the bytes are copied in
+    /// afterwards, which is many times faster than escaping megabytes of text (DESIGN.md §11).
+    /// The result is byte for byte what the encoder alone would write.
     public static func encode(_ board: Board) throws -> Data {
+        var board = referencedOnly(board)
+        let token = "@@evboard-asset-\(UUID().uuidString)-"
+        var payloads: [String] = []
+        for id in board.assets.keys.sorted() {
+            guard let base64 = board.assets[id]?.base64, base64.utf8.count >= 4096, isPlainBase64(base64) else { continue }
+            board.assets[id]?.base64 = token + String(payloads.count) + "@@"
+            payloads.append(base64)
+        }
+        let skeleton = try makeEncoder().encode(board)
+        return payloads.isEmpty ? skeleton : splice(payloads, into: skeleton, at: Array(token.utf8))
+    }
+
+    /// What ``encode(_:)`` writes, made by the encoder alone. For tests.
+    static func encodeDirectly(_ board: Board) throws -> Data {
+        try makeEncoder().encode(referencedOnly(board))
+    }
+
+    private static func referencedOnly(_ board: Board) -> Board {
         var board = board
         let referenced = board.referencedAssetIDs
         board.assets = board.assets.filter { referenced.contains($0.key) }
-        return try makeEncoder().encode(board)
+        return board
+    }
+
+    private static let base64Alphabet: [Bool] = (0...255).map { byte in
+        (65...90).contains(byte) || (97...122).contains(byte) || (48...57).contains(byte) || byte == 43 || byte == 47 || byte == 61
+    }
+
+    /// Only base64 characters, so it can go into JSON as is.
+    static func isPlainBase64(_ text: String) -> Bool {
+        let alphabet = base64Alphabet
+        if let result = text.utf8.withContiguousStorageIfAvailable({ bytes in bytes.allSatisfy { alphabet[Int($0)] } }) {
+            return result
+        }
+        return text.utf8.allSatisfy { alphabet[Int($0)] }
+    }
+
+    /// Replaces each `token` + index + `@@` in `skeleton` with that payload.
+    private static func splice(_ payloads: [String], into skeleton: Data, at token: [UInt8]) -> Data {
+        var output = Data(capacity: skeleton.count + payloads.reduce(0) { $0 + $1.utf8.count })
+        skeleton.withUnsafeBytes { raw in
+            let bytes = raw.bindMemory(to: UInt8.self)
+            let at = UInt8(ascii: "@")
+            var copied = 0
+            var index = 0
+            while index + token.count <= bytes.count {
+                guard bytes[index] == token[0], bytes[index..<index + token.count].elementsEqual(token) else {
+                    index += 1
+                    continue
+                }
+                var end = index + token.count
+                var number = 0
+                while end < bytes.count, bytes[end] != at {
+                    number = number * 10 + Int(bytes[end] &- UInt8(ascii: "0"))
+                    end += 1
+                }
+                output.append(UnsafeBufferPointer(rebasing: bytes[copied..<index]))
+                let payload = payloads[number]
+                if payload.utf8.withContiguousStorageIfAvailable({ output.append($0) }) == nil {
+                    output.append(contentsOf: Array(payload.utf8))
+                }
+                index = end + 2 // past "@@"
+                copied = index
+            }
+            output.append(UnsafeBufferPointer(rebasing: bytes[copied...]))
+        }
+        return output
     }
 
     static func makeDecoder() -> JSONDecoder {

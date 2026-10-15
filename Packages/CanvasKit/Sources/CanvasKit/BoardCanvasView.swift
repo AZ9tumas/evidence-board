@@ -498,6 +498,7 @@ public final class BoardCanvasView: NSView {
         guard force || nearby != visibleIDs else { return }
 
         let left = visibleIDs.subtracting(nearby)
+        let entered = nearby.subtracting(visibleIDs)
         visibleIDs = nearby
         if !left.isEmpty {
             let keep = visibleRect.insetBy(dx: -visibleRect.width, dy: -visibleRect.height)
@@ -506,18 +507,39 @@ public final class BoardCanvasView: NSView {
                 cardNodes[id]?.discardImage()
             }
         }
-        scheduleRenders()
+        // Mid-gesture, only the cards that just came into view are added; the whole queue
+        // is re-sorted once the camera settles.
+        if !force, renderQueue.isMoving() {
+            scheduleRenders(adding: entered)
+        } else {
+            scheduleRenders()
+        }
     }
 
-    func scheduleRenders() {
+    private func scheduleRenders(adding ids: Set<UUID>) {
+        let byDistance = sortedByDistance(ids)
+        for id in byDistance { requestImageIfNeeded(id) }
+        guard detailLevel != .minimal else { return }
+        renderQueue.enqueue(byDistance.filter(needsRender))
+    }
+
+    private func sortedByDistance(_ ids: Set<UUID>) -> [UUID] {
         let center = camera.center
-        let byDistance = visibleIDs.compactMap { id -> (UUID, CGFloat)? in
+        return ids.compactMap { id -> (UUID, CGFloat)? in
             guard let frame = cardNodes[id]?.card.frame else { return nil }
             return (id, hypot(CGFloat(frame.midX) - center.x, CGFloat(frame.midY) - center.y))
         }
         .sorted { $0.1 < $1.1 }
         .map { $0.0 }
+    }
 
+    private func needsRender(_ id: UUID) -> Bool {
+        guard let node = cardNodes[id] else { return false }
+        return node.hasTextContent && node.renderedTier != renderTier && editingCardID != id
+    }
+
+    func scheduleRenders() {
+        let byDistance = sortedByDistance(visibleIDs)
         // Photos stay visible at every detail level, so they load even when zoomed far out.
         for id in byDistance { requestImageIfNeeded(id) }
 
@@ -525,10 +547,7 @@ public final class BoardCanvasView: NSView {
             renderQueue.schedule([])
             return
         }
-        renderQueue.schedule(byDistance.filter { id in
-            guard let node = cardNodes[id] else { return false }
-            return node.hasTextContent && node.renderedTier != renderTier && editingCardID != id
-        })
+        renderQueue.schedule(byDistance.filter(needsRender))
     }
 
     /// The card whose text or caption is open in an editor.
@@ -681,11 +700,12 @@ public final class BoardCanvasView: NSView {
             let tier = Self.tier(for: self.camera.zoom)
             if tier != self.renderTier {
                 self.renderTier = tier
-                self.scheduleRenders()
                 withoutAnimation {
                     for node in self.stringNodes.values { node.setLabelScale(self.labelScale) }
                 }
             }
+            // Nearest cards first, now that the camera has stopped.
+            self.scheduleRenders()
         }
     }
 

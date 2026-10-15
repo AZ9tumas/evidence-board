@@ -120,4 +120,26 @@ struct BoardCodecTests {
         let fields = [#""format": "evidenceboard""#, #""formatVersion": 1"#] + (extra.map { [$0] } ?? [])
         return Data("{ \(fields.joined(separator: ", ")) }".utf8)
     }
+
+    @Test func fastSaveMatchesTheEncoderByteForByte() throws {
+        var board = Board.new(title: "Assets", now: Date(timeIntervalSince1970: 1_800_000_000))
+        let stamp = board.createdAt
+        for index in 0..<4 {
+            let bytes = Data((0..<6000).map { UInt8(truncatingIfNeeded: $0 * (index + 7)) })
+            var asset = Asset(mime: "image/png", pixelWidth: 10, pixelHeight: 10, data: bytes)
+            // One asset with characters that need escaping takes the slow path.
+            if index == 3 { asset.base64 += "\n\"/\\" }
+            let id = "sha256-\(index)"
+            board.assets[id] = asset
+            board.cards.append(Card(
+                frame: Rect(x: Double(index) * 300, y: 0, width: 200, height: 200), createdAt: stamp, modifiedAt: stamp,
+                content: .image(ImagePayload(asset: id, caption: "@@evboard-asset- in a caption"))
+            ))
+        }
+        board.assets["sha256-unused"] = Asset(mime: "image/png", data: Data(count: 9000))
+        let fast = try BoardCodec.encode(board)
+        #expect(fast == (try BoardCodec.encodeDirectly(board)))
+        #expect(!String(decoding: fast, as: UTF8.self).contains("sha256-unused"))
+        #expect(try BoardCodec.decode(fast).board.assets == board.assets.filter { $0.key != "sha256-unused" })
+    }
 }
