@@ -23,8 +23,9 @@ final class WebCardParts {
     private var glowSource: CGImage?
 
     init() {
-        glow.opacity = 0.3
+        glow.opacity = 0.35
         glow.isHidden = true
+        glow.contentsGravity = .resize
         mesh.contentsGravity = .resize
         mesh.magnificationFilter = .linear
         icon.masksToBounds = true
@@ -56,12 +57,13 @@ final class WebCardParts {
         mesh.frame = bounds
 
         // The glow is 15% larger than the card and sits a little low, like light from below.
-        let glowSize = CGSize(width: bounds.width * 1.15, height: bounds.height * 1.15)
+        // Its bitmap carries a transparent margin for the blur to fade into.
+        let reach = 1.15 * (1 + 2 * WebCardArt.glowMargin)
+        let glowSize = CGSize(width: bounds.width * reach, height: bounds.height * reach)
         glow.frame = CGRect(
             x: bounds.midX - glowSize.width / 2, y: bounds.midY - glowSize.height / 2 + 12,
             width: glowSize.width, height: glowSize.height
         )
-        glow.cornerRadius = 40
 
         if let frame = layout.icon {
             icon.frame = frame

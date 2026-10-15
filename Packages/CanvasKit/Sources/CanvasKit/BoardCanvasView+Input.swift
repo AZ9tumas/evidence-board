@@ -449,10 +449,10 @@ extension BoardCanvasView {
             }
         case 51, 117: // delete, forward delete
             deleteSelection()
-        case 36, 76 where modifiers == .command: // ⌘↩
-            openSelectionInBrowser()
         case 36, 76: // return, enter
-            if selection.count == 1, let id = selection.first {
+            if modifiers == .command {
+                openSelectionInBrowser()
+            } else if selection.count == 1, let id = selection.first {
                 activate(id, at: nil)
             } else if selection.isEmpty, selectedStrings.count == 1, let id = selectedStrings.first {
                 beginLabelEditing(id)

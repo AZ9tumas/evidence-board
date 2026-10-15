@@ -111,6 +111,7 @@ struct WebCardLayout {
         case .compact, .fallback:
             layoutCompact(content, width: width, style: style)
         }
+        size.height = max(size.height, Self.minimumSize.height)
     }
 
     /// Text blocks in drawing order.
@@ -175,9 +176,11 @@ struct WebCardLayout {
             y = block.frame.maxY + 5
         }
         // The open hint sits at the bottom of the text column, or under the image if that's lower.
-        let bottom = max(y + 6, frame.maxY - 16)
+        let bottom = max(y + 6, frame.maxY - 16, Self.minimumSize.height - 12 - 15)
         y = footer(content, y: bottom, width: width, byline: nil, style: style, left: x)
         size.height = max(y + 12, frame.maxY + Self.heroInset).rounded(.up)
+        // The image runs the full height of the card, like a cover on a shelf.
+        image = CGRect(x: frame.minX, y: frame.minY, width: frame.width, height: size.height - 2 * Self.heroInset)
     }
 
     private mutating func layoutSocial(_ content: WebCardContent, width: CGFloat, style: WebCardTypography) {

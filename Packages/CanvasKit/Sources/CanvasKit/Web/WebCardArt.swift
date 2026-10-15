@@ -95,16 +95,27 @@ enum WebCardArt {
 
     @MainActor private static let blurContext = CIContext(options: [.cacheIntermediates: false])
 
-    /// A heavily blurred, small copy of `image` for the glow behind the card.
+    /// How far the glow bitmap reaches past the picture it's made from, as a fraction of its
+    /// size on each side. The blur fades to nothing in this margin, so the glow has no edges.
+    static let glowMargin: CGFloat = 0.3
+
+    /// A heavily blurred, small copy of `image` for the glow behind the card, with a
+    /// transparent margin of `glowMargin` around it.
     @MainActor
     static func glowImage(from image: CGImage) -> CGImage? {
         let input = CIImage(cgImage: image)
         let scale = 64 / max(input.extent.width, input.extent.height, 1)
         let small = input.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
-        let blurred = small.clampedToExtent()
-            .applyingFilter("CIGaussianBlur", parameters: [kCIInputRadiusKey: 6])
-            .cropped(to: small.extent)
-        return blurContext.createCGImage(blurred, from: small.extent)
+        let size = small.extent.size
+        let canvas = CGRect(
+            x: -size.width * glowMargin, y: -size.height * glowMargin,
+            width: size.width * (1 + 2 * glowMargin), height: size.height * (1 + 2 * glowMargin)
+        )
+        let blurred = small
+            .transformed(by: CGAffineTransform(translationX: -small.extent.minX, y: -small.extent.minY))
+            .applyingFilter("CIGaussianBlur", parameters: [kCIInputRadiusKey: min(size.width, size.height) * 0.16])
+            .cropped(to: canvas)
+        return blurContext.createCGImage(blurred, from: canvas)
     }
 
     /// A rounded triangle pointing right, for the play button.

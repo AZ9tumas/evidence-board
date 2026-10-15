@@ -25,14 +25,15 @@ Requires **Xcode 16 or later** on **macOS 15 or later**.
 
 1. Open `EvidenceBoard.xcodeproj`.
 2. Pick the **EvidenceBoard** scheme and press **⌘R**. It signs to run locally, so no developer team is needed.
-3. Press **⌘U** to run the BoardKit and CanvasKit tests.
+3. Press **⌘U** to run the BoardKit, LinkPreviewKit and CanvasKit tests.
 
 To try a full board, open `docs/examples/harbor-case.evboard` with **File ▸ Open**.
 
 From the command line:
 
 ```sh
-swift test --package-path Packages/BoardKit     # also runs on Linux
+swift test --package-path Packages/BoardKit       # also runs on Linux
+swift test --package-path Packages/LinkPreviewKit  # also runs on Linux
 swift test --package-path Packages/CanvasKit
 xcodebuild -project EvidenceBoard.xcodeproj -scheme EvidenceBoard build
 ```
@@ -49,13 +50,22 @@ EvidenceBoard/             App target: SwiftUI app, document, window, HUD, theme
 Config/                    Info.plist (document types) and sandbox entitlements
 Packages/BoardKit/         Model, JSON codec, validation, BoardStore. Foundation only
 Packages/CanvasKit/        Camera and the Core Animation canvas (AppKit)
+Packages/LinkPreviewKit/   Link previews: fetch, head parser, merger, palette, cache
 docs/                      Design document, JSON schema, sample board
 Tools/                     Helper scripts
 ```
 
 ## Status
 
-**M0 (skeleton)**, **M1 (text cards)**, **M2 (image cards)** and **M3 (strings)** are done.
+**M0 (skeleton)**, **M1 (text cards)**, **M2 (image cards)**, **M3 (strings)** and **M4 (web cards)** are done.
+
+**Web cards (M4)**
+- **Add:** paste a link, drag one from a browser, drop a `.webloc` file, or use **Insert ▸ Link…** (⌘L). The card appears at once as a shimmering skeleton while the preview loads.
+- **Previews:** the app reads the page's `<head>` (Open Graph, Twitter cards, JSON‑LD, icons) alongside the system's LinkPresentation, picks the best title, image and icon, and takes a 5-color palette from the image. No page script ever runs.
+- **Seven layouts:** Hero, Article (with byline), Media (play button and duration), Portrait, Social (avatar, name, handle, the post as a quote), Compact (a full mesh gradient when there's no image) and Fallback (when the page can't be reached). Each card gets a mesh-gradient body, a gradient border and a soft glow from its own palette.
+- **Use:** double-click or **⌘↩** opens the page in your browser. Tap **Space** to **Peek** at the live page in a popover (no cookies, nothing kept). **⌘R** refreshes the selected previews, **⌘⇧R** all of them. Both can be undone.
+- **Offline:** the preview, palette and images are saved in the board, so it opens exactly as saved without touching the network. Fetched previews are also cached on disk for 30 days.
+- **Debug ▸ Add Test Links** puts one card of each layout on the board, from generated pages.
 
 **Strings (M3)**
 - **Connect:** hover a card and its pin brightens. Drag from the pin to another card: the string follows on a spring, snaps onto the target's pulsing pin, and pulls taut when you let go. Let go on empty canvas and it slides back into the pin. With the **Connect tool (C)** you can drag from anywhere on a card. **⌘K** connects two selected cards.
@@ -80,6 +90,6 @@ Tools/                     Helper scripts
 
 **Base (M0):** the document app (New, Open, Save, autosave, Versions), the forgiving JSON codec, the Noir canvas, and the camera.
 
-Not verified yet: frame rate and memory on real hardware (they need a Mac and Instruments), how the string physics feel on a real trackpad, and the Trace glow moving along the path. The glow's position is tested, but CI screen captures never show it. Web cards still show placeholders until M4.
+Not verified yet: frame rate and memory on real hardware (they need a Mac and Instruments), how the string physics feel on a real trackpad, and the Trace glow moving along the path. The glow's position is tested, but CI screen captures never show it. Fetching previews from live sites and Peek also need a Mac: CI checks the pipeline against 62 saved page heads, and the screenshots show generated previews.
 
 See the roadmap in [`docs/DESIGN.md` §16](docs/DESIGN.md#16-roadmap).

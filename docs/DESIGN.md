@@ -356,13 +356,13 @@ The signature feature. A Web card should look like the cover of a magazine story
 │  thousands of clues into one board…    │
 │                               ↗ Open   │
 ╰────────────────────────────────────────╯
-     ░░░ ambient glow: blurred hero, 30% ░░░   ← behind the card, bleeds onto the board
+     ░░░ ambient glow: blurred hero, 35% ░░░   ← behind the card, bleeds onto the board
 ```
 
 **What makes it high quality:**
 
-1. **Palette-driven gradients.** We take 5 swatches from the hero image (or the favicon, or `theme-color`) (§7.4). The card body fill is a **`MeshGradient`** (3×3) between the theme card color and two muted swatches, so every link card has its own color signature while still matching the board.
-2. **Ambient glow.** A 48 pt Gaussian-blurred, 1.15× scaled copy of the hero sits behind the card at 30% opacity, like Apple Music's backdrop. It's rendered once and cached as a bitmap.
+1. **Palette-driven gradients.** We take 5 swatches from the hero image (or the favicon, or `theme-color`) (§7.4). The card body fill is a **3×3 mesh gradient** between the theme card color and the swatches, so every link card has its own color signature while still matching the board. It's drawn once as a 32 px bitmap with smoothstep blending and stretched by Core Animation with linear filtering, which looks the same as a `MeshGradient` at any zoom and costs nothing to redraw.
+2. **Ambient glow.** A heavily blurred (Core Image Gaussian on a 64 px copy), 1.15× scaled copy of the hero sits behind the card at 35% opacity and fades out at its edges, like Apple Music's backdrop. It's made once per decoded hero.
 3. **Gradient border.** A 1 pt stroke from the vibrant swatch at 60% (top) to 0% (bottom).
 4. **Legible overlays.** Text over the image always gets a scrim: a gradient from transparent to the dark muted swatch at 85%. A contrast check (WCAG ≥ 4.5:1) picks light or dark text.
 5. **Crisp images.** Images are decoded off the main thread at exactly the display pixel size (§10.5).
@@ -374,7 +374,7 @@ The variant is chosen automatically from the metadata:
 | Variant | When | Look |
 |---|---|---|
 | **Hero** | An image ≥ 600 px wide with aspect 1.2–2.4 | As above |
-| **Portrait** | An image with aspect < 1.2 (posters, books, products) | Image on the left (120 pt), text on the right, mesh-gradient background |
+| **Portrait** | An image with aspect < 1.2 (posters, books, products) | Image down the left (up to 132 pt wide, the full height of the card), text on the right, mesh-gradient background |
 | **Media** | `og:type` is `video.*`, or YouTube/Vimeo/oEmbed video | Hero, plus a frosted play button and a duration badge (from oEmbed or JSON‑LD `duration`) |
 | **Social** | X, Bluesky, Mastodon, Threads, Reddit (by domain or `og:type`) | Avatar + author, then the post text as a large quote, then media below if any |
 | **Article** | JSON‑LD `Article` or `NewsArticle` | Hero, plus a byline row (author · date · reading time) |
@@ -414,6 +414,8 @@ Details:
 - **User agent**: a desktop Safari UA string, which gets the richest OG tags from most sites.
 - No JavaScript is ever executed (§13). Sites that render metadata only client-side fall back to LP results.
 
+**As built (M4).** All of this lives in the `LinkPreviewKit` package. The pure parts (URL normalizing, head parser, JSON‑LD, merger, variant rules, palette, cache) build and test on Linux too; the fetching parts (`PageFetcher`, `LPMetadataProvider`, ImageIO) are Darwin-only. `LinkPreviewService.shared` is an actor that runs the pipeline and never throws: when anything fails it returns the **Fallback** preview. The limits (4 fetches at once, 1 per host) are app-wide. The canvas turns the downloaded images into board assets (hero up to 1600 px, icon up to 256 px) off the main thread. The first preview of a new card is part of adding it, so it doesn't get its own undo step; it only marks the document edited. A refresh is its own undoable step, and a refresh that fails keeps the old snapshot and says so.
+
 ### 7.4 Palette extraction
 
 ```swift
@@ -439,21 +441,22 @@ The palette is stored in the snapshot, so it's never recomputed on load.
 ### 7.5 Loading states
 
 - **Skeleton**: the card renders at its final size immediately, with a shimmering gradient sweep (1.2 s loop) over placeholder bars. You can move and connect it at once.
-- **Progressive**: the title and favicon appear first (usually under 300 ms from LP or the HTML head), and the hero blurs in when it's decoded.
+- **Arrival**: the finished preview replaces the skeleton in one step, and the card takes the height its layout needs. Images then decode at display size (§10.5); until the favicon arrives, a monogram on the palette color stands in for it.
+- *(Planned)* **Progressive**: show the title and favicon first and the hero when it's decoded. M4 waits for the whole preview, which is simpler and usually fast enough.
 
 ### 7.6 Caching
 
 | Layer | Contents | Policy |
 |---|---|---|
 | **Board assets** | Snapshot (metadata + palette) in the card's `web` field. Hero and icon bytes in `assets` | Permanent, travels with the file |
-| **Disk cache** | `~/Library/Caches/<bundle>/LinkPreviews/<sha256(url)>.json` + images | 30‑day LRU, 500 MB cap |
+| **Disk cache** | `~/Library/Caches/<bundle>/LinkPreviews/<fnv1a(url)>.json` + images | 30‑day LRU, 500 MB cap |
 | **Memory** | `NSCache` of decoded `CGImage` per (assetID, pixelSize) | Evicted on memory pressure |
 
 **Opening a board never touches the network.** Previews come from the snapshot. Refresh is only ever explicit (⌘R on a card, or `Board ▸ Refresh All Previews`).
 
 ### 7.7 Peek (live view on demand)
 
-Press Space on a selected Web card to open a **popover** (720×520, resizable) with a `WKWebView` (non-persistent data store, no access to the user's cookies) loading the page. It closes on Esc. The web view is created lazily and torn down on close. No `WKWebView` ever lives on the canvas itself, which is critical for memory and scroll performance.
+Tap Space (press and release without panning) on a selected Web card to open a **popover** (720×520) with a `WKWebView` (non-persistent data store, no access to the user's cookies) loading the page. It closes on Esc. The web view is created lazily and torn down on close. No `WKWebView` ever lives on the canvas itself, which is critical for memory and scroll performance.
 
 ---
 
@@ -822,7 +825,7 @@ The canvas sits in a plain host view. A layer-hosting view can't have subviews, 
 
 Card chrome (body, shadows, stroke, pin) is plain Core Animation, so it stays sharp at any zoom for free. Only the content is a bitmap:
 
-1. **Text cards** are drawn with TextKit (`NSAttributedString` into a bitmap context, about 0.2–0.5 ms per card) at `frameSize × zoomTier × backingScale`, capped at 4096 px on the long side, and set as `contentLayer.contents`. Rich cards (web, M4) will use SwiftUI's `ImageRenderer` the same way.
+1. **Text cards** are drawn with TextKit (`NSAttributedString` into a bitmap context, about 0.2–0.5 ms per card) at `frameSize × zoomTier × backingScale`, capped at 4096 px on the long side, and set as `contentLayer.contents`. **Web cards** work the same way: `WebCardLayout` places everything for the card's variant and width, all of the card's text is drawn into one TextKit bitmap per tier, and the pictures (mesh, glow, hero, favicon, play button, badge, skeleton shimmer) are plain layers. SwiftUI's `ImageRenderer` turned out not to be needed, and staying with Core Animation keeps web cards as cheap as text cards.
 2. Zoom tiers are **0.25, 0.5, 1, 2 and 4**. The tier follows the zoom once the zoom has been still for 160 ms, so a pinch never redraws every card per frame. Until then the old bitmap is scaled.
 3. Bitmaps are drawn by a **render queue** that spends at most 5 ms of each frame, nearest cards first, and only for cards within 25% of the viewport. Bitmaps of cards more than a screen away are freed.
 4. While a text card is **being edited**, its bitmap is hidden and a live `NSTextView` (inside an `NSScrollView` whose magnification equals the zoom) sits over the card, using exactly the same attributes, so no line moves when editing starts or ends.
@@ -1074,9 +1077,9 @@ docs/
 |---|---|---|
 | **BoardKit** | Codec round-trip, migrations, validation, unknown-field preservation, graph queries (focus N hops, shortest-path trace) | Swift Testing (`@Test`), golden JSON fixtures in `Tests/Fixtures/` |
 | **Commands / undo** | Every command's inverse restores an identical board | Property-based tests: random command sequences, then undo all, then compare to the original |
-| **LinkPreviewKit** | Head parser against 60 saved real-world HTML heads; merger priority; palette roles | Fixtures + `URLProtocol` stubs, no live network in CI |
+| **LinkPreviewKit** | Head parser against 62 saved page heads modeled on real sites; merger priority; variants; palette roles; cache | Fixtures with expectations in a leading comment, no live network in CI |
 | **CanvasKit** | Camera math, hit testing and resizing on rotated cards, spatial grid against brute force, text measuring and rendering, string path bounds | Unit tests |
-| **Rendering** | Card visuals per theme and variant | Snapshot tests of `ImageRenderer` output, with a 0.5% pixel tolerance |
+| **Rendering** | Card visuals per theme and variant | Web card layouts for all 62 fixtures at four widths are checked for overlaps, overflow and line limits. Screenshots of every variant come from the snapshot workflow |
 | **Performance** | Pan/zoom FPS on a synthetic 500 / 3,000-card board, open/save timings | `XCTOSSignpostMetric`, `XCTMemoryMetric`, `XCTClockMetric` with baselines |
 | **UI** | Create, paste, connect, save, reopen flows | XCUITest |
 | **Fuzzing** | Board loader against malformed and huge JSON | libFuzzer harness on `BoardCodec.decode` |
