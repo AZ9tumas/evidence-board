@@ -61,7 +61,11 @@ public final class BoardCanvasView: NSView {
     var tierSettleTask: Task<Void, Never>?
     var visibleIDs: Set<UUID> = []
     lazy var renderQueue: RenderQueue = {
-        let queue = RenderQueue(view: self) { [weak self] id in self?.renderText(of: id) }
+        let queue = RenderQueue(
+            view: self,
+            prepare: { [weak self] id in self?.bitmapJob(for: id) },
+            apply: { [weak self] id, job, image in self?.applyBitmap(job, image, to: id) }
+        )
         queue.isMoving = { [weak self] in
             guard let self else { return false }
             return CACurrentMediaTime() - self.lastCameraMove < 0.2
@@ -561,34 +565,44 @@ public final class BoardCanvasView: NSView {
         textEditor?.cardID ?? captionEditor?.cardID
     }
 
-    /// Draws the text (or caption) of one card for the current tier.
+    /// Draws the text (or caption) of one card for the current tier, right here.
     func renderText(of id: UUID) {
+        guard let job = bitmapJob(for: id) else { return }
+        applyBitmap(job, job.draw(), to: id)
+    }
+
+    /// What one card's text bitmap for the current tier would be, if it needs one.
+    func bitmapJob(for id: UUID) -> BitmapJob? {
         guard let node = cardNodes[id], node.renderedTier != renderTier, visibleIDs.contains(id),
-              let card = liveCard(id) else { return }
-        let image: CGImage?
-        let scale: CGFloat
+              let card = liveCard(id) else { return nil }
+        // Cap bitmaps at 4096 px on the long side, however far in you zoom.
+        func scale(for size: CGSize) -> CGFloat {
+            min(renderTier * backingScale, 4096 / max(size.width, size.height, 1))
+        }
+        let kind: BitmapJob.Kind
+        let size: CGSize
         switch card.content {
         case .text(let text):
-            let size = CGSize(width: card.frame.width, height: card.frame.height)
-            // Cap bitmaps at 4096 px on the long side, however far in you zoom.
-            scale = min(renderTier * backingScale, 4096 / max(size.width, size.height, 1))
-            image = TextCardTypography.render(text, size: size, scale: scale, appearance: canvasAppearance)
+            size = CGSize(width: card.frame.width, height: card.frame.height)
+            kind = .text(text, size: size, appearance: canvasAppearance)
         case .image(let photo):
-            guard let caption = photo.caption, !caption.isEmpty else { return }
-            let size = ImageCardLayout.captionRect(
+            guard let caption = photo.caption, !caption.isEmpty else { return nil }
+            size = ImageCardLayout.captionRect(
                 for: photo.frameStyle, in: CGSize(width: card.frame.width, height: card.frame.height)
             ).size
-            scale = min(renderTier * backingScale, 4096 / max(size.width, size.height, 1))
-            image = TextCardTypography.renderCaption(
-                caption, overlay: ImageCardLayout.captionIsOverlaid(for: photo.frameStyle),
-                size: size, scale: scale, appearance: canvasAppearance
-            )
+            kind = .caption(caption, overlay: ImageCardLayout.captionIsOverlaid(for: photo.frameStyle), size: size, appearance: canvasAppearance)
         case .web:
-            guard let layout = node.webLayout else { return }
-            scale = min(renderTier * backingScale, 4096 / max(layout.size.width, layout.size.height, 1))
-            image = WebCardTypography.render(layout, scale: scale)
+            guard let layout = node.webLayout else { return nil }
+            size = layout.size
+            kind = .web(layout)
         }
-        withoutAnimation { node.setRenderedText(image, tier: renderTier, scale: scale) }
+        return BitmapJob(kind: kind, tier: renderTier, scale: scale(for: size), version: node.textVersion)
+    }
+
+    /// Puts a drawn bitmap on its card, unless the card has changed since it was described.
+    func applyBitmap(_ job: BitmapJob, _ image: CGImage?, to id: UUID) {
+        guard let node = cardNodes[id], node.textVersion == job.version else { return }
+        withoutAnimation { node.setRenderedText(image, tier: job.tier, scale: job.scale) }
     }
 
     /// Starts decoding a photo if the card needs more pixels than it has asked for.

@@ -60,6 +60,16 @@ final class CardNode {
 
     /// Zoom tier of the current text bitmap, or `nil` when there is none or it is stale.
     private(set) var renderedTier: CGFloat?
+    /// Changes whenever the text bitmap is replaced, dropped or out of date, so a bitmap drawn
+    /// in the background for an older version is thrown away. Unique across nodes, so a node
+    /// rebuilt for a new theme never takes the old one's bitmap.
+    private(set) var textVersion: Int
+    private static var lastTextVersion = 0
+
+    private static func newTextVersion() -> Int {
+        lastTextVersion += 1
+        return lastTextVersion
+    }
     private var detail = DetailLevel.full
     private var isLifted = false
     private var isEditing = false
@@ -82,6 +92,7 @@ final class CardNode {
     init(card: Card, appearance: CanvasAppearance, scale: CGFloat) {
         id = card.id
         self.card = card
+        textVersion = Self.newTextVersion()
         ghost.opacity = 0.35
         ghost.isHidden = true
         root.addSublayer(ghost)
@@ -242,8 +253,10 @@ final class CardNode {
             // A resized bitmap would look stretched; better blank for a frame than distorted.
             content.contents = nil
             renderedTier = nil
+            textVersion = Self.newTextVersion()
         } else if contentChanged {
             renderedTier = nil
+            textVersion = Self.newTextVersion()
         }
 
         skeleton.frame = bounds
@@ -411,6 +424,7 @@ final class CardNode {
     // MARK: Text bitmap
 
     func setRenderedText(_ image: CGImage?, tier: CGFloat, scale: CGFloat) {
+        textVersion = Self.newTextVersion()
         content.contents = image
         content.contentsScale = scale
         renderedTier = image == nil ? nil : tier
@@ -419,6 +433,7 @@ final class CardNode {
 
     /// Frees the bitmap of a card that scrolled far out of view.
     func discardRenderedText() {
+        textVersion = Self.newTextVersion()
         guard renderedTier != nil || content.contents != nil else { return }
         content.contents = nil
         renderedTier = nil
