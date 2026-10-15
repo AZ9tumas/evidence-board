@@ -82,7 +82,7 @@ private struct MinimapCards: View, Equatable {
     let theme: Theme
 
     /// The board's revision (in the geometry) stands in for comparing every card.
-    static func == (a: MinimapCards, b: MinimapCards) -> Bool {
+    nonisolated static func == (a: MinimapCards, b: MinimapCards) -> Bool {
         a.geometry == b.geometry && a.theme.id == b.theme.id
     }
 

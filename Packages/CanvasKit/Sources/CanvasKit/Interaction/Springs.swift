@@ -19,6 +19,19 @@ enum Motion {
     }
 }
 
+extension CASpringAnimation {
+    /// A Core Animation spring that moves like SwiftUI's `.spring(response:dampingFraction:)`.
+    static func spring(keyPath: String, response: CGFloat, damping: CGFloat) -> CASpringAnimation {
+        let spring = CASpringAnimation(keyPath: keyPath)
+        let omega = 2 * CGFloat.pi / max(response, 0.01)
+        spring.mass = 1
+        spring.stiffness = omega * omega
+        spring.damping = 2 * damping * omega
+        spring.duration = spring.settlingDuration
+        return spring
+    }
+}
+
 /// A damped spring stepped by hand each frame, for motion that has to follow the pointer or
 /// re-route a string as it moves (DESIGN.md §6.6). `response` is the period in seconds and
 /// `damping` the damping ratio, as in SwiftUI's `.spring(response:dampingFraction:)`.

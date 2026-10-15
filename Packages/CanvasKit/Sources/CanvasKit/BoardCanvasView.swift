@@ -428,9 +428,12 @@ public final class BoardCanvasView: NSView {
         withoutAnimation {
             for id in changes.removedStrings { removeStringNode(id, animated: true) }
             for id in changes.removedCards { removeCardNode(id) }
+            // New cards pop in, unless a whole batch arrives at once (test cards, big pastes).
+            let entrance = changes.insertedCards.count <= 40
             for id in changes.insertedCards {
                 guard cardNodes[id] == nil, let card = store.card(id) else { continue }
                 addCardNode(card)
+                if entrance { cardNodes[id]?.playEntrance() }
             }
             for id in changes.updatedCards {
                 guard let node = cardNodes[id], let card = store.card(id) else { continue }

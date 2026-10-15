@@ -326,10 +326,19 @@ final class CardNode {
     /// Shows a decode of the card's image. The node keeps the whole image and crops it itself,
     /// so reframing and resizing never need a new decode unless more pixels are required.
     func setImage(_ image: CGImage) {
+        let firstShown = photo.contents == nil
         fullImage = image
         web?.setHero(image, usesAsAvatar: webContent?.imageIsAvatar ?? false)
         applyImage()
         applyVisibility()
+        // A photo fades in when it first arrives, not when a sharper decode replaces it.
+        if firstShown, photo.contents != nil {
+            let fade = CABasicAnimation(keyPath: "opacity")
+            fade.fromValue = 0
+            fade.toValue = 1
+            fade.duration = Motion.isReduced ? 0.15 : 0.3
+            photo.add(fade, forKey: "arrive")
+        }
     }
 
     func discardImage() {
@@ -428,15 +437,51 @@ final class CardNode {
     }
 
     /// Picked up for dragging: slightly larger, with deeper shadows, and above everything.
+    /// Put down, it settles back with a little spring (DESIGN.md §6.6).
     func setLifted(_ lifted: Bool) {
         guard lifted != isLifted else { return }
         isLifted = lifted
         CATransaction.begin()
-        CATransaction.setAnimationDuration(0.14)
+        CATransaction.setAnimationDuration(lifted ? 0.14 : 0.3)
         applyZ()
         applyTransform()
         applyShadows()
+        if !lifted, !Motion.isReduced {
+            let settle = CASpringAnimation.spring(keyPath: "transform.scale", response: 0.3, damping: 0.7)
+            settle.fromValue = 1.02
+            settle.toValue = 1
+            root.add(settle, forKey: "settle")
+        }
         CATransaction.commit()
+    }
+
+    /// A new card arrives: it grows from 92%, fades in and drops the last 8 pt into place,
+    /// on a spring. With Reduce Motion it only fades.
+    func playEntrance() {
+        let fade = CABasicAnimation(keyPath: "opacity")
+        fade.fromValue = 0
+        fade.toValue = 1
+        fade.duration = Motion.isReduced ? 0.15 : 0.2
+        fade.timingFunction = CAMediaTimingFunction(name: .easeOut)
+        root.add(fade, forKey: "entrance.fade")
+        guard !Motion.isReduced else { return }
+        let grow = CASpringAnimation.spring(keyPath: "transform.scale", response: 0.35, damping: 0.78)
+        grow.fromValue = 0.92
+        grow.toValue = 1
+        root.add(grow, forKey: "entrance.grow")
+        let drop = CASpringAnimation.spring(keyPath: "position.y", response: 0.35, damping: 0.78)
+        drop.fromValue = -8
+        drop.toValue = 0
+        drop.isAdditive = true
+        root.add(drop, forKey: "entrance.drop")
+    }
+
+    /// The preview arrived: the skeleton cross-fades into the finished card.
+    func crossFadeContent() {
+        let fade = CATransition()
+        fade.type = .fade
+        fade.duration = Motion.isReduced ? 0.15 : 0.25
+        root.add(fade, forKey: "resolve")
     }
 
     /// While the live editor is open, its own text replaces the bitmap.

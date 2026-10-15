@@ -173,6 +173,7 @@ extension BoardCanvasView {
         let content = WebCardContent(payload: payload, assets: withAssets, isLoading: false)
         card.frame.height = Double(WebCardLayout(content: content, width: CGFloat(card.frame.width), appearance: canvasAppearance).size.height)
         let command = BoardCommand.batch([.addAssets(assets.all), .updateCards([card])])
+        cardNodes[id]?.crossFadeContent()
         if refresh {
             boardEditor.perform(command, actionName: "Refresh Preview")
         } else {
