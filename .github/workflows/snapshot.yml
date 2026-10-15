@@ -1,5 +1,5 @@
 # Launches the app on a macOS runner in a few states (empty board, sample board, selection,
-# editing, 500 extra cards, photos, reframing, connecting, Trace, Focus, web cards, themes, search, minimap, Quick Look) and publishes screenshots as neutral
+# editing, 500 extra cards, photos, reframing, connecting, Trace, Focus, web cards, themes, search, minimap, Quick Look, the Albania board) and publishes screenshots as neutral
 # check runs ("snapshot img<n> part<i>/<total>", base64 JPEG in the output text), so
 # the canvas can be checked visually without a Mac. Runs on demand, or on pushes whose
 # commit message contains [snapshot]. Fetch them with Tools/fetch-snapshots.py.
@@ -72,6 +72,17 @@ jobs:
           capture /tmp/Harbor.evboard search
           capture /tmp/Harbor.evboard minimap
           capture /tmp/Harbor.evboard renderer
+          # The Albania Files: the whole board, then close-ups of each part.
+          cp "boards/The Albania Files.evboard" /tmp/Albania.evboard
+          capture /tmp/Albania.evboard
+          view=0
+          for spot in "-2500 -1250 0.5" "-700 -1700 0.55" "1150 -900 0.5" "-2550 450 0.55" "-1050 300 0.55"; do
+            set -- $spot
+            view=$((view + 1))
+            jq --argjson x "$1" --argjson y "$2" --argjson z "$3" '.viewport = {x: $x, y: $y, zoom: $z}' \
+              /tmp/Albania.evboard > "/tmp/Albania$view.evboard"
+            capture "/tmp/Albania$view.evboard"
+          done
           # Quick Look: register the extensions and ask Finder's machinery for a thumbnail. The
           # build is unsigned, so the system may refuse them; then qlmanage falls back to a
           # generic text icon, which isn't ours, so it's only published when ours is registered.

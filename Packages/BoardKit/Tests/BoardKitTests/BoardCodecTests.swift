@@ -13,6 +13,30 @@ struct BoardCodecTests {
         .deletingLastPathComponent() // repository root
         .appending(path: "docs/examples/harbor-case.evboard")
 
+    /// Every board in `boards/` loads without a single repair, keeps all its strings and assets,
+    /// and survives a save and reload unchanged.
+    @Test func boardsInTheRepositoryLoadCleanly() throws {
+        let folder = Self.sampleURL
+            .deletingLastPathComponent() // examples
+            .deletingLastPathComponent() // docs
+            .deletingLastPathComponent() // repository root
+            .appending(path: "boards")
+        let files = try FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension == "evboard" }
+        #expect(!files.isEmpty)
+        for file in files {
+            let data = try Data(contentsOf: file)
+            let result = try BoardCodec.decode(data)
+            #expect(result.report == LoadReport(), "\(file.lastPathComponent)")
+            let raw = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+            #expect(result.board.cards.count == (raw["cards"] as? [Any])?.count)
+            #expect(result.board.strings.count == (raw["strings"] as? [Any])?.count)
+            #expect(result.board.referencedAssetIDs == Set(result.board.assets.keys))
+            let again = try BoardCodec.decode(BoardCodec.encode(result.board))
+            #expect(again.board == result.board)
+        }
+    }
+
     @Test func loadsPublishedSample() throws {
         let result = try BoardCodec.decode(Data(contentsOf: Self.sampleURL))
         let board = result.board
