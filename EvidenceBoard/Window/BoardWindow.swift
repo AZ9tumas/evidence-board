@@ -199,6 +199,10 @@ private enum SnapshotScenario {
         case "trace":
             canvas.debugSelectCards(at: [1, 4])
             canvas.traceSelection()
+        case "tracepath":
+            canvas.debugSelectCards(at: [1, 4])
+            canvas.traceSelection()
+            canvas.debugShowWholePulse()
         case "focus":
             canvas.debugSelectCards(at: [2])
             canvas.focusSelection()
