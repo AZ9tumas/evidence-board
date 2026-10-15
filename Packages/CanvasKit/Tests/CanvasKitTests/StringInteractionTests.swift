@@ -156,7 +156,16 @@ struct StringInteractionTests {
 
     @Test func connectToolPullsFromAnywhereOnACard() {
         view.setTool(.connect)
-        drag(from: CGPoint(x: 60, y: 80), to: CGPoint(x: 880, y: 60))
+        #expect(view.tool == .connect)
+        let start = CGPoint(x: 60, y: 80)
+        let end = CGPoint(x: 880, y: 60)
+        view.mouseDown(with: mouse(.leftMouseDown, at: start))
+        #expect(view.connection?.source == cards[0].id)
+        view.mouseDragged(with: mouse(.leftMouseDragged, at: CGPoint(x: 470, y: 70)))
+        #expect(view.connection?.target == cards[1].id)
+        view.mouseDragged(with: mouse(.leftMouseDragged, at: end))
+        #expect(view.connection?.target == cards[2].id)
+        view.mouseUp(with: mouse(.leftMouseUp, at: end))
         #expect(store.board.strings.map(\.to) == [cards[2].id])
         view.escape()
         #expect(view.tool == .select)

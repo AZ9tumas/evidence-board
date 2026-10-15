@@ -549,7 +549,7 @@ final class PinNode {
         CATransaction.commit()
 
         halo.removeAnimation(forKey: "pulse")
-        if state == .target && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+        if state == .target && !Motion.isReduced {
             let grow = CABasicAnimation(keyPath: "transform.scale")
             grow.fromValue = 0.7
             grow.toValue = 1.5

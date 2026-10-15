@@ -34,9 +34,10 @@ jobs:
           cp docs/examples/harbor-case.evboard /tmp/Harbor.evboard
           shot=0
           # capture <file> [scenario]: launches a fresh app instance, waits, screenshots, quits it.
+          echo "Reduce Motion: $(defaults read com.apple.universalaccess reduceMotion 2>&1)"
           capture() {
             shot=$((shot + 1))
-            open -n --env "EB_SNAPSHOT_SCENARIO=${2:-none}" -a "$app" "$1" --args -ApplePersistenceIgnoreState YES
+            open -n --env "EB_SNAPSHOT_SCENARIO=${2:-none}" --env EB_IGNORE_REDUCE_MOTION=1 -a "$app" "$1" --args -ApplePersistenceIgnoreState YES
             sleep 9
             pgrep -x EvidenceBoard >/dev/null && echo "shot $shot: running" || echo "shot $shot: APP NOT RUNNING"
             screencapture -x "/tmp/shot$shot.png"

@@ -1,6 +1,18 @@
 import AppKit
 import QuartzCore
 
+/// Whether to tone motion down (DESIGN.md §6.6): springs become fades, pulses stop.
+@MainActor
+enum Motion {
+    static var isReduced: Bool {
+        #if DEBUG
+        // Lets the snapshot workflow show motion even if its Mac has Reduce Motion on.
+        if ProcessInfo.processInfo.environment["EB_IGNORE_REDUCE_MOTION"] != nil { return false }
+        #endif
+        return NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+    }
+}
+
 /// A damped spring stepped by hand each frame, for motion that has to follow the pointer or
 /// re-route a string as it moves (DESIGN.md §6.6). `response` is the period in seconds and
 /// `damping` the damping ratio, as in SwiftUI's `.spring(response:dampingFraction:)`.

@@ -81,7 +81,7 @@ public final class BoardCanvasView: NSView {
     var pulseLength: CGFloat = 0
     /// What the mode banner says while Focus or Trace is on.
     var highlightStatus: CanvasModeStatus?
-    let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+    var reduceMotion: Bool { Motion.isReduced }
 
     struct CameraAnimation {
         let from: Camera
@@ -103,7 +103,7 @@ public final class BoardCanvasView: NSView {
         self.renderTier = Self.tier(for: Camera(viewport: store.viewport).zoom)
         self.rings = SelectionRings(
             appearance: appearance,
-            reduceMotion: NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+            reduceMotion: Motion.isReduced
         )
         super.init(frame: .zero)
 
@@ -618,7 +618,7 @@ public final class BoardCanvasView: NSView {
 
     func animateCamera(to target: Camera, anchor: CGPoint?) {
         guard target != camera else { return }
-        if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+        if Motion.isReduced {
             stopCameraAnimation()
             setCamera(target)
             return
