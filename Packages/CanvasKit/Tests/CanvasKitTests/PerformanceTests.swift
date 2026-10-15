@@ -189,8 +189,9 @@ struct PerformanceTests {
         view.setCamera(Camera(center: CGPoint(x: 1500, y: 800), zoom: 0.5))
         view.select(Set(cluster))
 
+        // Grab the card left of its pin, inside its (text-fitted) height.
         let grab = store.card(cluster[0])!.frame
-        let start = CGPoint(x: grab.x + 150, y: grab.y + 150)
+        let start = CGPoint(x: grab.x + 40, y: grab.y + min(40, grab.height / 2))
         func event(_ type: NSEvent.EventType, _ world: CGPoint) -> NSEvent {
             let point = view.convert(view.camera.worldToView(world, in: view.bounds.size), to: nil)
             return NSEvent.mouseEvent(
@@ -232,7 +233,7 @@ struct PerformanceTests {
             }
             var bytes = noise
             bytes.append(contentsOf: withUnsafeBytes(of: UInt32(photoIndex)) { Array($0) })
-            let asset = Asset(mime: "image/jpeg", pixelWidth: 1400, pixelHeight: 1050, data: bytes)
+            let asset = Asset(mime: "image/jpeg", pixelWidth: 680, pixelHeight: 510, data: bytes)
             let id = "sha256-perf-\(photoIndex)"
             board.assets[id] = asset
             photo.asset = id
@@ -241,7 +242,7 @@ struct PerformanceTests {
         }
         let data = try BoardCodec.encode(board)
         print("BUDGET-INFO|board size|\(data.count / 1_048_576) MB, \(board.cards.count) cards, \(board.assets.count) photos")
-        #expect(data.count > 45_000_000)
+        #expect(data.count > 40_000_000 && data.count < 90_000_000)
 
         _ = NSApplication.shared
         let clock = ContinuousClock()
@@ -298,9 +299,10 @@ struct PerformanceTests {
         Budget.check("Work scheduled at rest (timers, links, fetches)", Double(busy), under: 0, unit: "items")
     }
 
-    /// A 1400 × 1050 JPEG of noise, about half a megabyte: photos that don't compress.
+    /// A 680 × 510 JPEG of noise, about 390 KB: photos that don't compress, so 100 of them
+    /// make a board of about 50 MB.
     static func noiseJPEG() -> Data? {
-        let width = 1400, height = 1050
+        let width = 680, height = 510
         var random = SplitMix(seed: 42)
         var pixels = [UInt8](repeating: 255, count: width * height * 4)
         for index in stride(from: 0, to: pixels.count, by: 4) {

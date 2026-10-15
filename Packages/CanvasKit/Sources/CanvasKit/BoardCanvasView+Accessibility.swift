@@ -171,24 +171,26 @@ extension BoardCanvasView {
     }
 
     /// ⌥ + arrow: the nearest card whose center lies that way, favoring ones straight ahead.
+    /// Cards within about 70° of the direction come first; others only if there's none.
     func focusCard(toward direction: CGVector) {
         guard let id = selection.first, selection.count == 1, let card = liveCard(id) else {
             focusNextCard(1)
             return
         }
         let origin = CGPoint(x: card.frame.midX, y: card.frame.midY)
-        let best = store.board.cards
+        let candidates = store.board.cards
             .filter { $0.id != id }
-            .compactMap { other -> (UUID, CGFloat)? in
+            .compactMap { other -> (id: UUID, score: CGFloat, inCone: Bool)? in
                 let dx = CGFloat(other.frame.midX) - origin.x
                 let dy = CGFloat(other.frame.midY) - origin.y
                 let ahead = dx * direction.dx + dy * direction.dy
                 let aside = abs(dx * direction.dy - dy * direction.dx)
                 guard ahead > 1 else { return nil }
-                return (other.id, ahead + aside * 2)
+                return (other.id, ahead + aside * 2, ahead >= aside * 0.35)
             }
-            .min { $0.1 < $1.1 }
-        guard let target = best?.0 else {
+        let inCone = candidates.filter(\.inCone)
+        let best = (inCone.isEmpty ? candidates : inCone).min { $0.score < $1.score }
+        guard let target = best?.id else {
             NSSound.beep()
             return
         }
