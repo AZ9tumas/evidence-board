@@ -117,14 +117,12 @@ public final class CanvasController {
     /// workflow to print.
     public func debugReport() -> String {
         guard let view else { return "no view" }
-        let animation = view.pulseSpark.animation(forKey: "pulse")
-        let position = view.pulseSpark.presentation()?.position
+        let box = view.pulseCore.path?.boundingBoxOfPath
         return [
             "reduceMotion=\(Motion.isReduced) ignoresSystemSetting=\(Motion.ignoresSystemSetting)",
             "counts=\(view.debugCounts.sorted { $0.key < $1.key })",
-            "pulseHidden=\(view.pulseLayer.isHidden) length=\(view.pulseLength) start=\(view.pulseStart)",
-            "now=\(CACurrentMediaTime()) animationBegin=\(animation?.beginTime ?? -1) duration=\(animation?.duration ?? -1)",
-            "sparkModel=\(view.pulseSpark.position) sparkPresented=\(position.map { "\($0)" } ?? "nil")",
+            "pulseHidden=\(view.pulseLayer.isHidden) length=\(view.pulseLength) ticking=\(view.physics.isRunning)",
+            "pulse box=\(box.map { "\($0)" } ?? "nil")",
         ].joined(separator: "\n")
     }
 

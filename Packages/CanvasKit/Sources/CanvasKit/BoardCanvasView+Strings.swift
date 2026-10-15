@@ -272,7 +272,8 @@ extension BoardCanvasView {
                 if let node = stringNodes[id] { layoutString(node) }
             }
         }
-        return connection != nil || !droopSprings.isEmpty
+        if isPulsing { updatePulseFrame(at: CACurrentMediaTime()) }
+        return connection != nil || !droopSprings.isEmpty || isPulsing
     }
 
     // MARK: - Sag
@@ -555,88 +556,96 @@ extension BoardCanvasView {
         dimLayer.frame = visible.insetBy(dx: -visible.width, dy: -visible.height)
     }
 
-    /// A glow that travels along the traced path at 600 pt/s, trailing a tail about 60 pt
-    /// long (DESIGN.md §6.6).
+    static let pulseSpeed: CGFloat = 600
+    static let pulseSegment: CGFloat = 60
+    static let pulsePause: CFTimeInterval = 0.35
+
+    /// Whether the Trace pulse is moving, which keeps the frame ticker running.
+    var isPulsing: Bool { tracePath != nil && !pulseLayer.isHidden }
+
+    /// A 60 pt glow that travels along the traced path at 600 pt/s (DESIGN.md §6.6). It's
+    /// moved by the frame ticker rather than a Core Animation keyframe animation, which the
+    /// CI Mac's window server drew frozen at the first pin.
     private func updatePulse() {
         #if DEBUG
         debugCounts["updatePulse", default: 0] += 1
         #endif
-        pulseSpark.removeAnimation(forKey: "pulse")
         guard let tracePath, !tracePath.strings.isEmpty, !reduceMotion else {
             withoutAnimation { pulseLayer.isHidden = true }
-            pulsePath = nil
+            pulsePoints = []
             return
         }
         let color = stringNodes[tracePath.strings[0]].map { canvasAppearance.gradient(for: $0.string.color).from } ?? canvasAppearance.pin.from
-        let size: CGFloat = 9
-        let copies = 14
         withoutAnimation {
             pulseLayer.isHidden = false
-            pulseLayer.instanceCount = copies
-            pulseLayer.instanceDelay = 60.0 / 600 / Double(copies)
-            pulseLayer.instanceAlphaOffset = -1 / Float(copies)
-            pulseSpark.bounds = CGRect(x: 0, y: 0, width: size, height: size)
-            pulseSpark.cornerRadius = size / 2
-            pulseSpark.backgroundColor = color.mixed(with: .white, 0.75).cgColor
-            pulseSpark.shadowPath = CGPath(ellipseIn: pulseSpark.bounds, transform: nil)
-            pulseSpark.shadowColor = color.cgColor
-            pulseSpark.shadowOpacity = 1
-            pulseSpark.shadowRadius = 5
-            pulseSpark.shadowOffset = .zero
+            // A wide translucent stroke reads as glow without an offscreen shadow pass.
+            pulseGlow.strokeColor = color.opacity(0.4).cgColor
+            pulseGlow.lineWidth = 11
+            pulseCore.strokeColor = color.mixed(with: .white, 0.75).cgColor
+            pulseCore.lineWidth = 3.5
         }
-        pulseStart = pulseLayer.convertTime(CACurrentMediaTime(), from: nil)
+        pulseStart = CACurrentMediaTime()
         updatePulsePath()
+        physics.start(in: self)
     }
 
-    /// Joins the traced strings end to end, each drawn in the direction of travel, and sends
-    /// the spark along it. When the path moves (a card is dragged) the spark keeps its place.
+    /// Joins the traced strings end to end, each in the direction of travel, as points with
+    /// their running distances. Called again when a traced card moves.
     func updatePulsePath() {
         guard let tracePath, !pulseLayer.isHidden else { return }
         #if DEBUG
         debugCounts["updatePulsePath", default: 0] += 1
         #endif
-        let path = CGMutablePath()
-        var total: CGFloat = 0
-        var start: CGPoint?
+        var points: [CGPoint] = []
         for (index, id) in tracePath.strings.enumerated() {
             guard let node = stringNodes[id], index < tracePath.cards.count else { continue }
             let curve = node.string.from == tracePath.cards[index] ? node.curve : node.curve.reversed
-            if path.isEmpty {
-                path.move(to: curve.a)
-                start = curve.a
-            } else if path.currentPoint != curve.a {
-                path.addLine(to: curve.a)
-            }
-            path.addCurve(to: curve.b, control1: curve.c1, control2: curve.c2)
-            total += node.length
+            let piece = curve.flattened(segments: 48)
+            points += points.last == piece.first ? piece.dropFirst() : piece[...]
         }
-        pulsePath = path
-        pulseLength = total
-        guard let start else { return }
+        var distances: [CGFloat] = points.isEmpty ? [] : [0]
+        for (a, b) in zip(points, points.dropFirst()) {
+            distances.append(distances[distances.count - 1] + hypot(b.x - a.x, b.y - a.y))
+        }
+        pulsePoints = points
+        pulseDistances = distances
+        pulseLength = distances.last ?? 0
+        updatePulseFrame(at: CACurrentMediaTime())
+    }
 
-        let travel = CFTimeInterval(max(total, 60) / 600)
-        let move = CAKeyframeAnimation(keyPath: "position")
-        move.path = path
-        move.calculationMode = .paced
-        move.duration = travel
-        move.fillMode = .both
-        // Fade out at the far pin, then set off again.
-        let fade = CAKeyframeAnimation(keyPath: "opacity")
-        fade.values = [1, 1, 0]
-        fade.keyTimes = [0, 0.92, 1]
-        fade.duration = travel
-        fade.fillMode = .both
-        let pulse = CAAnimationGroup()
-        pulse.animations = [move, fade]
-        pulse.duration = travel + 0.35
-        pulse.repeatCount = .infinity
-        pulse.beginTime = pulseStart
-        // The tail's copies start a little late; until then they wait at the first pin.
-        pulse.fillMode = .backwards
-        withoutAnimation {
-            pulseSpark.position = start
-            pulseSpark.add(pulse, forKey: "pulse")
+    /// Cuts the glowing piece for time `now`: its head runs from the first pin to past the
+    /// last, so the tail slides into the pin, then waits a moment and sets off again.
+    func updatePulseFrame(at now: CFTimeInterval) {
+        guard pulsePoints.count >= 2, pulseLength > 0 else { return }
+        let travel = CFTimeInterval((pulseLength + Self.pulseSegment) / Self.pulseSpeed)
+        let elapsed = (now - pulseStart).truncatingRemainder(dividingBy: travel + Self.pulsePause)
+        let head = min(CGFloat(elapsed) * Self.pulseSpeed, pulseLength + Self.pulseSegment)
+        let path = CGMutablePath()
+        let from = max(head - Self.pulseSegment, 0)
+        let to = min(head, pulseLength)
+        if to > from {
+            path.move(to: pulsePoint(at: from))
+            for (point, distance) in zip(pulsePoints, pulseDistances) where distance > from && distance < to {
+                path.addLine(to: point)
+            }
+            path.addLine(to: pulsePoint(at: to))
         }
+        withoutAnimation {
+            pulseGlow.path = path
+            pulseCore.path = path
+        }
+    }
+
+    /// The point `distance` along the pulse path.
+    private func pulsePoint(at distance: CGFloat) -> CGPoint {
+        guard let next = pulseDistances.firstIndex(where: { $0 >= distance }), next > 0 else {
+            return distance <= 0 ? pulsePoints[0] : pulsePoints[pulsePoints.count - 1]
+        }
+        let a = pulsePoints[next - 1]
+        let b = pulsePoints[next]
+        let span = pulseDistances[next] - pulseDistances[next - 1]
+        let t = span > 0 ? (distance - pulseDistances[next - 1]) / span : 0
+        return CGPoint(x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t)
     }
 
     func setNeedsPulseUpdate() {

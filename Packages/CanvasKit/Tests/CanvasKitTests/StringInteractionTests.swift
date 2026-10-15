@@ -128,14 +128,14 @@ struct StringInteractionTests {
         #expect(test.view.stringNodes.values.allSatisfy { $0.emphasis == .glowing })
         // The pulse runs along both strings, from the first card's pin to the last one's.
         #expect(!test.view.pulseLayer.isHidden)
-        #expect(test.view.pulseSpark.animation(forKey: "pulse") != nil)
+        #expect(test.view.isPulsing)
         #expect(test.view.pulseLength > 800)
-        let box = try #require(test.view.pulsePath?.boundingBoxOfPath)
-        #expect(abs(box.minX - test.pin(0).x) < 1 && abs(box.maxX - test.pin(2).x) < 1)
-        // Let Core Animation run for a moment: the spark should be well on its way.
-        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.4))
-        let spark = try #require(test.view.pulseSpark.presentation()?.position)
-        #expect(spark.x - test.pin(0).x > 100, "spark at \(spark), animation \(String(describing: test.view.pulseSpark.animation(forKey: "pulse")?.beginTime)), now \(CACurrentMediaTime())")
+        #expect(test.view.pulsePoints.first == test.pin(0) && test.view.pulsePoints.last == test.pin(2))
+        // 0.4 s in, the glow is the 60 pt of path ending 240 pt from the first pin.
+        test.view.updatePulseFrame(at: test.view.pulseStart + 0.4)
+        let glow = try #require(test.view.pulseCore.path?.boundingBoxOfPath)
+        #expect(glow.minX > test.pin(0).x + 150 && glow.maxX < test.pin(0).x + 240)
+        #expect(glow.width > 40 && glow.width <= 60.5)
 
         test.view.escape()
         #expect(test.view.highlight == nil)
