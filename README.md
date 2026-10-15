@@ -55,7 +55,14 @@ Tools/                     Helper scripts
 
 ## Status
 
-**M0 (skeleton)**, **M1 (text cards)** and **M2 (image cards)** are done.
+**M0 (skeleton)**, **M1 (text cards)**, **M2 (image cards)** and **M3 (strings)** are done.
+
+**Strings (M3)**
+- **Connect:** hover a card and its pin brightens. Drag from the pin to another card: the string follows on a spring, snaps onto the target's pulsing pin, and pulls taut when you let go. Let go on empty canvas and it slides back into the pin. With the **Connect tool (C)** you can drag from anywhere on a card. **⌘K** connects two selected cards.
+- **Edit:** click a string to select it, drag it up or down to change the slack, double-click (or **↩**) to label it, and **⌫** to delete it. Right-click for color, thickness, style, arrow, slack and direction. New strings use the last color, thickness and style you picked.
+- **Look:** a gradient from pin to pin with a fiber texture, a soft shadow, knots over the pins, arrowheads and a glass label capsule. Further out they turn solid, then become hairlines. Several strings between the same two cards fan out.
+- **Focus (F):** highlights the selected cards and everything one string away, and dims the rest. Press **F** again to widen by a hop.
+- **Trace (⌘T):** with two cards selected, lights up the shortest chain of strings between them and sends a glow along it. **Esc** leaves Focus or Trace. Finding the path takes well under 5 ms on a 1,000-string board (there's a test for it).
 
 **Images (M2)**
 - **Add:** drop images or image files from Finder or a browser, paste them, or use **Insert ▸ Image…** (⌘⇧I). PDFs show their first page.
@@ -73,6 +80,6 @@ Tools/                     Helper scripts
 
 **Base (M0):** the document app (New, Open, Save, autosave, Versions), the forgiving JSON codec, the Noir canvas, and the camera.
 
-Not verified yet: frame rate and memory on real hardware (they need a Mac and Instruments). Web cards still show placeholders until M4, and strings can't be created until M3.
+Not verified yet: frame rate and memory on real hardware (they need a Mac and Instruments), and how the string physics feel on a real trackpad. Web cards still show placeholders until M4.
 
 See the roadmap in [`docs/DESIGN.md` §16](docs/DESIGN.md#16-roadmap).

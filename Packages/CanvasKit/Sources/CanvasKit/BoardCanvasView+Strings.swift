@@ -560,8 +560,8 @@ extension BoardCanvasView {
         let color = stringNodes[tracePath.strings[0]].map { canvasAppearance.gradient(for: $0.string.color).from } ?? canvasAppearance.pin.from
         withoutAnimation {
             pulseLayer.isHidden = false
-            pulseLayer.strokeColor = color.mixed(with: .white, 0.55).cgColor
-            pulseLayer.lineWidth = 3.5
+            pulseLayer.strokeColor = color.mixed(with: .white, 0.7).cgColor
+            pulseLayer.lineWidth = 4
             pulseLayer.shadowColor = color.cgColor
             pulseLayer.shadowOpacity = 1
             pulseLayer.shadowRadius = 6

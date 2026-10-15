@@ -699,6 +699,15 @@ final class BoardStore {
     /// The single mutation entry point. Returns the inverse command, or nil if nothing changed.
     func apply(_ command: BoardCommand) -> BoardCommand?
     func addObserver(_ observer: @escaping @MainActor (BoardChanges) -> Void) -> UUID
+    var graph: BoardGraph { get }              // rebuilt lazily after string edits
+}
+
+/// Strings as an undirected graph of cards, for Focus and Trace. Card IDs map to array
+/// indices once; searches are plain BFS over arrays.
+struct BoardGraph: Sendable {
+    init(strings: [BoardString])
+    func neighborhood(of seeds: Set<UUID>, hops: Int) -> Neighborhood  // cards, strings, canWiden
+    func shortestPath(from: UUID, to: UUID) -> GraphPath?              // cards[i] —strings[i]— cards[i+1]
 }
 
 // MARK: Commands (every mutation is one, so undo is free)
@@ -708,6 +717,7 @@ enum BoardCommand: Sendable, Equatable {
     case removeCards(Set<UUID>)                          // also removes their strings
     case insertStrings([BoardString], positions: [Int]? = nil)
     case removeStrings(Set<UUID>)
+    case updateStrings([BoardString])                    // color, label, sag, arrow, direction
     case setFrames([UUID: Rect])                         // move and resize
     case updateCards([Card])                             // text, style, tint, z, lock
     case addAssets([AssetID: Asset])
@@ -717,7 +727,7 @@ enum BoardCommand: Sendable, Equatable {
 
 struct BoardChanges {                                    // exactly what changed
     var insertedCards, updatedCards, removedCards: Set<UUID>
-    var insertedStrings, removedStrings: Set<UUID>
+    var insertedStrings, updatedStrings, removedStrings: Set<UUID>
 }
 ```
 
@@ -786,15 +796,17 @@ BoardCanvasView.layer (root)
 ├── gridLayer            CAReplicatorLayer dots, re-pitched at zoom tiers
 ├── worldLayer           ◀── sublayerTransform = camera (scale + translate) — the ONLY thing pan/zoom changes
 │   ├── cardsLayer       one CardLayer per card, stacked by zPosition = z
+│   │     dimLayer        Focus/Trace: one translucent layer over the cards; highlighted cards are raised above it
 │   │     CardLayer
 │   │       ├── shadowLayers  (3 shadows, explicit shadowPath)
 │   │       ├── bodyLayer     (gradient fill, tint band, placeholder bars)
 │   │       ├── contentLayer  (card content as a bitmap for the current zoom tier)
 │   │       ├── strokeLayer   (gradient border)
 │   │       └── pinLayer      (inside the card, so a card on top covers the pins below it)
-│   ├── stringsLayer     one string per layer above every card, with a knot over each pin
+│   ├── stringsLayer     one string per layer above every card, with a knot over each pin,
+│   │                    plus the live connect string and the Trace pulse
 │   └── selectionLayer   selection rings (world space, re-thickened when the zoom settles)
-├── overlayLayer         resize handles, marquee, guides, live connect string (screen-space)
+├── overlayLayer         resize handles, the string grip, marquee, guides (screen-space)
 └── HUD (SwiftUI)        toolbar, minimap, zoom HUD, inspector, which are separate NSHostingViews
 ```
 
@@ -864,10 +876,15 @@ func stringPath(from a: CGPoint, to b: CGPoint, sag: CGFloat, fanOffset: CGFloat
 }
 ```
 
-- **Gradient along the string**: a `CAGradientLayer` with axis start = `a` and end = `b`, masked by the `CAShapeLayer`.
-- **Thread texture**: a second stroke with `lineDashPattern [1, 2]` at 25% white and an offset of 0.5 pt, which reads as twisted fibers at ≥ 100% zoom. It's hidden below 60%.
-- **Shadow**: the shape layer's own `shadowPath = path.copy(strokingWithWidth:)`, offset (0, 3), blur 4, 35%.
+- **Gradient along the string**: a `CAGradientLayer` framed to the curve's box, with axis start = `a` and end = `b`, masked by a `CAShapeLayer` whose bounds origin is the box origin, so the mask path stays in world coordinates.
+- **Thread texture**: a second, thinner stroke dashed at about [½, 1] × thickness, 25% white, nudged up a fraction of a point. It reads as twisted fibers up close and is hidden below 60%.
+- **Shadow**: a separate layer whose `shadowPath` is the stroked curve (dashed first for dashed strings), offset (0, 3), blur 4, 35%. It's only computed at full detail, so dragging cards at lower zoom never strokes paths.
+- **Knots, arrowheads and label**: a knot over each pin in the end's color; arrowheads sit just clear of the pin, along the curve's last segment; the label is a capsule at `B(0.5)` with its text drawn per zoom tier like card text.
+- **Levels of detail** follow §10.4: gradient, texture, shadow and label at full; a solid stroke when reduced; a 1-screen-point hairline at minimal. Dimmed strings (Focus/Trace) turn solid at 28% alpha instead of using layer opacity, which would force an offscreen pass per string.
+- **Hit testing** uses the 16-segment polyline kept from the last layout (§10.6); a label also counts as the string.
+- **Slack dragging**: the middle of the curve sits `0.75 × droop` below the chord, so dragging by `dy` changes sag by `dy / (0.75 × droopCap)` and the middle follows the pointer exactly.
 - **During drag**, only the strings attached to dragged cards recompute their path (an adjacency map from card ID to string IDs, O(degree)).
+- **Springs**: the live connect string's loose end and the "pull taut" overshoot are stepped by hand on a display link (a damped spring, fixed 1/240 s substeps), because they re-route the curve every frame. Draw-in, snapping away, the pin pulse and the Trace pulse are plain Core Animation.
 
 ### 10.8 Input handling
 
@@ -876,7 +893,9 @@ A **tool state machine** in the canvas:
 ```
 idle ──mouseDown(card)──▶ pressingCard ──drag>3pt──▶ draggingCards ──mouseUp──▶ idle (commit MoveCards)
  │                            └──mouseUp──▶ idle (select)
- ├─mouseDown(pin)──▶ connecting ──mouseUp(on card)──▶ idle (commit AddString)
+ ├─mouseDown(pin, or card with C)──▶ connecting ──mouseUp(on card)──▶ idle (commit insertStrings)
+ │                                       └──mouseUp(empty) / Esc──▶ idle (string retracts)
+ ├─mouseDown(string)──▶ pressingString ──drag>3pt──▶ adjustingSag ──mouseUp──▶ idle (commit updateStrings)
  ├─mouseDown(empty)──▶ marquee ──mouseUp──▶ idle (select)
  ├─space down──▶ panReady ──drag──▶ panning
  └─doubleClick(empty)──▶ creatingText ──▶ editingText
