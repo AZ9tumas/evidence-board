@@ -466,6 +466,9 @@ extension BoardCanvasView {
 
     /// Works out what Focus or Trace shows (again, after an edit) and shows it.
     func refreshHighlight(animated: Bool = false) {
+        #if DEBUG
+        debugCounts["refreshHighlight", default: 0] += 1
+        #endif
         var cards: Set<UUID> = []
         var strings: Set<UUID> = []
         var path: GraphPath?
@@ -555,6 +558,9 @@ extension BoardCanvasView {
     /// A glow that travels along the traced path at 600 pt/s, trailing a tail about 60 pt
     /// long (DESIGN.md §6.6).
     private func updatePulse() {
+        #if DEBUG
+        debugCounts["updatePulse", default: 0] += 1
+        #endif
         pulseSpark.removeAnimation(forKey: "pulse")
         guard let tracePath, !tracePath.strings.isEmpty, !reduceMotion else {
             withoutAnimation { pulseLayer.isHidden = true }
@@ -569,7 +575,6 @@ extension BoardCanvasView {
             pulseLayer.instanceCount = copies
             pulseLayer.instanceDelay = 60.0 / 600 / Double(copies)
             pulseLayer.instanceAlphaOffset = -1 / Float(copies)
-            pulseLayer.instanceTransform = CATransform3DMakeScale(0.95, 0.95, 1)
             pulseSpark.bounds = CGRect(x: 0, y: 0, width: size, height: size)
             pulseSpark.cornerRadius = size / 2
             pulseSpark.backgroundColor = color.mixed(with: .white, 0.75).cgColor
@@ -587,6 +592,9 @@ extension BoardCanvasView {
     /// the spark along it. When the path moves (a card is dragged) the spark keeps its place.
     func updatePulsePath() {
         guard let tracePath, !pulseLayer.isHidden else { return }
+        #if DEBUG
+        debugCounts["updatePulsePath", default: 0] += 1
+        #endif
         let path = CGMutablePath()
         var total: CGFloat = 0
         var start: CGPoint?

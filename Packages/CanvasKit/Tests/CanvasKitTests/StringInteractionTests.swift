@@ -132,6 +132,10 @@ struct StringInteractionTests {
         #expect(test.view.pulseLength > 800)
         let box = try #require(test.view.pulsePath?.boundingBoxOfPath)
         #expect(abs(box.minX - test.pin(0).x) < 1 && abs(box.maxX - test.pin(2).x) < 1)
+        // Let Core Animation run for a moment: the spark should be well on its way.
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.4))
+        let spark = try #require(test.view.pulseSpark.presentation()?.position)
+        #expect(spark.x - test.pin(0).x > 100, "spark at \(spark), animation \(String(describing: test.view.pulseSpark.animation(forKey: "pulse")?.beginTime)), now \(CACurrentMediaTime())")
 
         test.view.escape()
         #expect(test.view.highlight == nil)

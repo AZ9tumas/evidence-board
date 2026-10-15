@@ -884,7 +884,8 @@ func stringPath(from a: CGPoint, to b: CGPoint, sag: CGFloat, fanOffset: CGFloat
 - **Hit testing** uses the 16-segment polyline kept from the last layout (§10.6); a label also counts as the string.
 - **Slack dragging**: the middle of the curve sits `0.75 × droop` below the chord, so dragging by `dy` changes sag by `dy / (0.75 × droopCap)` and the middle follows the pointer exactly.
 - **During drag**, only the strings attached to dragged cards recompute their path (an adjacency map from card ID to string IDs, O(degree)).
-- **Springs**: the live connect string's loose end and the "pull taut" overshoot are stepped by hand on a display link (a damped spring, fixed 1/240 s substeps), because they re-route the curve every frame. Draw-in, snapping away, the pin pulse and the Trace pulse are plain Core Animation.
+- **Springs**: the live connect string's loose end and the "pull taut" overshoot are stepped by hand on a display link (a damped spring, fixed 1/240 s substeps), because they re-route the curve every frame. Draw-in, snapping away, the pin pulse and the Trace pulse are plain Core Animation. The Trace pulse is a glowing spark moved along the joined path by a paced keyframe animation, repeated by a `CAReplicatorLayer` with a small delay and fading copies, which draws the 60 pt tail. (Animating `strokeStart` and `strokeEnd` together didn't show on screen.) Moving a traced card re-adds the animation with the same `beginTime`, so the spark keeps its place.
+- **Reduce Motion** is read in one place; debug builds launched for a snapshot scenario ignore it, because the CI Mac has it on.
 
 ### 10.8 Input handling
 

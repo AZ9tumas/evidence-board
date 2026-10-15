@@ -86,6 +86,10 @@ public final class BoardCanvasView: NSView {
     /// What the mode banner says while Focus or Trace is on.
     var highlightStatus: CanvasModeStatus?
     var reduceMotion: Bool { Motion.isReduced }
+    #if DEBUG
+    /// How often some updates ran, for the snapshot workflow's diagnostics.
+    var debugCounts: [String: Int] = [:]
+    #endif
 
     struct CameraAnimation {
         let from: Camera
@@ -245,6 +249,9 @@ public final class BoardCanvasView: NSView {
     /// Recreates every card and string layer. Used on load and when the theme changes;
     /// edits go through ``storeDidChange(_:)`` instead.
     private func rebuildContent() {
+        #if DEBUG
+        debugCounts["rebuildContent", default: 0] += 1
+        #endif
         cancelConnecting(animated: false)
         droopSprings = [:]
         withoutAnimation {
@@ -382,6 +389,9 @@ public final class BoardCanvasView: NSView {
     // MARK: - Store changes
 
     func storeDidChange(_ changes: BoardChanges) {
+        #if DEBUG
+        debugCounts["storeDidChange", default: 0] += 1
+        #endif
         withoutAnimation {
             for id in changes.removedStrings { removeStringNode(id, animated: true) }
             for id in changes.removedCards { removeCardNode(id) }

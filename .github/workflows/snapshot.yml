@@ -61,6 +61,7 @@ jobs:
           capture /tmp/Harbor.evboard focus
           capture /tmp/Harbor.evboard string
           echo "$shot" > /tmp/shot-count
+          echo "--- diagnostics"; cat /tmp/eb-diag.txt 2>/dev/null || echo "(none)"
       - name: Publish images
         env:
           GH_TOKEN: ${{ github.token }}
