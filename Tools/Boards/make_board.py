@@ -1,4 +1,5 @@
-"""Builds "The Albania Files" evidence board from sourced facts. Usage: make_board.py map.jpg out.evboard [iterations] [seed]"""
+"""Builds "The Albania Files" evidence board from sourced facts.
+Usage: make_board.py map.jpg out.evboard [iterations] [seed] [musk-iterations] [musk-seed]"""
 import base64
 import hashlib
 import json
@@ -80,6 +81,12 @@ PALETTES = {
     "Commercial Observer": ("#D9363E", "#9A6E70", "#4C0B0F", "#251718", "#FFE8E9"),
     "Yahoo News": ("#7B3FE4", "#7F70A0", "#2A0E5C", "#1C1628", "#F1EAFF"),
     "NPR": ("#D62021", "#946A6A", "#470909", "#241515", "#FFE7E7"),
+    "RTSH": ("#C8102E", "#8F6A6E", "#4A0510", "#241517", "#FFE8EA"),
+    "bne IntelliNews": ("#E4002B", "#946A70", "#4A000E", "#241416", "#FFE6EB"),
+    "BNN Bloomberg": ("#7A3CF0", "#76699C", "#280C5E", "#1A1528", "#F0EAFF"),
+    "AGBI": ("#C9A227", "#8C7F5E", "#5A4508", "#26221A", "#FFF6DD"),
+    "Bloomberg": ("#5B2EE5", "#71699E", "#1F0B5C", "#18142A", "#EFEAFF"),
+    "Snopes": ("#F2B705", "#8F8158", "#5C4400", "#26221A", "#FFF7DB"),
 }
 
 
@@ -120,8 +127,9 @@ GAP = 46
 # ---------------------------------------------------------------- Title
 text("title", -460, -2330, 720, "THE ALBANIA FILES", "headline", locked=True, rotation=0)
 text("subtitle", -460, -2240, 720,
-     "**Jared Kushner · Ivanka Trump · Donald Trump · Steve Witkoff**: Sazan Island and Zvërnec, the Flamingo "
-     "Revolution, the question of Israel's role, the billions behind Affinity Partners, and the envoy beside Kushner.\n"
+     "**Jared Kushner · Ivanka Trump · Donald Trump · Steve Witkoff · Elon Musk**: Sazan Island and Zvërnec, the "
+     "Flamingo Revolution, the question of Israel's role, the billions behind Affinity Partners, the envoy beside "
+     "Kushner, and Musk's own threads to Albania.\n"
      "Compiled 16 Oct 2026 from public reporting. Each card names its source.", rotation=0, locked=True)
 text("legend", 330, -2340, 360,
      "HOW TO READ THIS BOARD\n"
@@ -414,6 +422,67 @@ web("w_telegraph", 1450, 140, "https://www.yahoo.com/news/politics/articles/bill
     "Yahoo News", "The billion-dollar conflicts threatening to tear apart Trump's board of peace",
     "The Telegraph's investigation.", "2026-10-13T00:00:00Z")
 
+# ---------------------------------------------------------------- Elon Musk
+OLD_CARDS = len(cards)
+CLUSTER[0] = "musk"
+text("h_musk", 0, 0, 620, "THE BILLIONAIRE: ELON MUSK", "headline", locked=True, rotation=0)
+text("musk", 0, 0, 300,
+     "**ELON MUSK**\nCEO of Tesla and SpaceX. SpaceX took over his AI company **xAI**, owner of **X** and Grok, in "
+     "Feb 2026. Ran DOGE for Trump, Jan–May 2025.", tint="violet")
+text("m_trump", 0, 0, 320,
+     "✅ **Backer, rift, medal**\nSpent more than $250M to elect Trump in 2024. Left DOGE in May 2025; public feud in "
+     "June over the tax bill; reunited in September. **8 Oct 2026**: Trump gives him the National Medal of Science, "
+     "calling him a \"national treasure\".", tint="azure")
+text("m_rome", 0, 0, 320,
+     "✅ **Dec 2023: Rama meets Musk**\nBoth guests of Meloni's party festival in Rome. Rama posts \"With Mister X in "
+     "Rome\". Musk says he'd like to visit Albania; Rama says he won't regret it. No visit reported.", tint="azure")
+text("m_migrants", 0, 0, 320,
+     "✅ **Nov 2024: \"These judges need to go\"**\nMusk on the Rome judges who blocked holding migrants in Italy's "
+     "centres in Albania, the Meloni–Rama deal. Italy's President Mattarella rebukes him: Italy \"knows how to take "
+     "care of itself\".", tint="azure")
+text("m_space", 0, 0, 320,
+     "✅ **SpaceX and Starlink in Albania**\n3 Jan 2023: a SpaceX Falcon 9 carries **Albania-1 and -2**, Satellogic "
+     "satellites that watch for illegal building, logging and cannabis. Apr 2024: Starlink goes live in Albania.",
+     tint="red")
+text("m_gulf", 0, 0, 320,
+     "✅ **The same Gulf funds**\nQatar's QIA put **$375M** into his Twitter buyout (2022) and joined xAI's **$20B** "
+     "round (Jan 2026) with Abu Dhabi's **MGX**. QIA also backs Affinity. MGX's $2B Binance deal ran through "
+     "World Liberty's USD1.", tint="teal")
+text("m_saudi", 0, 0, 320,
+     "✅ **Saudi Arabia: xAI and HUMAIN**\n19 Nov 2025, during MBS's Washington visit: xAI will build a **500 MW** data "
+     "centre with HUMAIN, the AI company owned by PIF and chaired by MBS. Terms not disclosed.", tint="teal")
+text("m_kushner", 0, 0, 320,
+     "⚠️ **Musk and Kushner**\nPhotographed side by side at the World Cup final in Qatar, 18 Dec 2022 (Snopes: the "
+     "photo is real). Neither said why. No business deal between them found.", tint="amber")
+text("m_albania", 0, 0, 320,
+     "❌ **Musk and the resort?**\nTraced: no reporting ties Musk, X, xAI, SpaceX or Starlink to Sazan, Zvërnec or the "
+     "companies behind them, and no Musk post on the Flamingo protests turned up. His Albania threads run through Rama "
+     "and Meloni, not Kushner's project.", tint="graphite")
+web("w_medal", 0, 0, "https://www.aljazeera.com/news/2026/10/8/trump-gives-top-us-science-awards-to-elon-musk-and-other-tech-executives",
+    "Al Jazeera", "Trump gives top US science awards to Elon Musk and other tech executives",
+    "\"National treasure\": the medal after the rift.", "2026-10-08T00:00:00Z")
+web("w_rome", 0, 0, "https://rti.rtsh.al/article/prime-minister-rama-meets-elon-musk-in-italy-musk-rama-i-would-like-to-come-to-albania",
+    "RTSH", "Prime Minister Rama meets Elon Musk in Italy: \"I would like to come to Albania\"",
+    "\"With Mister X in Rome.\"", None)
+web("w_mattarella", 0, 0, "https://www.euronews.com/my-europe/2024/11/14/italys-president-criticises-elon-musk-for-interfering-in-migration-row",
+    "Euronews", "Italy's president criticises Elon Musk for interfering in migration row",
+    "Mattarella answers Musk's post on the judges.", "2024-11-14T00:00:00Z")
+web("w_sats", 0, 0, "https://www.intellinews.com/albania-s-first-satellites-launched-into-space-265909/",
+    "bne IntelliNews", "Albania's first satellites launched into space",
+    "Albania-1 and -2 ride a SpaceX Falcon 9.", None)
+web("w_twitter", 0, 0, "https://www.bnnbloomberg.ca/musk-s-twitter-investors-include-saudi-prince-dorsey-and-qatar-1.1839805",
+    "BNN Bloomberg", "Musk's Twitter investors include Saudi prince, Dorsey and Qatar",
+    "Qatar Holding: $375M for about 1%.", "2022-10-31T00:00:00Z")
+web("w_xai", 0, 0, "https://www.agbi.com/ai/2026/01/qatar-and-abu-dhabi-back-musks-xai-20bn-fundraising/",
+    "AGBI", "Qatar and Abu Dhabi back Musk's xAI $20bn fundraising",
+    "QIA and MGX in the Series E.", None)
+web("w_humain", 0, 0, "https://www.bloomberg.com/news/articles/2025-11-19/musk-s-xai-to-build-500-megawatt-data-center-in-saudi-arabia",
+    "Bloomberg", "Musk's xAI to Build 500 Megawatt Data Center in Saudi Arabia",
+    "With HUMAIN, using Nvidia chips.", "2025-11-19T00:00:00Z")
+web("w_snopes", 0, 0, "https://www.snopes.com/fact-check/jared-kushner-elon-musk-fifa-world-cup/",
+    "Snopes", "Is This a Real Photo of Jared Kushner and Elon Musk at the FIFA World Cup?",
+    "Rated real; Getty shots from other angles.", "2022-12-19T00:00:00Z")
+
 # ---------------------------------------------------------------- Strings
 # Family and politics
 string("trump", "kushner", "azure", "son-in-law, envoy", arrow="forward")
@@ -497,6 +566,27 @@ for card, source in [
     ("e_telegraph", "w_telegraph"),
 ]:
     string(card, source, "graphite", thickness=1.2, sag=0.3)
+# Elon Musk
+OLD_STRINGS = len(strings)
+string("trump", "musk", "azure", "backer, DOGE, medal")
+string("musk", "m_trump", "azure")
+string("musk", "m_rome", "azure")
+string("m_rome", "rama", "azure", "\"Mister X\", Rome 2023", style="dashed")
+string("musk", "m_migrants", "azure", "posted on X")
+string("musk", "m_space", "red", "SpaceX, Starlink", arrow="forward")
+string("m_gulf", "musk", "red", "backers", arrow="forward", thickness=2.5)
+string("m_gulf", "b_gulf", "teal", "same Qatari fund", style="dashed")
+string("m_gulf", "e_wlf", "teal", "same MGX", style="dashed")
+string("musk", "m_saudi", "red", "xAI", arrow="forward")
+string("m_saudi", "b_pif", "teal", "PIF owns HUMAIN", style="dashed")
+string("musk", "m_kushner", "amber")
+string("m_kushner", "kushner", "amber", "Qatar, Dec 2022", style="dashed", thickness=1.5)
+string("musk", "m_albania", "graphite", "traced", style="dotted", thickness=1.5)
+for card, source in [
+    ("m_trump", "w_medal"), ("m_rome", "w_rome"), ("m_migrants", "w_mattarella"), ("m_space", "w_sats"),
+    ("m_gulf", "w_twitter"), ("m_gulf", "w_xai"), ("m_saudi", "w_humain"), ("m_kushner", "w_snopes"),
+]:
+    string(card, source, "graphite", thickness=1.2, sag=0.3)
 
 # ---------------------------------------------------------------- Layout and output
 from layout import optimize
@@ -514,16 +604,23 @@ REGIONS = {  # cluster: (x0, y0, x1, y1), below each heading
     "israel": (-1950, -1560, 300, 240),
     "envoy": (650, -760, 2950, 600),
 }
+MUSK_REGION = (300, -3950, 3700, -2950)  # above the billions
 FIXED = {
     "title": (-1700, -3120), "subtitle": (-1700, -3030), "legend": (-880, -3130),
     "h_albania": (-4600, -2740), "h_flamingo": (-4600, -880), "h_israel": (-1950, -1690), "h_billions": (650, -2740),
-    "h_envoy": (650, -880),
+    "h_envoy": (650, -880), "h_musk": (650, -4070),
 }
 for card in cards:
     spot = FIXED.get(card["_name"])
     if spot:
         card["frame"]["x"], card["frame"]["y"] = spot
-optimize(cards, strings, REGIONS, iterations=int(sys.argv[3]) if len(sys.argv) > 3 else 90000, seed=int(sys.argv[4]) if len(sys.argv) > 4 else 2)
+# The board as it stood before Musk keeps its layout; his cluster is then placed around it.
+optimize(cards[:OLD_CARDS], strings[:OLD_STRINGS], REGIONS, iterations=int(sys.argv[3]) if len(sys.argv) > 3 else 90000,
+         seed=int(sys.argv[4]) if len(sys.argv) > 4 else 2)
+for card in cards[:OLD_CARDS]:
+    card["_cluster"] = "fixed"
+optimize(cards, strings, {"musk": MUSK_REGION}, iterations=int(sys.argv[5]) if len(sys.argv) > 5 else 50000,
+         seed=int(sys.argv[6]) if len(sys.argv) > 6 else 3)
 
 ids = {c["id"] for c in cards}
 for s in strings:

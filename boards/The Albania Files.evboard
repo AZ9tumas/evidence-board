@@ -33,7 +33,7 @@
   {
    "createdAt": "2026-10-15T15:00:00Z",
    "frame": {
-    "height": 126,
+    "height": 146,
     "width": 720,
     "x": -1700,
     "y": -3030
@@ -45,7 +45,7 @@
    "text": {
     "alignment": "leading",
     "autoHeight": true,
-    "content": "**Jared Kushner · Ivanka Trump · Donald Trump · Steve Witkoff**: Sazan Island and Zvërnec, the Flamingo Revolution, the question of Israel's role, the billions behind Affinity Partners, and the envoy beside Kushner.\nCompiled 16 Oct 2026 from public reporting. Each card names its source.",
+    "content": "**Jared Kushner · Ivanka Trump · Donald Trump · Steve Witkoff · Elon Musk**: Sazan Island and Zvërnec, the Flamingo Revolution, the question of Israel's role, the billions behind Affinity Partners, the envoy beside Kushner, and Musk's own threads to Albania.\nCompiled 16 Oct 2026 from public reporting. Each card names its source.",
     "style": "note"
    },
    "type": "text",
@@ -1988,6 +1988,489 @@
     "url": "https://www.yahoo.com/news/politics/articles/billion-dollar-conflicts-threatening-tear-050000648.html"
    },
    "z": 80
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 78,
+    "width": 620,
+    "x": 650,
+    "y": -4070
+   },
+   "id": "9BF50731-CDBE-5EBE-9CEE-4E90EF7FB18C",
+   "locked": true,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": 0,
+   "text": {
+    "alignment": "leading",
+    "autoHeight": true,
+    "content": "THE BILLIONAIRE: ELON MUSK",
+    "style": "headline"
+   },
+   "type": "text",
+   "z": 81
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 165,
+    "width": 300,
+    "x": 1120,
+    "y": -3450
+   },
+   "id": "EB685E5A-2903-5C92-A33B-2A64ED92B21E",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": -0.7,
+   "text": {
+    "alignment": "leading",
+    "autoHeight": true,
+    "content": "**ELON MUSK**\nCEO of Tesla and SpaceX. SpaceX took over his AI company **xAI**, owner of **X** and Grok, in Feb 2026. Ran DOGE for Trump, Jan–May 2025.",
+    "style": "note"
+   },
+   "tint": "violet",
+   "type": "text",
+   "z": 82
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 204,
+    "width": 320,
+    "x": 1700,
+    "y": -3890
+   },
+   "id": "F51309CA-7FC8-528F-B50E-2CE6E07667BE",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": 0.2,
+   "text": {
+    "alignment": "leading",
+    "autoHeight": true,
+    "content": "✅ **Backer, rift, medal**\nSpent more than $250M to elect Trump in 2024. Left DOGE in May 2025; public feud in June over the tax bill; reunited in September. **8 Oct 2026**: Trump gives him the National Medal of Science, calling him a \"national treasure\".",
+    "style": "note"
+   },
+   "tint": "azure",
+   "type": "text",
+   "z": 83
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 185,
+    "width": 320,
+    "x": 860,
+    "y": -3930
+   },
+   "id": "FB5D7CFA-3052-56BF-8960-EEB2B24C1282",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": 1.1,
+   "text": {
+    "alignment": "leading",
+    "autoHeight": true,
+    "content": "✅ **Dec 2023: Rama meets Musk**\nBoth guests of Meloni's party festival in Rome. Rama posts \"With Mister X in Rome\". Musk says he'd like to visit Albania; Rama says he won't regret it. No visit reported.",
+    "style": "note"
+   },
+   "tint": "azure",
+   "type": "text",
+   "z": 84
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 204,
+    "width": 320,
+    "x": 2030,
+    "y": -3200
+   },
+   "id": "178AE05C-86C3-5746-AAB2-F8312A28AED4",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": -0.3,
+   "text": {
+    "alignment": "leading",
+    "autoHeight": true,
+    "content": "✅ **Nov 2024: \"These judges need to go\"**\nMusk on the Rome judges who blocked holding migrants in Italy's centres in Albania, the Meloni–Rama deal. Italy's President Mattarella rebukes him: Italy \"knows how to take care of itself\".",
+    "style": "note"
+   },
+   "tint": "azure",
+   "type": "text",
+   "z": 85
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 185,
+    "width": 320,
+    "x": 2230,
+    "y": -3910
+   },
+   "id": "1E088213-73FC-5E4E-8692-F1CE45AD2E48",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": -0.8,
+   "text": {
+    "alignment": "leading",
+    "autoHeight": true,
+    "content": "✅ **SpaceX and Starlink in Albania**\n3 Jan 2023: a SpaceX Falcon 9 carries **Albania-1 and -2**, Satellogic satellites that watch for illegal building, logging and cannabis. Apr 2024: Starlink goes live in Albania.",
+    "style": "note"
+   },
+   "tint": "red",
+   "type": "text",
+   "z": 86
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 185,
+    "width": 320,
+    "x": 1200,
+    "y": -3150
+   },
+   "id": "84FE6CA3-27B3-5532-971A-F6C19E23DBC5",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": 1.4,
+   "text": {
+    "alignment": "leading",
+    "autoHeight": true,
+    "content": "✅ **The same Gulf funds**\nQatar's QIA put **$375M** into his Twitter buyout (2022) and joined xAI's **$20B** round (Jan 2026) with Abu Dhabi's **MGX**. QIA also backs Affinity. MGX's $2B Binance deal ran through World Liberty's USD1.",
+    "style": "note"
+   },
+   "tint": "teal",
+   "type": "text",
+   "z": 87
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 165,
+    "width": 320,
+    "x": 1500,
+    "y": -3490
+   },
+   "id": "996021E4-6971-5619-8643-7B3614FEC28B",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": 0.0,
+   "text": {
+    "alignment": "leading",
+    "autoHeight": true,
+    "content": "✅ **Saudi Arabia: xAI and HUMAIN**\n19 Nov 2025, during MBS's Washington visit: xAI will build a **500 MW** data centre with HUMAIN, the AI company owned by PIF and chaired by MBS. Terms not disclosed.",
+    "style": "note"
+   },
+   "tint": "teal",
+   "type": "text",
+   "z": 88
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 165,
+    "width": 320,
+    "x": 480,
+    "y": -3930
+   },
+   "id": "8A6E3233-4BF8-5818-B348-EA861742B344",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": -1.1,
+   "text": {
+    "alignment": "leading",
+    "autoHeight": true,
+    "content": "⚠️ **Musk and Kushner**\nPhotographed side by side at the World Cup final in Qatar, 18 Dec 2022 (Snopes: the photo is real). Neither said why. No business deal between them found.",
+    "style": "note"
+   },
+   "tint": "amber",
+   "type": "text",
+   "z": 89
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 204,
+    "width": 320,
+    "x": 1620,
+    "y": -3160
+   },
+   "id": "60C9B8E6-B133-5047-895D-23BA32AD9EB9",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": -1.3,
+   "text": {
+    "alignment": "leading",
+    "autoHeight": true,
+    "content": "❌ **Musk and the resort?**\nTraced: no reporting ties Musk, X, xAI, SpaceX or Starlink to Sazan, Zvërnec or the companies behind them, and no Musk post on the Flamingo protests turned up. His Albania threads run through Rama and Meloni, not Kushner's project.",
+    "style": "note"
+   },
+   "tint": "graphite",
+   "type": "text",
+   "z": 90
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 261,
+    "width": 340,
+    "x": 2430,
+    "y": -3620
+   },
+   "id": "F303A03B-717C-5AA9-9D22-93615D7D8A02",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": -1.1,
+   "type": "web",
+   "web": {
+    "snapshot": {
+     "description": "\"National treasure\": the medal after the rift.",
+     "fetchedAt": "2026-10-15T15:00:00Z",
+     "palette": {
+      "darkMuted": "#2E2A24",
+      "darkVibrant": "#7A4A00",
+      "light": "#FFF4DD",
+      "muted": "#8C7B5E",
+      "vibrant": "#F2A900"
+     },
+     "publishedAt": "2026-10-08T00:00:00Z",
+     "siteName": "Al Jazeera",
+     "title": "Trump gives top US science awards to Elon Musk and other tech executives",
+     "variant": "compact"
+    },
+    "url": "https://www.aljazeera.com/news/2026/10/8/trump-gives-top-us-science-awards-to-elon-musk-and-other-tech-executives"
+   },
+   "z": 91
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 243,
+    "width": 340,
+    "x": 1270,
+    "y": -3880
+   },
+   "id": "D1535532-D857-5926-BB4E-4E32929EA3D2",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": 0.4,
+   "type": "web",
+   "web": {
+    "snapshot": {
+     "description": "\"With Mister X in Rome.\"",
+     "fetchedAt": "2026-10-15T15:00:00Z",
+     "palette": {
+      "darkMuted": "#241517",
+      "darkVibrant": "#4A0510",
+      "light": "#FFE8EA",
+      "muted": "#8F6A6E",
+      "vibrant": "#C8102E"
+     },
+     "publishedAt": null,
+     "siteName": "RTSH",
+     "title": "Prime Minister Rama meets Elon Musk in Italy: \"I would like to come to Albania\"",
+     "variant": "compact"
+    },
+    "url": "https://rti.rtsh.al/article/prime-minister-rama-meets-elon-musk-in-italy-musk-rama-i-would-like-to-come-to-albania"
+   },
+   "z": 92
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 261,
+    "width": 340,
+    "x": 2430,
+    "y": -3220
+   },
+   "id": "C4F3472B-203A-534B-B227-67AB09919259",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": 0.8,
+   "type": "web",
+   "web": {
+    "snapshot": {
+     "description": "Mattarella answers Musk's post on the judges.",
+     "fetchedAt": "2026-10-15T15:00:00Z",
+     "palette": {
+      "darkMuted": "#131B26",
+      "darkVibrant": "#0A2655",
+      "light": "#E6EFFF",
+      "muted": "#64809F",
+      "vibrant": "#2C6FE0"
+     },
+     "publishedAt": "2024-11-14T00:00:00Z",
+     "siteName": "Euronews",
+     "title": "Italy's president criticises Elon Musk for interfering in migration row",
+     "variant": "compact"
+    },
+    "url": "https://www.euronews.com/my-europe/2024/11/14/italys-president-criticises-elon-musk-for-interfering-in-migration-row"
+   },
+   "z": 93
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 218,
+    "width": 340,
+    "x": 2920,
+    "y": -3810
+   },
+   "id": "EEFFD28A-0C3E-5686-A438-503951F073E3",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": -0.2,
+   "type": "web",
+   "web": {
+    "snapshot": {
+     "description": "Albania-1 and -2 ride a SpaceX Falcon 9.",
+     "fetchedAt": "2026-10-15T15:00:00Z",
+     "palette": {
+      "darkMuted": "#241416",
+      "darkVibrant": "#4A000E",
+      "light": "#FFE6EB",
+      "muted": "#946A70",
+      "vibrant": "#E4002B"
+     },
+     "publishedAt": null,
+     "siteName": "bne IntelliNews",
+     "title": "Albania's first satellites launched into space",
+     "variant": "compact"
+    },
+    "url": "https://www.intellinews.com/albania-s-first-satellites-launched-into-space-265909/"
+   },
+   "z": 94
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 243,
+    "width": 340,
+    "x": 2020,
+    "y": -3610
+   },
+   "id": "9A033417-3FEB-53B6-9B6B-76C706404BCD",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": -1.2,
+   "type": "web",
+   "web": {
+    "snapshot": {
+     "description": "Qatar Holding: $375M for about 1%.",
+     "fetchedAt": "2026-10-15T15:00:00Z",
+     "palette": {
+      "darkMuted": "#1A1528",
+      "darkVibrant": "#280C5E",
+      "light": "#F0EAFF",
+      "muted": "#76699C",
+      "vibrant": "#7A3CF0"
+     },
+     "publishedAt": "2022-10-31T00:00:00Z",
+     "siteName": "BNN Bloomberg",
+     "title": "Musk's Twitter investors include Saudi prince, Dorsey and Qatar",
+     "variant": "compact"
+    },
+    "url": "https://www.bnnbloomberg.ca/musk-s-twitter-investors-include-saudi-prince-dorsey-and-qatar-1.1839805"
+   },
+   "z": 95
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 218,
+    "width": 340,
+    "x": 3030,
+    "y": -3500
+   },
+   "id": "78765541-DED8-5754-A8D4-BD4C3D629007",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": -0.3,
+   "type": "web",
+   "web": {
+    "snapshot": {
+     "description": "QIA and MGX in the Series E.",
+     "fetchedAt": "2026-10-15T15:00:00Z",
+     "palette": {
+      "darkMuted": "#26221A",
+      "darkVibrant": "#5A4508",
+      "light": "#FFF6DD",
+      "muted": "#8C7F5E",
+      "vibrant": "#C9A227"
+     },
+     "publishedAt": null,
+     "siteName": "AGBI",
+     "title": "Qatar and Abu Dhabi back Musk's xAI $20bn fundraising",
+     "variant": "compact"
+    },
+    "url": "https://www.agbi.com/ai/2026/01/qatar-and-abu-dhabi-back-musks-xai-20bn-fundraising/"
+   },
+   "z": 96
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 243,
+    "width": 340,
+    "x": 2860,
+    "y": -3220
+   },
+   "id": "7D966542-F069-523A-B0AA-C1AADBA54502",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": 1.4,
+   "type": "web",
+   "web": {
+    "snapshot": {
+     "description": "With HUMAIN, using Nvidia chips.",
+     "fetchedAt": "2026-10-15T15:00:00Z",
+     "palette": {
+      "darkMuted": "#18142A",
+      "darkVibrant": "#1F0B5C",
+      "light": "#EFEAFF",
+      "muted": "#71699E",
+      "vibrant": "#5B2EE5"
+     },
+     "publishedAt": "2025-11-19T00:00:00Z",
+     "siteName": "Bloomberg",
+     "title": "Musk's xAI to Build 500 Megawatt Data Center in Saudi Arabia",
+     "variant": "compact"
+    },
+    "url": "https://www.bloomberg.com/news/articles/2025-11-19/musk-s-xai-to-build-500-megawatt-data-center-in-saudi-arabia"
+   },
+   "z": 97
+  },
+  {
+   "createdAt": "2026-10-15T15:00:00Z",
+   "frame": {
+    "height": 243,
+    "width": 340,
+    "x": 650,
+    "y": -3390
+   },
+   "id": "42794170-A935-50F3-8886-90B23B42ADEF",
+   "locked": false,
+   "modifiedAt": "2026-10-15T15:00:00Z",
+   "rotation": 0.1,
+   "type": "web",
+   "web": {
+    "snapshot": {
+     "description": "Rated real; Getty shots from other angles.",
+     "fetchedAt": "2026-10-15T15:00:00Z",
+     "palette": {
+      "darkMuted": "#26221A",
+      "darkVibrant": "#5C4400",
+      "light": "#FFF7DB",
+      "muted": "#8F8158",
+      "vibrant": "#F2B705"
+     },
+     "publishedAt": "2022-12-19T00:00:00Z",
+     "siteName": "Snopes",
+     "title": "Is This a Real Photo of Jared Kushner and Elon Musk at the FIFA World Cup?",
+     "variant": "compact"
+    },
+    "url": "https://www.snopes.com/fact-check/jared-kushner-elon-musk-fifa-world-cup/"
+   },
+   "z": 98
   }
  ],
  "createdAt": "2026-10-15T15:00:00Z",
@@ -2934,13 +3417,244 @@
    "style": "solid",
    "thickness": 1.2,
    "to": "F25E43A4-1D65-5FE0-B478-2A1E3A2C40CF"
+  },
+  {
+   "arrow": "none",
+   "color": "azure",
+   "from": "63AE535B-2A14-58EE-907C-8E1AE9C625F0",
+   "id": "8F6D676F-9112-5E5F-BA89-FA5583AD2CEF",
+   "label": "backer, DOGE, medal",
+   "sag": 0.45,
+   "style": "solid",
+   "thickness": 2.0,
+   "to": "EB685E5A-2903-5C92-A33B-2A64ED92B21E"
+  },
+  {
+   "arrow": "none",
+   "color": "azure",
+   "from": "EB685E5A-2903-5C92-A33B-2A64ED92B21E",
+   "id": "2E61BF84-E20F-57E3-963E-257139EA534F",
+   "sag": 0.45,
+   "style": "solid",
+   "thickness": 2.0,
+   "to": "F51309CA-7FC8-528F-B50E-2CE6E07667BE"
+  },
+  {
+   "arrow": "none",
+   "color": "azure",
+   "from": "EB685E5A-2903-5C92-A33B-2A64ED92B21E",
+   "id": "C35E3E3F-7F6F-5BB9-9661-CF484B3F22B2",
+   "sag": 0.45,
+   "style": "solid",
+   "thickness": 2.0,
+   "to": "FB5D7CFA-3052-56BF-8960-EEB2B24C1282"
+  },
+  {
+   "arrow": "none",
+   "color": "azure",
+   "from": "FB5D7CFA-3052-56BF-8960-EEB2B24C1282",
+   "id": "BB3DB602-ACF1-5579-AA66-9A3A151B9FA8",
+   "label": "\"Mister X\", Rome 2023",
+   "sag": 0.45,
+   "style": "dashed",
+   "thickness": 2.0,
+   "to": "D9B3B494-4D73-54E5-B27C-B2AE9A8459AD"
+  },
+  {
+   "arrow": "none",
+   "color": "azure",
+   "from": "EB685E5A-2903-5C92-A33B-2A64ED92B21E",
+   "id": "09E1E17F-1744-5EF8-964C-2300F4205632",
+   "label": "posted on X",
+   "sag": 0.45,
+   "style": "solid",
+   "thickness": 2.0,
+   "to": "178AE05C-86C3-5746-AAB2-F8312A28AED4"
+  },
+  {
+   "arrow": "forward",
+   "color": "red",
+   "from": "EB685E5A-2903-5C92-A33B-2A64ED92B21E",
+   "id": "8C41DABB-0A9E-54C4-B642-9B6258B9A874",
+   "label": "SpaceX, Starlink",
+   "sag": 0.45,
+   "style": "solid",
+   "thickness": 2.0,
+   "to": "1E088213-73FC-5E4E-8692-F1CE45AD2E48"
+  },
+  {
+   "arrow": "forward",
+   "color": "red",
+   "from": "84FE6CA3-27B3-5532-971A-F6C19E23DBC5",
+   "id": "0E005BF0-0E4E-5BD2-9AC8-97DA08176BE2",
+   "label": "backers",
+   "sag": 0.45,
+   "style": "solid",
+   "thickness": 2.5,
+   "to": "EB685E5A-2903-5C92-A33B-2A64ED92B21E"
+  },
+  {
+   "arrow": "none",
+   "color": "teal",
+   "from": "84FE6CA3-27B3-5532-971A-F6C19E23DBC5",
+   "id": "7A7DEBB9-7E53-5D3D-AEB4-CD94FA2502A8",
+   "label": "same Qatari fund",
+   "sag": 0.45,
+   "style": "dashed",
+   "thickness": 2.0,
+   "to": "9E2433F1-1A3C-5CCE-9A5F-84EB5691DAE1"
+  },
+  {
+   "arrow": "none",
+   "color": "teal",
+   "from": "84FE6CA3-27B3-5532-971A-F6C19E23DBC5",
+   "id": "10783160-FF2B-5760-A1F6-C04BFE40A13C",
+   "label": "same MGX",
+   "sag": 0.45,
+   "style": "dashed",
+   "thickness": 2.0,
+   "to": "A074DD1B-CF5D-5C27-97FE-1F6DE50F254F"
+  },
+  {
+   "arrow": "forward",
+   "color": "red",
+   "from": "EB685E5A-2903-5C92-A33B-2A64ED92B21E",
+   "id": "C707F3D9-7136-53E0-AE9F-40EE88CB87D0",
+   "label": "xAI",
+   "sag": 0.45,
+   "style": "solid",
+   "thickness": 2.0,
+   "to": "996021E4-6971-5619-8643-7B3614FEC28B"
+  },
+  {
+   "arrow": "none",
+   "color": "teal",
+   "from": "996021E4-6971-5619-8643-7B3614FEC28B",
+   "id": "91B7CACF-F43B-5B9E-AC85-9FB8C217D40F",
+   "label": "PIF owns HUMAIN",
+   "sag": 0.45,
+   "style": "dashed",
+   "thickness": 2.0,
+   "to": "8DB6A00E-04CB-5223-928D-6ED61806E964"
+  },
+  {
+   "arrow": "none",
+   "color": "amber",
+   "from": "EB685E5A-2903-5C92-A33B-2A64ED92B21E",
+   "id": "C65F5570-720F-59D5-A7B7-1EB51EF6E73B",
+   "sag": 0.45,
+   "style": "solid",
+   "thickness": 2.0,
+   "to": "8A6E3233-4BF8-5818-B348-EA861742B344"
+  },
+  {
+   "arrow": "none",
+   "color": "amber",
+   "from": "8A6E3233-4BF8-5818-B348-EA861742B344",
+   "id": "577817F1-3CBF-5481-A2E1-9E69A157F92C",
+   "label": "Qatar, Dec 2022",
+   "sag": 0.45,
+   "style": "dashed",
+   "thickness": 1.5,
+   "to": "BEF417B5-E965-527D-8118-88C3378B0D0A"
+  },
+  {
+   "arrow": "none",
+   "color": "graphite",
+   "from": "EB685E5A-2903-5C92-A33B-2A64ED92B21E",
+   "id": "AED4055B-EB43-588E-9491-8C057F4A0A2F",
+   "label": "traced",
+   "sag": 0.45,
+   "style": "dotted",
+   "thickness": 1.5,
+   "to": "60C9B8E6-B133-5047-895D-23BA32AD9EB9"
+  },
+  {
+   "arrow": "none",
+   "color": "graphite",
+   "from": "F51309CA-7FC8-528F-B50E-2CE6E07667BE",
+   "id": "F9167287-8245-5772-B555-C844819987EA",
+   "sag": 0.3,
+   "style": "solid",
+   "thickness": 1.2,
+   "to": "F303A03B-717C-5AA9-9D22-93615D7D8A02"
+  },
+  {
+   "arrow": "none",
+   "color": "graphite",
+   "from": "FB5D7CFA-3052-56BF-8960-EEB2B24C1282",
+   "id": "D5FD667E-9659-5917-8117-1FB99961A1AB",
+   "sag": 0.3,
+   "style": "solid",
+   "thickness": 1.2,
+   "to": "D1535532-D857-5926-BB4E-4E32929EA3D2"
+  },
+  {
+   "arrow": "none",
+   "color": "graphite",
+   "from": "178AE05C-86C3-5746-AAB2-F8312A28AED4",
+   "id": "177C717B-6DA2-5A57-8684-EEAD84814082",
+   "sag": 0.3,
+   "style": "solid",
+   "thickness": 1.2,
+   "to": "C4F3472B-203A-534B-B227-67AB09919259"
+  },
+  {
+   "arrow": "none",
+   "color": "graphite",
+   "from": "1E088213-73FC-5E4E-8692-F1CE45AD2E48",
+   "id": "963A03A9-FE61-5748-BE0F-B864EB44E9D1",
+   "sag": 0.3,
+   "style": "solid",
+   "thickness": 1.2,
+   "to": "EEFFD28A-0C3E-5686-A438-503951F073E3"
+  },
+  {
+   "arrow": "none",
+   "color": "graphite",
+   "from": "84FE6CA3-27B3-5532-971A-F6C19E23DBC5",
+   "id": "8280F238-4977-538E-A737-7C9BCA3607BA",
+   "sag": 0.3,
+   "style": "solid",
+   "thickness": 1.2,
+   "to": "9A033417-3FEB-53B6-9B6B-76C706404BCD"
+  },
+  {
+   "arrow": "none",
+   "color": "graphite",
+   "from": "84FE6CA3-27B3-5532-971A-F6C19E23DBC5",
+   "id": "E13AD79E-B0B4-558B-A49A-DB162D85D050",
+   "sag": 0.3,
+   "style": "solid",
+   "thickness": 1.2,
+   "to": "78765541-DED8-5754-A8D4-BD4C3D629007"
+  },
+  {
+   "arrow": "none",
+   "color": "graphite",
+   "from": "996021E4-6971-5619-8643-7B3614FEC28B",
+   "id": "546B068F-515C-5FED-BC88-7B44176D57D6",
+   "sag": 0.3,
+   "style": "solid",
+   "thickness": 1.2,
+   "to": "7D966542-F069-523A-B0AA-C1AADBA54502"
+  },
+  {
+   "arrow": "none",
+   "color": "graphite",
+   "from": "8A6E3233-4BF8-5818-B348-EA861742B344",
+   "id": "7F301390-B38E-5C9C-9AD1-6575B16EDF59",
+   "sag": 0.3,
+   "style": "solid",
+   "thickness": 1.2,
+   "to": "42794170-A935-50F3-8886-90B23B42ADEF"
   }
  ],
  "theme": "cork",
  "title": "The Albania Files",
  "viewport": {
-  "x": -910.0,
-  "y": -1208.5,
+  "x": -615.0,
+  "y": -1678.5,
   "zoom": 0.13
  }
 }
