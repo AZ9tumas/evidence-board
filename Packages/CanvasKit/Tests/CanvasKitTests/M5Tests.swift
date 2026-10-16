@@ -65,6 +65,24 @@ struct ThemeTests {
         #expect(first.dataProvider?.data as Data? == second.dataProvider?.data as Data?)
     }
 
+    /// The grain is glued to the board: its tiles always cover a power-of-two fraction of
+    /// 256 board points, starting at the board's origin, so zooming never slides it under
+    /// the cards; and crossing a power of two in zoom changes nothing on screen.
+    @Test func corkGrainZoomsWithTheBoard() {
+        var zoom: CGFloat = 0.05
+        while zoom < 8 {
+            let octave = GrainTexture.octave(forZoom: zoom)
+            let exponent = log2(Double(GrainTexture.tileSize * zoom / octave.coarseSide))
+            #expect(abs(exponent - exponent.rounded()) < 1e-9, "zoom \(zoom)")
+            #expect(octave.coarseSide >= 256 - 1e-9 && octave.coarseSide < 512)
+            zoom *= 1.07
+        }
+        let below = GrainTexture.octave(forZoom: 0.5 - 1e-9)
+        let at = GrainTexture.octave(forZoom: 0.5)
+        #expect(abs(below.coarseSide / 2 - at.coarseSide) < 0.01)
+        #expect(below.fineOpacity > 0.999 && at.fineOpacity < 0.001)
+    }
+
     @Test func webTextStaysReadableOnLightCards() {
         var appearance = TextCardTests.appearance
         appearance.cardFill = GradientPair(.white, RGBA(0xF9FAFC))

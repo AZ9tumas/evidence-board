@@ -1,54 +1,61 @@
+import Foundation
 import QuartzCore
 
 /// Cork grain behind a Cork board.
 ///
 /// One seamless tile is drawn procedurally when the theme is applied and repeated by
-/// replicator layers. It moves with the board when you pan but keeps its size when you
-/// zoom, like the grain of the cork itself rather than a picture of it, so it never
-/// pixelates.
+/// replicator layers. The grain is glued to the board, like the cork itself: it pans and
+/// zooms with the cards and never slides under them. So it doesn't grow blotchy as you zoom
+/// in (or turn to dust as you zoom out), it's shown at two neighbouring sizes, a power of two
+/// apart, and the finer one fades in as the coarser one grows. On screen a tile is always
+/// between 128 and 512 points wide.
 @MainActor
 final class GrainTexture {
     nonisolated static let tileSize: CGFloat = 256
 
     let layer = CALayer()
-    private let rows = CAReplicatorLayer()
-    private let columns = CAReplicatorLayer()
-    private let tile = CALayer()
+    private let coarse = TileSet()
+    private let fine = TileSet()
     private var drawn: (color: RGBA, scale: CGFloat)?
 
     init() {
         layer.masksToBounds = true
-        layer.addSublayer(rows)
-        rows.addSublayer(columns)
-        columns.addSublayer(tile)
+        layer.addSublayer(coarse.layer)
+        layer.addSublayer(fine.layer)
     }
 
-    /// Draws the tile in `color` (the dark specks; light ones are added) at `scale`.
+    /// Draws the tile in `color` (the dark specks; light ones are added) for a screen of
+    /// `scale` pixels per point.
     func setColor(_ color: RGBA, scale: CGFloat) {
         guard drawn?.color != color || drawn?.scale != scale else { return }
         drawn = (color, scale)
-        tile.contents = Self.makeTile(color: color, scale: scale)
-        tile.contentsScale = scale
+        // Twice the screen's detail: a tile is shown at up to twice its nominal size.
+        let image = Self.makeTile(color: color, scale: scale * 2)
+        coarse.setImage(image)
+        fine.setImage(image)
     }
 
     func update(camera: Camera, viewSize size: CGSize) {
-        let frame = CGRect(origin: .zero, size: size)
-        layer.frame = frame
-        rows.frame = frame
-        columns.frame = frame
+        layer.frame = CGRect(origin: .zero, size: size)
         guard size.width > 0, size.height > 0 else { return }
-        let side = Self.tileSize
+        let octave = Self.octave(forZoom: camera.zoom)
+        // Tiles start at the board's origin, so the pattern stays put on the board.
         let origin = camera.worldToView(.zero, in: size)
-        func start(_ value: CGFloat) -> CGFloat {
-            let remainder = value.truncatingRemainder(dividingBy: side)
-            return (remainder < 0 ? remainder + side : remainder) - side
-        }
-        let first = CGPoint(x: start(origin.x), y: start(origin.y))
-        tile.frame = CGRect(origin: first, size: CGSize(width: side, height: side))
-        columns.instanceCount = Int((size.width - first.x) / side) + 1
-        columns.instanceTransform = CATransform3DMakeTranslation(side, 0, 0)
-        rows.instanceCount = Int((size.height - first.y) / side) + 1
-        rows.instanceTransform = CATransform3DMakeTranslation(0, side, 0)
+        coarse.update(origin: origin, side: octave.coarseSide, size: size)
+        fine.update(origin: origin, side: octave.coarseSide / 2, size: size)
+        coarse.layer.opacity = Float(1 - octave.fineOpacity)
+        fine.layer.opacity = Float(octave.fineOpacity)
+    }
+
+    /// The coarse tile's size on screen at `zoom`, from one to two nominal tiles, and how far
+    /// the fine tiles (half that size) have faded in. Both cover a power-of-two fraction of
+    /// 256 board points, so at an exact power-of-two zoom the fine tiles have fully taken
+    /// over and become the next coarse ones: nothing jumps.
+    nonisolated static func octave(forZoom zoom: CGFloat) -> (coarseSide: CGFloat, fineOpacity: CGFloat) {
+        let level = log2(Double(max(zoom, 0.0001)))
+        let fraction = level - level.rounded(.down)
+        let t = min(max((fraction - 0.25) / 0.75, 0), 1)
+        return (tileSize * CGFloat(exp2(fraction)), CGFloat(t * t * (3 - 2 * t)))
     }
 
     /// Soft blotches, dark granules and a few light ones, wrapped at the edges so the tile
@@ -84,6 +91,41 @@ final class GrainTexture {
         for _ in 0..<1600 { speck(radius: 0.5...2.2, alpha: 0.25 * strength...0.7 * strength, tone: ink, stretch: true) }
         for _ in 0..<520 { speck(radius: 0.5...1.6, alpha: 0.06...0.16, tone: RGBA(0xFFE9C9), stretch: false) }
         return context.makeImage()
+    }
+}
+
+/// One size of grain: a tile repeated across and down from the board's origin.
+@MainActor
+private final class TileSet {
+    let layer = CAReplicatorLayer()
+    private let columns = CAReplicatorLayer()
+    private let tile = CALayer()
+
+    init() {
+        layer.addSublayer(columns)
+        columns.addSublayer(tile)
+        // Mipmapped, so tiles shown small don't shimmer.
+        tile.minificationFilter = .trilinear
+    }
+
+    func setImage(_ image: CGImage?) {
+        tile.contents = image
+    }
+
+    func update(origin: CGPoint, side: CGFloat, size: CGSize) {
+        let frame = CGRect(origin: .zero, size: size)
+        layer.frame = frame
+        columns.frame = frame
+        func start(_ value: CGFloat) -> CGFloat {
+            let remainder = value.truncatingRemainder(dividingBy: side)
+            return (remainder < 0 ? remainder + side : remainder) - side
+        }
+        let first = CGPoint(x: start(origin.x), y: start(origin.y))
+        tile.frame = CGRect(origin: first, size: CGSize(width: side, height: side))
+        columns.instanceCount = Int((size.width - first.x) / side) + 1
+        columns.instanceTransform = CATransform3DMakeTranslation(side, 0, 0)
+        layer.instanceCount = Int((size.height - first.y) / side) + 1
+        layer.instanceTransform = CATransform3DMakeTranslation(0, side, 0)
     }
 }
 
