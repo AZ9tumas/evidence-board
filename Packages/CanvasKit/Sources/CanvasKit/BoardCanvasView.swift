@@ -61,11 +61,7 @@ public final class BoardCanvasView: NSView {
     var tierSettleTask: Task<Void, Never>?
     var visibleIDs: Set<UUID> = []
     lazy var renderQueue: RenderQueue = {
-        let queue = RenderQueue(
-            view: self,
-            prepare: { [weak self] id in self?.bitmapJob(for: id) },
-            apply: { [weak self] id, job, image in self?.applyBitmap(job, image, to: id) }
-        )
+        let queue = RenderQueue(view: self) { [weak self] id in self?.renderText(of: id) ?? false }
         queue.isMoving = { [weak self] in
             guard let self else { return false }
             return CACurrentMediaTime() - self.lastCameraMove < 0.2
@@ -573,9 +569,13 @@ public final class BoardCanvasView: NSView {
     }
 
     /// Draws the text (or caption) of one card for the current tier, right here.
-    func renderText(of id: UUID) {
-        guard let job = bitmapJob(for: id) else { return }
-        applyBitmap(job, job.draw(), to: id)
+    /// Returns whether it drew anything.
+    @discardableResult
+    func renderText(of id: UUID) -> Bool {
+        guard let job = bitmapJob(for: id), let node = cardNodes[id] else { return false }
+        let image = job.draw()
+        withoutAnimation { node.setRenderedText(image, tier: job.tier, scale: job.scale) }
+        return true
     }
 
     /// What one card's text bitmap for the current tier would be, if it needs one.
@@ -603,13 +603,7 @@ public final class BoardCanvasView: NSView {
             size = layout.size
             kind = .web(layout)
         }
-        return BitmapJob(kind: kind, tier: renderTier, scale: scale(for: size), version: node.textVersion)
-    }
-
-    /// Puts a drawn bitmap on its card, unless the card has changed since it was described.
-    func applyBitmap(_ job: BitmapJob, _ image: CGImage?, to id: UUID) {
-        guard let node = cardNodes[id], node.textVersion == job.version else { return }
-        withoutAnimation { node.setRenderedText(image, tier: job.tier, scale: job.scale) }
+        return BitmapJob(kind: kind, tier: renderTier, scale: scale(for: size))
     }
 
     /// Starts decoding a photo if the card needs more pixels than it has asked for.

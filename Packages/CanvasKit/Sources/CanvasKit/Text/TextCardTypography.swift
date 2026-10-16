@@ -4,8 +4,9 @@ import BoardKit
 /// Fonts, colors and layout for text cards.
 ///
 /// The bitmap renderer and the live editor both take their attributes from here, so going
-/// into edit mode doesn't move a single line. Bitmaps are drawn on background threads, so
-/// nothing here touches the main actor.
+/// into edit mode doesn't move a single line. Main actor only: AppKit's text drawing isn't
+/// safe on other threads.
+@MainActor
 enum TextCardTypography {
     /// Space between the card edge and its text. The top clears the pin.
     static var insets: NSEdgeInsets { NSEdgeInsets(top: 30, left: 18, bottom: 18, right: 18) }

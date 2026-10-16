@@ -127,7 +127,8 @@ struct WebCardTypography {
         ])
     }
 
-    /// Draws every text block of `layout`, transparent elsewhere. Safe off the main thread.
+    /// Draws every text block of `layout`, transparent elsewhere.
+    @MainActor
     static func render(_ layout: WebCardLayout, scale: CGFloat) -> CGImage? {
         guard !layout.blocks.isEmpty else { return nil }
         return TextCardTypography.drawBitmap(size: layout.size, scale: scale) {
