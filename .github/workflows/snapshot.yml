@@ -76,7 +76,7 @@ jobs:
           cp "boards/The Albania Files.evboard" /tmp/Albania.evboard
           capture /tmp/Albania.evboard
           view=0
-          for spot in "-3450 -1900 0.5" "-850 -2350 0.55" "1800 -1850 0.5" "-3450 -100 0.55" "-850 -650 0.5"; do
+          for spot in "-3450 -1900 0.5" "-850 -2350 0.55" "1800 -1850 0.5" "-3450 -100 0.55" "-850 -650 0.5" "1800 -150 0.5"; do
             set -- $spot
             view=$((view + 1))
             jq --argjson x "$1" --argjson y "$2" --argjson z "$3" '.viewport = {x: $x, y: $y, zoom: $z}' \

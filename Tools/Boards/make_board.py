@@ -74,6 +74,12 @@ PALETTES = {
     "Citizens.al": ("#14B3C2", "#5F9599", "#04424A", "#122224", "#E2FBFD"),
     "Wikipedia": ("#9AA0A8", "#7A7F87", "#2E3238", "#1C1E22", "#F4F5F7"),
     "Euronews": ("#2C6FE0", "#64809F", "#0A2655", "#131B26", "#E6EFFF"),
+    "Axios": ("#2F6BFF", "#6A7FA8", "#0B2260", "#141A28", "#E7EEFF"),
+    "Kitco": ("#E5A823", "#8F7F5C", "#5A3E00", "#26211A", "#FFF5DC"),
+    "Sen. Jeff Merkley": ("#3F67B5", "#6D7F9F", "#11275A", "#151B28", "#E8EEFB"),
+    "Commercial Observer": ("#D9363E", "#9A6E70", "#4C0B0F", "#251718", "#FFE8E9"),
+    "Yahoo News": ("#7B3FE4", "#7F70A0", "#2A0E5C", "#1C1628", "#F1EAFF"),
+    "NPR": ("#D62021", "#946A6A", "#470909", "#241515", "#FFE7E7"),
 }
 
 
@@ -114,9 +120,9 @@ GAP = 46
 # ---------------------------------------------------------------- Title
 text("title", -460, -2330, 720, "THE ALBANIA FILES", "headline", locked=True, rotation=0)
 text("subtitle", -460, -2240, 720,
-     "**Jared Kushner · Ivanka Trump · Donald Trump**: Sazan Island and Zvërnec, the Flamingo Revolution, "
-     "the question of Israel's role, and the billions behind Affinity Partners.\n"
-     "Compiled 15 Oct 2026 from public reporting. Each card names its source.", rotation=0, locked=True)
+     "**Jared Kushner · Ivanka Trump · Donald Trump · Steve Witkoff**: Sazan Island and Zvërnec, the Flamingo "
+     "Revolution, the question of Israel's role, the billions behind Affinity Partners, and the envoy beside Kushner.\n"
+     "Compiled 16 Oct 2026 from public reporting. Each card names its source.", rotation=0, locked=True)
 text("legend", 330, -2340, 360,
      "HOW TO READ THIS BOARD\n"
      "✅ reported by named outlets/records\n"
@@ -358,6 +364,56 @@ web("w_raskin", 1600, y, "https://democrats-judiciary.house.gov/sites/evo-subsit
     "House Judiciary Democrats", "Raskin to Kushner and Affinity re: conflict of interest",
     "Letter to the \"Special Envoy for Peace\", 16 Apr 2026.", "2026-04-16T00:00:00Z")
 
+# ---------------------------------------------------------------- The envoy
+CLUSTER[0] = "envoy"
+text("h_envoy", 650, -880, 620, "THE ENVOY: STEVE WITKOFF", "headline", locked=True, rotation=0)
+text("witkoff", 650, -760, 300,
+     "**STEVE WITKOFF**\nNew York real-estate developer (Witkoff Group) and longtime friend of Trump. U.S. Special "
+     "Envoy to the Middle East since Jan 2025, and Trump's go-between with Putin. Works side by side with Kushner "
+     "(NPR).", tint="azure")
+text("e_duo", 650, -500, 320,
+     "✅ **The duo: Gaza and Moscow**\nWith Kushner on the Gaza ceasefire and the Board of Peace (both named by the "
+     "White House, Jan 2026; signed at Davos, 22 Jan). Five hours with Putin in the Kremlin on 2 Dec 2025 over the "
+     "Ukraine plan (Axios); more Moscow trips in 2026.", tint="azure")
+text("e_wlf", 650, -200, 320,
+     "✅ **World Liberty Financial**\nCrypto venture founded by Trump and his sons with Witkoff and his sons. May 2025: "
+     "Zach Witkoff announces its **USD1** stablecoin will carry Abu Dhabi fund MGX's **$2 billion** investment in "
+     "Binance. The reserves can earn the issuer tens of millions in interest.", tint="red")
+text("e_ethics", 650, 100, 320,
+     "⚠️ **Conflict-of-interest questions**\nSenators Warren and Merkley asked the ethics office to investigate "
+     "(2025). Democrats note Witkoff worked on a U.S.–UAE AI deal while World Liberty dealt with the Emirati fund. "
+     "Fortune (Oct 2025): he still held World Liberty crypto and shares in WC Digital Fi LLC. No official finding "
+     "found.", tint="red")
+text("e_qatar", 650, 400, 320,
+     "✅ **Qatar bought his hotel**\nAug 2023: Qatar's sovereign fund (QIA) paid about **$623M** for Manhattan's Park "
+     "Lane Hotel, owned by the Witkoff Group with Abu Dhabi's Mubadala (Commercial Observer). The same Qatari fund "
+     "invested in Kushner's Affinity.", tint="teal")
+text("e_telegraph", 1050, -760, 320,
+     "⚠️ **The Telegraph, Oct 2026**\nReports overlapping business interests between Kushner, Witkoff and Apollo's "
+     "Marc Rowan, who all help steer Gaza's rebuilding through the Board of Peace. The Board calls it baseless; no "
+     "deal through the Board has been shown.", tint="amber")
+text("e_albania", 1050, -460, 320,
+     "❌ **Witkoff and Albania?**\nTraced: no reporting ties him to Sazan, Zvërnec or the companies behind them. He "
+     "turns up only in commentary that pairs him with Kushner. Not on the project's ownership chain.", tint="graphite")
+web("w_npr", 1050, -200, "https://www.npr.org/2025/04/25/nx-s1-5364884/trump-witkoff-russia-iran-middle-east", "NPR",
+    "Meet Steve Witkoff, Trump's negotiator with Iran, Russia and the Middle East",
+    "From real estate to envoy.", "2025-04-25T00:00:00Z")
+web("w_axios", 1050, 100, "https://www.axios.com/2025/12/02/putin-witkoff-kushner-meeting-ukraine-plan", "Axios",
+    "Witkoff and Kushner met Putin for five hours on Ukraine plan", "Kremlin talks on the U.S. peace plan.",
+    "2025-12-02T00:00:00Z")
+web("w_kitco", 1450, -760, "https://www.kitco.com/news/off-the-wire/2025-05-01/trumps-stablecoin-chosen-2-billion-abu-dhabi-investment-binance-co",
+    "Kitco", "Trump's stablecoin chosen for $2 billion Abu Dhabi investment in Binance, co-founder says",
+    "Zach Witkoff announces USD1 for MGX's deal.", "2025-05-01T00:00:00Z")
+web("w_merkley", 1450, -460, "https://www.merkley.senate.gov/?p=22101", "Sen. Jeff Merkley",
+    "Merkley, Warren: Trump-Linked Crypto Deal is a 'Staggering' Conflict of Interest",
+    "Request for an ethics investigation.", "2025-05-01T00:00:00Z")
+web("w_qia", 1450, -160, "https://commercialobserver.com/2023/08/qatar-sovereign-fund-acquires-park-lane-hotel-for-623m/",
+    "Commercial Observer", "Qatar Sovereign Fund Acquires Park Lane Hotel for $623M",
+    "Bought from the Witkoff Group and Mubadala.", "2023-08-28T00:00:00Z")
+web("w_telegraph", 1450, 140, "https://www.yahoo.com/news/politics/articles/billion-dollar-conflicts-threatening-tear-050000648.html",
+    "Yahoo News", "The billion-dollar conflicts threatening to tear apart Trump's board of peace",
+    "The Telegraph's investigation.", "2026-10-13T00:00:00Z")
+
 # ---------------------------------------------------------------- Strings
 # Family and politics
 string("trump", "kushner", "azure", "son-in-law, envoy", arrow="forward")
@@ -416,12 +472,29 @@ string("i_c5", "f_may30", "graphite", "Major Security", style="dotted", thicknes
 string("i_d1", "i_d2", "teal", "meet at Elbit, not Zvërnec", style="dashed", thickness=2.5)
 string("i_d1", "i_verdict", "teal", style="dotted", thickness=1.5)
 string("i_d2", "i_verdict", "teal", style="dotted", thickness=1.5)
+# The envoy
+string("trump", "witkoff", "azure", "friend, envoy", arrow="forward")
+string("witkoff", "kushner", "azure", "the duo", thickness=2.5)
+string("witkoff", "e_duo", "azure")
+string("witkoff", "b_quote", "graphite", "\"Steve and I\"", style="dashed", thickness=1.5)
+string("witkoff", "e_wlf", "red", "co-founder, with sons", arrow="forward", thickness=2.5)
+string("trump", "e_wlf", "red", "co-founder, with sons", arrow="forward")
+string("e_wlf", "e_ethics", "red")
+string("e_wlf", "b_gaza", "red", "USD1 for Gaza? (senators)", style="dashed")
+string("witkoff", "e_qatar", "teal", "sold to QIA", arrow="forward")
+string("b_gulf", "e_qatar", "teal", "same Qatari fund", style="dashed")
+string("witkoff", "e_telegraph", "amber")
+string("e_telegraph", "b_gaza", "amber", style="dashed", thickness=1.5)
+string("witkoff", "e_albania", "graphite", "traced", style="dotted", thickness=1.5)
+string("e_albania", "developer", "graphite", "not in the ownership chain", style="dotted", thickness=1.5)
 # Sources
 for card, source in [
     ("sazan", "w_aljazeera"), ("developer", "w_exit"), ("freeze", "w_occrp"), ("spak", "w_koha"),
     ("kushner_account", "w_citizens"), ("f_100days", "w_balkan"), ("f_may31", "w_nbc"), ("f_may23", "w_wiki"),
     ("i_c1", "w_toi"), ("i_d1", "w_haaretz"), ("b_pif", "w_pif"), ("b_ea", "w_ea"), ("b_phoenix", "w_cnn"),
     ("b_wbd", "w_wbd"), ("b_belgrade", "w_n1"), ("b_gaza", "w_raskin"),
+    ("witkoff", "w_npr"), ("e_duo", "w_axios"), ("e_wlf", "w_kitco"), ("e_ethics", "w_merkley"), ("e_qatar", "w_qia"),
+    ("e_telegraph", "w_telegraph"),
 ]:
     string(card, source, "graphite", thickness=1.2, sag=0.3)
 
@@ -439,16 +512,18 @@ REGIONS = {  # cluster: (x0, y0, x1, y1), below each heading
     "billions": (650, -2620, 2950, -1080),
     "flamingo": (-4600, -760, -2350, 600),
     "israel": (-1950, -1560, 300, 240),
+    "envoy": (650, -760, 2950, 600),
 }
 FIXED = {
     "title": (-1700, -3120), "subtitle": (-1700, -3030), "legend": (-880, -3130),
     "h_albania": (-4600, -2740), "h_flamingo": (-4600, -880), "h_israel": (-1950, -1690), "h_billions": (650, -2740),
+    "h_envoy": (650, -880),
 }
 for card in cards:
     spot = FIXED.get(card["_name"])
     if spot:
         card["frame"]["x"], card["frame"]["y"] = spot
-optimize(cards, strings, REGIONS, iterations=int(sys.argv[3]) if len(sys.argv) > 3 else 90000, seed=int(sys.argv[4]) if len(sys.argv) > 4 else 1)
+optimize(cards, strings, REGIONS, iterations=int(sys.argv[3]) if len(sys.argv) > 3 else 90000, seed=int(sys.argv[4]) if len(sys.argv) > 4 else 2)
 
 ids = {c["id"] for c in cards}
 for s in strings:
