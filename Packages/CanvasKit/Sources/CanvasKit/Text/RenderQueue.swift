@@ -15,7 +15,7 @@ struct BitmapJob {
     let scale: CGFloat
 
     /// AppKit's text drawing must stay on the main thread: drawn on background threads it
-    /// crashed inside AppKit on macOS 26.
+    /// crashed inside AppKit on a real Mac (CI's Macs never hit it).
     @MainActor
     func draw() -> CGImage? {
         switch kind {
