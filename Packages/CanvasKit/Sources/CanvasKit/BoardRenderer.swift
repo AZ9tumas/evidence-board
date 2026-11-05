@@ -35,7 +35,7 @@ public enum BoardRenderer {
             context.saveGState()
             context.clip(to: content)
             context.setAlpha(min(max(zoom / 0.3, 0.15), 1))
-            context.drawTiledImage(in: CGRect(x: 0, y: 0, width: 256, height: 256), image: surface)
+            context.draw(surface, in: CGRect(x: 0, y: 0, width: 256, height: 256), byTiling: true)
             context.restoreGState()
         }
 
