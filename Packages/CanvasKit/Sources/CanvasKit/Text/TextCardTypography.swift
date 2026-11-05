@@ -13,12 +13,12 @@ enum TextCardTypography {
     static let defaultWidth: CGFloat = 260
     static let minimumSize = CGSize(width: 120, height: 64)
 
-    static func font(for text: TextPayload) -> NSFont {
+    static func font(for text: TextPayload, appearance: CanvasAppearance) -> NSFont {
         let size = CGFloat(text.resolvedFontSize)
         let weight: NSFont.Weight = text.isEnabled(.bold) ? .bold : .regular
         let base: NSFont = text.style == .typewriter
             ? .monospacedSystemFont(ofSize: size, weight: weight)
-            : .systemFont(ofSize: size, weight: weight)
+            : ThemeTypography.font(appearance.design.font, size: size, weight: weight)
         guard text.italic else { return base }
         let traits = base.fontDescriptor.symbolicTraits.union(.italic)
         return NSFont(descriptor: base.fontDescriptor.withSymbolicTraits(traits), size: size) ?? base
@@ -41,7 +41,7 @@ enum TextCardTypography {
         paragraph.lineHeightMultiple = text.style == .headline ? 1.05 : 1.25
         paragraph.lineBreakMode = .byWordWrapping
         return [
-            .font: font(for: text),
+            .font: font(for: text, appearance: appearance),
             .foregroundColor: textColor(for: text.style, appearance: appearance),
             .paragraphStyle: paragraph,
             .kern: text.style == .headline ? -0.4 : 0,
@@ -61,7 +61,7 @@ enum TextCardTypography {
               )
         else { return plain }
 
-        let baseFont = font(for: text)
+        let baseFont = font(for: text, appearance: appearance)
         let styled = NSMutableAttributedString(string: String(parsed.characters), attributes: base)
         for run in parsed.runs {
             guard let intent = run.inlinePresentationIntent else { continue }
@@ -130,7 +130,7 @@ enum TextCardTypography {
         paragraph.alignment = overlay ? .left : .center
         paragraph.lineBreakMode = .byTruncatingTail
         var attributes: [NSAttributedString.Key: Any] = [
-            .font: captionFont(size: size),
+            .font: appearance.design == .standard ? captionFont(size: size) : ThemeTypography.font(appearance.design.font, size: size),
             .foregroundColor: overlay ? NSColor.white.withAlphaComponent(0.95) : appearance.captionInk.nsColor,
             .paragraphStyle: paragraph,
         ]

@@ -106,10 +106,8 @@ public final class CanvasController {
     public func toggleLockOnSelection() { view?.toggleLockOnSelection() }
     public func addTestCards(count: Int) { view?.addTestCards(count: count) }
     public func addTestPhotos(count: Int) { view?.addTestPhotos(count: count) }
-    #if DEBUG
     /// One web card of each layout, plus one still loading, from generated previews.
     public func addTestWebCards() { view?.addTestWebCards() }
-    #endif
 
     /// Insert ▸ Image…: picks image or PDF files and pins them to the board.
     public func insertImage() { view?.presentImagePicker() }

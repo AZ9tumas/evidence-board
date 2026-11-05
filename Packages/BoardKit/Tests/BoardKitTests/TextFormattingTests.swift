@@ -21,7 +21,7 @@ struct TextFormattingTests {
         #expect(!text.italic && !text.underline && !text.strikethrough)
     }
 
-    @Test(arguments: [ThemeID.forest, .midnight, .parchment])
+    @Test(arguments: [ThemeID.fieldNotes, .observatory, .parchment])
     func themesAndFormattingSurviveSavingAndCopying(_ theme: ThemeID) throws {
         let text = TextPayload(content: "Clue **one**", style: .typewriter, alignment: .center,
                                fontSize: 36, bold: true, italic: true, underline: true, strikethrough: true)
@@ -75,7 +75,7 @@ struct TextFormattingTests {
         let store = BoardStore(board: original)
         var updated = original.cards[0]
         updated.content = .text(TextPayload(content: "Clue", fontSize: 32, bold: true, underline: true))
-        let undo = try #require(store.apply(.batch([.updateCards([updated]), .setTheme(.forest)])))
+        let undo = try #require(store.apply(.batch([.updateCards([updated]), .setTheme(.fieldNotes)])))
         let edited = store.board
         let redo = try #require(store.apply(undo))
         #expect(store.board == original)

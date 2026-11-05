@@ -19,7 +19,7 @@ enum StringLabelStyle {
     static func attributes(appearance: CanvasAppearance, size: CGFloat = fontSize) -> [NSAttributedString.Key: Any] {
         let paragraph = NSMutableParagraphStyle()
         paragraph.lineBreakMode = .byTruncatingTail
-        return [.font: font(size: size), .foregroundColor: appearance.labelText.nsColor, .paragraphStyle: paragraph]
+        return [.font: ThemeTypography.font(appearance.design.font, size: size, weight: .semibold), .foregroundColor: appearance.labelText.nsColor, .paragraphStyle: paragraph]
     }
 
     static func textWidth(_ text: String, appearance: CanvasAppearance) -> CGFloat {

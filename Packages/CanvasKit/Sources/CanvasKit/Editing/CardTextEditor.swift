@@ -60,7 +60,7 @@ final class CardTextEditor: NSObject, NSTextViewDelegate {
         let attributes = TextCardTypography.baseAttributes(for: text, appearance: appearance)
         textView.typingAttributes = attributes
         textView.defaultParagraphStyle = attributes[.paragraphStyle] as? NSParagraphStyle
-        textView.font = TextCardTypography.font(for: text)
+        textView.font = TextCardTypography.font(for: text, appearance: appearance)
         textView.textColor = TextCardTypography.textColor(for: text.style, appearance: appearance)
         textView.insertionPointColor = appearance.selection.from.nsColor
         textView.selectedTextAttributes = [.backgroundColor: appearance.selection.from.opacity(0.35).nsColor]
@@ -94,7 +94,7 @@ final class CardTextEditor: NSObject, NSTextViewDelegate {
         payload = updated
         let attributes = TextCardTypography.baseAttributes(for: payload, appearance: appearance)
         let selection = textView.selectedRanges
-        textView.font = TextCardTypography.font(for: payload)
+        textView.font = TextCardTypography.font(for: payload, appearance: appearance)
         textView.textColor = TextCardTypography.textColor(for: payload.style, appearance: appearance)
         textView.textStorage?.setAttributes(attributes, range: NSRange(location: 0, length: textView.textStorage?.length ?? 0))
         textView.defaultParagraphStyle = attributes[.paragraphStyle] as? NSParagraphStyle

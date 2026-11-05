@@ -1,4 +1,5 @@
 import Foundation
+import BoardKit
 import QuartzCore
 
 /// Cork grain behind a Cork board.
@@ -16,7 +17,7 @@ final class GrainTexture {
     let layer = CALayer()
     private let coarse = TileSet()
     private let fine = TileSet()
-    private var drawn: (color: RGBA, scale: CGFloat)?
+    private var drawn: (color: RGBA, scale: CGFloat, texture: BoardTexture)?
 
     init() {
         layer.masksToBounds = true
@@ -26,11 +27,11 @@ final class GrainTexture {
 
     /// Draws the tile in `color` (the dark specks; light ones are added) for a screen of
     /// `scale` pixels per point.
-    func setColor(_ color: RGBA, scale: CGFloat) {
-        guard drawn?.color != color || drawn?.scale != scale else { return }
-        drawn = (color, scale)
+    func setColor(_ color: RGBA, scale: CGFloat, texture: BoardTexture = .grain) {
+        guard drawn?.color != color || drawn?.scale != scale || drawn?.texture != texture else { return }
+        drawn = (color, scale, texture)
         // Twice the screen's detail: a tile is shown at up to twice its nominal size.
-        let image = Self.makeTile(color: color, scale: scale * 2)
+        let image = ThemeArtwork.surfaceTile(texture, color: color, scale: scale * 2)
         coarse.setImage(image)
         fine.setImage(image)
     }
@@ -38,6 +39,15 @@ final class GrainTexture {
     func update(camera: Camera, viewSize size: CGSize) {
         layer.frame = CGRect(origin: .zero, size: size)
         guard size.width > 0, size.height > 0 else { return }
+        if drawn?.texture != .grain {
+            // Geometric surfaces stay at one fixed world scale, including when zooming.
+            let origin = camera.worldToView(.zero, in: size)
+            coarse.update(origin: origin, side: Self.tileSize * camera.zoom, size: size)
+            coarse.layer.opacity = Float(min(max(camera.zoom / 0.3, 0.15), 1))
+            fine.layer.isHidden = true
+            return
+        }
+        fine.layer.isHidden = false
         let octave = Self.octave(forZoom: camera.zoom)
         // Tiles start at the board's origin, so the pattern stays put on the board.
         let origin = camera.worldToView(.zero, in: size)

@@ -48,6 +48,15 @@ final class CardNode {
     private let glow = CALayer()
     private let shadowLayers = CardNode.shadows.map { _ in CALayer() }
     private let body = CAGradientLayer()
+    private let bodyMask = CAShapeLayer()
+    private let ornament = CAShapeLayer()
+    private let photoMount = CAShapeLayer()
+    private var skinSize: CGSize?
+    private var skinDesign: ThemeDesign?
+    private var mountRect: CGRect?
+    private var mountStyle: PhotoMount?
+    private var shadowOffsetScale: CGFloat = 1
+    private var shadowBlurScale: CGFloat = 1
     private let tintBand = CAGradientLayer()
     private let skeleton = CALayer()
     private let photo = CALayer()
@@ -94,15 +103,22 @@ final class CardNode {
         }
         body.cornerCurve = .continuous
         body.masksToBounds = true
+        body.mask = bodyMask
+        ornament.fillColor = nil
+        ornament.lineWidth = 0.8
+        photoMount.fillColor = nil
+        photoMount.lineWidth = 1.2
         body.startPoint = CGPoint(x: 0.5, y: 0)
         body.endPoint = CGPoint(x: 0.5, y: 1)
         root.addSublayer(body)
         body.addSublayer(tintBand)
         body.addSublayer(skeleton)
+        body.addSublayer(ornament)
 
         photo.masksToBounds = true
         photo.cornerCurve = .continuous
         root.addSublayer(photo)
+        root.addSublayer(photoMount)
         scrim.startPoint = CGPoint(x: 0.5, y: 0)
         scrim.endPoint = CGPoint(x: 0.5, y: 1)
         scrim.colors = [RGBA.black.opacity(0).cgColor, RGBA.black.opacity(0.55).cgColor]
@@ -175,8 +191,8 @@ final class CardNode {
         let needsRender = sizeChanged || contentChanged || renderedTier == nil
 
         let bounds = CGRect(x: 0, y: 0, width: newCard.frame.width, height: newCard.frame.height)
-        let radius = CanvasGeometry.cornerRadius(of: newCard)
-        let outline = CGPath(roundedRect: bounds, cornerWidth: radius, cornerHeight: radius, transform: nil)
+        let skinChanged = skinSize != bounds.size || skinDesign != appearance.design || old.kind != newCard.kind || old.content.imagePayload?.frameStyle != newCard.content.imagePayload?.frameStyle
+        let outline = !skinChanged ? (bodyMask.path ?? ThemeArtwork.outline(bounds, card: newCard, appearance: appearance)) : ThemeArtwork.outline(bounds, card: newCard, appearance: appearance)
 
         root.bounds = bounds
         root.position = CGPoint(x: newCard.frame.midX, y: newCard.frame.midY)
@@ -191,12 +207,24 @@ final class CardNode {
             layer.shadowColor = shadowColor
         }
         shadowStrength = Float(appearance.shadow.alpha)
+        shadowOffsetScale = appearance.design.shadowOffset
+        shadowBlurScale = appearance.design.shadowBlur
         applyShadows()
         glow.frame = bounds
         glow.shadowPath = outline
 
         body.frame = bounds
-        body.cornerRadius = radius
+        body.mask = appearance.design.edge == .standard ? nil : bodyMask
+        body.cornerRadius = appearance.design.edge == .standard ? CanvasGeometry.cornerRadius(of: newCard) : 0
+        bodyMask.frame = bounds
+        bodyMask.path = outline
+        ornament.frame = bounds
+        ornament.strokeColor = appearance.text.opacity(appearance.design.ornament == .chalk ? 0.3 : 0.16).cgColor
+        if skinChanged {
+            ornament.path = ThemeArtwork.ornament(in: bounds, style: appearance.design.ornament)
+            skinSize = bounds.size
+            skinDesign = appearance.design
+        }
         body.colors = bodyFill(for: newCard, appearance: appearance).cgColors
         body.borderColor = appearance.cardStroke.from.cgColor
 
@@ -212,10 +240,10 @@ final class CardNode {
         stroke.frame = bounds
         stroke.colors = appearance.cardStroke.cgColors
         strokeMask.frame = bounds
-        strokeMask.path = CGPath(
-            roundedRect: bounds.insetBy(dx: 0.5, dy: 0.5),
-            cornerWidth: max(radius - 0.5, 0), cornerHeight: max(radius - 0.5, 0), transform: nil
-        )
+        strokeMask.lineWidth = appearance.design.borderWidth
+        if skinChanged {
+            strokeMask.path = ThemeArtwork.outline(bounds.insetBy(dx: appearance.design.borderWidth / 2, dy: appearance.design.borderWidth / 2), card: newCard, appearance: appearance)
+        }
 
         if isWebCard, let content = newWeb ?? webContent {
             applyWeb(content, bounds: bounds, appearance: appearance, contentChanged: contentChanged || sizeChanged)
@@ -255,6 +283,14 @@ final class CardNode {
             skeleton.sublayers = Self.placeholders(for: newCard, in: bounds.size, appearance: appearance)
         }
 
+        photoMount.frame = bounds
+        photoMount.strokeColor = appearance.captionInk.opacity(0.7).cgColor
+        photoMount.isHidden = appearance.design.photoMount == .standard || (imagePayload == nil && webLayout?.image == nil)
+        if !photoMount.isHidden, mountRect != photo.frame || mountStyle != appearance.design.photoMount {
+            photoMount.path = ThemeArtwork.photoMount(in: photo.frame, style: appearance.design.photoMount)
+            mountRect = photo.frame
+            mountStyle = appearance.design.photoMount
+        }
         pin.root.position = CGPoint(x: bounds.midX, y: CanvasGeometry.pinInset)
         pin.update(locked: newCard.locked, appearance: appearance)
         applyVisibility()
@@ -277,10 +313,13 @@ final class CardNode {
         }
         guard let layout = webLayout else { return }
         parts.apply(layout, content: content, bounds: bounds, appearance: appearance)
+        parts.mesh.opacity = Float(appearance.design.webMeshOpacity)
+        parts.glow.opacity = Float(appearance.design.webMeshOpacity)
         stroke.colors = [
             (RGBA(hex: content.palette.vibrant) ?? appearance.cardStroke.from).opacity(0.6).cgColor,
             (RGBA(hex: content.palette.vibrant) ?? appearance.cardStroke.from).opacity(0).cgColor,
         ]
+        if appearance.design != .standard { stroke.colors = appearance.cardStroke.cgColors }
         let imageRect = layout.image ?? .zero
         photo.frame = imageRect
         photo.cornerRadius = WebCardLayout.heroCornerRadius
@@ -534,8 +573,8 @@ final class CardNode {
             case .minimal: false
             }
             layer.isHidden = !visible
-            layer.shadowOffset = CGSize(width: 0, height: shadow.offset * lift.offset)
-            layer.shadowRadius = shadow.blur * lift.blur / 2
+            layer.shadowOffset = CGSize(width: 0, height: shadow.offset * lift.offset * shadowOffsetScale)
+            layer.shadowRadius = shadow.blur * lift.blur * shadowBlurScale / 2
             layer.shadowOpacity = shadow.opacity * shadowStrength
         }
     }
@@ -630,6 +669,10 @@ final class PinNode {
     private let halo = CAGradientLayer()
     private let head = CAGradientLayer()
     private let glint = CALayer()
+    private let needle = CALayer()
+    private let glyph = CAShapeLayer()
+    private let glyphDetail = CAShapeLayer()
+    private var fastener = BoardFastener.pushpin
     private var colors = GradientPair(.white, .white)
     private var state = PinState.normal
 
@@ -648,7 +691,6 @@ final class PinNode {
         halo.opacity = 0
         root.addSublayer(halo)
 
-        let needle = CALayer()
         needle.bounds = bounds
         needle.position = CGPoint(x: bounds.midX, y: bounds.midY)
         needle.shadowPath = CGPath(ellipseIn: bounds, transform: nil)
@@ -670,10 +712,26 @@ final class PinNode {
         glint.cornerRadius = 1.75
         glint.backgroundColor = RGBA.white.opacity(0.7).cgColor
         root.addSublayer(glint)
+        glyphDetail.fillColor = nil
+        glyphDetail.lineWidth = 1.4
+        root.addSublayer(glyph)
+        root.addSublayer(glyphDetail)
     }
 
     func update(locked: Bool, appearance: CanvasAppearance) {
         colors = locked ? appearance.lockedPin : appearance.pin
+        fastener = appearance.design.fastener
+        let standard = fastener == .pushpin
+        head.isHidden = !standard
+        glint.isHidden = !standard
+        needle.isHidden = !standard
+        glyph.isHidden = standard
+        glyphDetail.isHidden = standard
+        let paths = ThemeArtwork.fastener(fastener, in: root.bounds)
+        glyph.frame = root.bounds
+        glyphDetail.frame = root.bounds
+        glyph.path = paths.body
+        glyphDetail.path = paths.detail
         halo.colors = [colors.from.opacity(0.7).cgColor, colors.from.opacity(0).cgColor]
         applyHead()
     }
@@ -719,6 +777,8 @@ final class PinNode {
     private func applyHead() {
         // Brighter while it's the thing you're about to grab.
         let lift = state == .normal ? 0 : 0.22
+        glyph.fillColor = colors.from.mixed(with: .white, lift).cgColor
+        glyphDetail.strokeColor = (fastener == .chalkCross || fastener == .paperclip ? colors.from : colors.to.mixed(with: .black, 0.4)).cgColor
         head.colors = [colors.from.mixed(with: .white, lift).cgColor, colors.to.mixed(with: .white, lift * 0.5).cgColor]
     }
 }

@@ -11,7 +11,7 @@
     "title": { "type": "string", "maxLength": 512 },
     "createdAt": { "type": "string", "format": "date-time" },
     "modifiedAt": { "type": "string", "format": "date-time" },
-    "theme": { "enum": ["system", "noir", "cork", "blueprint", "daylight", "forest", "midnight", "parchment"], "default": "system" },
+    "theme": { "enum": ["system", "noir", "cork", "blueprint", "daylight", "parchment", "chalkboard", "fieldNotes", "crimeLab", "circuit", "scrapbook", "newsroom", "observatory"], "default": "system" },
     "viewport": {
       "type": "object",
       "required": ["x", "y", "zoom"],

@@ -18,6 +18,10 @@ public final class BoardCanvasView: NSView {
             fade.duration = Motion.isReduced ? 0.15 : 0.4
             rootLayer.add(fade, forKey: "theme")
             applyAppearance()
+            if canvasAppearance.design.font != oldValue.design.font {
+                fitAutoHeightTextCards()
+                fitWebCards()
+            }
         }
     }
 
@@ -259,7 +263,7 @@ public final class BoardCanvasView: NSView {
             }
             grid.setContentsScale(scale)
             lineGrid.setContentsScale(scale)
-            if canvasAppearance.texture == .grain { grain.setColor(canvasAppearance.gridDot, scale: scale) }
+            if canvasAppearance.texture != .dots && canvasAppearance.texture != .lines { grain.setColor(canvasAppearance.gridDot, scale: scale, texture: canvasAppearance.texture) }
             for node in cardNodes.values { node.setContentsScale(scale) }
             for node in stringNodes.values {
                 node.setContentsScale(scale)
@@ -289,10 +293,10 @@ public final class BoardCanvasView: NSView {
             let texture = canvasAppearance.texture
             grid.layer.isHidden = texture != .dots
             lineGrid.layer.isHidden = texture != .lines
-            grain.layer.isHidden = texture != .grain
+            grain.layer.isHidden = texture == .dots || texture == .lines
             grid.setColor(canvasAppearance.gridDot)
             lineGrid.setColor(canvasAppearance.gridDot)
-            if texture == .grain { grain.setColor(canvasAppearance.gridDot, scale: backingScale) }
+            if !grain.layer.isHidden { grain.setColor(canvasAppearance.gridDot, scale: backingScale, texture: texture) }
             overlay.setAppearance(canvasAppearance)
         }
         rebuildContent()
@@ -686,7 +690,7 @@ public final class BoardCanvasView: NSView {
             switch canvasAppearance.texture {
             case .dots: grid.update(camera: camera, viewSize: size)
             case .lines: lineGrid.update(camera: camera, viewSize: size, backingScale: backingScale)
-            case .grain: grain.update(camera: camera, viewSize: size)
+            default: grain.update(camera: camera, viewSize: size)
             }
             let level = DetailLevel(zoom: camera.zoom)
             if level != detailLevel {

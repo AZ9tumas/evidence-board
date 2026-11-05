@@ -14,7 +14,7 @@ A native macOS app for building detective-style evidence boards. You place **tex
 - Only three card types: Text, Image and Web
 - Rich, gradient-driven link previews built from each page's own color palette
 - Physical-looking strings with sag, labels, and **Focus** and **Trace** modes to follow connections
-- Seven themes: Noir, Cork, Blueprint, Daylight, Forest, Midnight and Parchment, with Liquid Glass on macOS 26
+- Twelve board themes, with distinct materials, card shapes, lettering, fasteners, connections and photo mounts; Liquid Glass on macOS 26
 - Text-card formatting: 8–96 pt sizes, bold, italic, underline, strikethrough and alignment, from the toolbar or **Format** menu
 - `.evboard` is plain JSON. Images and link snapshots are embedded, so a board opens offline exactly as you saved it
 
@@ -46,6 +46,27 @@ Tools/Fuzz/run.sh 60
 ### Without a Mac
 
 GitHub Actions builds and tests everything on every push (`.github/workflows/ci.yml`). To see the running app, push a commit whose message contains `[snapshot]` (or run the **Snapshot** workflow by hand). It launches the app on a macOS runner with an empty board and the sample board, and publishes screenshots that `Tools/fetch-snapshots.py <commit-sha> <dir>` downloads.
+
+## Material themes
+
+Alongside Noir, Cork, Blueprint and Daylight, these themes change the board surface, card edges and ornaments, default lettering, fasteners, connection material, label treatment and photo mounts. Web previews also take on the theme's typography and card material. Explicit text size, emphasis, image framing and connection styles remain yours; themes do not rewrite card content.
+
+| Theme | Board and cards | Lettering and fasteners | Connections and photos |
+|---|---|---|---|
+| Parchment | Paper fibers, deckled edges and archival rules | Baskerville and wax seals | Cord, luggage-tag labels and etched mounts |
+| Chalkboard | Chalk dust, erased strokes and double chalk outlines | Chalkboard lettering and chalk crosses | Broken chalk lines, underlined labels and chalk frames |
+| Field Notes | Ruled notebook paper, margin rules and punched index cards | Handwriting and masking tape | Pencil lines, square labels and taped photos |
+| Crime Lab | Ceramic tile grid, clipped specimen panels and barcodes | Condensed technical type and steel screws | Cable, bracket labels and film sprockets |
+| Circuit | Printed circuit traces, chamfered plates and contact marks | Monospaced type and solder pads | Glowing segmented links, plaque labels and corner brackets |
+| Scrapbook | Woven linen, scalloped cards and stitching | Marker lettering and buttons | Thick twine, perforated labels and photo corners |
+| Newsroom | Newsprint columns, squared clippings and editorial rules | Georgia and paperclips | Red ink, tag labels and double-rule photo frames |
+| Observatory | Star charts and rounded instrument panels | Rounded type and brass stars | Fine orbital dashes, rounded labels and rounded mounts |
+
+The materials are drawn procedurally and stay attached to the board when panning and zooming. Quick Look and thumbnails use the same artwork. Font families fall back to system fonts if unavailable; requested bold formatting takes precedence over decorative faces that have no bold member. Forest and Midnight have been retired from the picker. Existing boards using those IDs open as Field Notes and Observatory respectively.
+
+### Optional Debug menu
+
+The **Debug** menu is off by default in both Debug and Release builds. Set the process environment variable **`EB_DEBUG_TOOLS=1`** to include it; set it to `0` or remove it to hide it. In Xcode, toggle this variable under **Edit Scheme ▸ Run ▸ Arguments ▸ Environment Variables**, then relaunch. The menu includes sample text cards, photos and links in either build configuration. Snapshot automation remains restricted to Debug builds and its separate `EB_SNAPSHOT_SCENARIO` variable.
 
 ## Project layout
 
@@ -119,7 +140,7 @@ Its 30 link cards carry the headline and outlet, but no page images. To fetch th
 - **Create:** double-click empty canvas, press **T**, use **Insert ▸ Text Card** (⌘⇧T), or paste text.
 - **Edit:** double-click a card or press **↩**. **Esc** or **⌘↩** finishes. Markdown `**bold**`, `*italic*` and `` `code` `` render on the card.
 - **Format:** select one or more text cards and use the **Text Format** toolbar button or **Format** menu. Choose a size (8–96 pt), bold (**⌘B**), italic (**⌘I**), underline (**⌘U**), strikethrough, alignment or card style. Controls apply to all text in the selected unlocked cards, and also work while typing. **Style Default** restores the style's font size; **Reset Card Formatting** restores Note style, left alignment and default typography while keeping the content and inline Markdown. Changes are saved with the board and can be undone.
-- **More themes:** **Board ▸ Theme** or the theme toolbar menu includes Forest (green and brass), Midnight (violet and pink), and Parchment (warm paper and sepia), alongside the original four themes. **⌥⌘T** cycles through all themes.
+- **Themes:** use **Board ▸ Theme** or the theme toolbar menu; **⌥⌘T** cycles through all themes. See the material themes below.
 - **Select, move, resize:** click, ⇧/⌘-click, marquee, ⌘A, drag, arrow keys, and corner handles.
 - **Arrange:** front/back, lock, duplicate, copy, cut and paste between boards, plus style and color from the right-click menu. Every change is one undo step.
 

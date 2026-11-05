@@ -72,7 +72,7 @@ struct BoardCommands: Commands {
                 set: { canvas?.setTheme($0) }
             )) {
                 ForEach(ThemeID.allCases, id: \.self) { theme in
-                    Text(theme.title).tag(theme)
+                    Text(theme.title).help(theme.subtitle).tag(theme)
                 }
             }
             .disabled(canvas == nil)
@@ -124,17 +124,20 @@ struct BoardCommands: Commands {
             Divider()
         }
 
-        #if DEBUG
-        CommandMenu("Debug") {
-            Button("Add 100 Test Cards") { canvas?.addTestCards(count: 100) }
-            Button("Add 500 Test Cards") { canvas?.addTestCards(count: 500) }
-            Divider()
-            Button("Add 50 Test Photos") { canvas?.addTestPhotos(count: 50) }
-            Button("Add 200 Test Photos") { canvas?.addTestPhotos(count: 200) }
-            Divider()
-            Button("Add Test Links") { canvas?.addTestWebCards() }
+        if ProcessInfo.processInfo.environment["EB_DEBUG_TOOLS"] == "1" {
+            CommandMenu("Debug") {
+                Group {
+                    Button("Add 100 Test Cards") { canvas?.addTestCards(count: 100) }
+                    Button("Add 500 Test Cards") { canvas?.addTestCards(count: 500) }
+                    Divider()
+                    Button("Add 50 Test Photos") { canvas?.addTestPhotos(count: 50) }
+                    Button("Add 200 Test Photos") { canvas?.addTestPhotos(count: 200) }
+                    Divider()
+                    Button("Add Test Links") { canvas?.addTestWebCards() }
+                }
+                .disabled(canvas == nil)
+            }
         }
-        #endif
     }
 }
 

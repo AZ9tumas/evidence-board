@@ -241,7 +241,6 @@ extension BoardCanvasView {
         PeekPopover.show(web.url, relativeTo: rect, of: self)
     }
 
-    #if DEBUG
     /// One web card of each layout and one still loading, made from generated pages and laid
     /// out in columns around the view center. For the Debug menu and the snapshot workflow.
     func addTestWebCards() {
@@ -289,7 +288,6 @@ extension BoardCanvasView {
         for id in loading { previewTasks[id] = Task {} }
         boardEditor.perform(.batch([.addAssets(added), .insertCards(cards)]), actionName: "Add Test Links")
     }
-    #endif
 
     func copySelectedLinks() {
         let urls = selectedWebURLs

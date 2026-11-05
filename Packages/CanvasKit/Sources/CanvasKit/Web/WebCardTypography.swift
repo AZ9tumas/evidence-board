@@ -4,6 +4,7 @@ import BoardKit
 /// Fonts and colors for web card text. Text sits on the card's mesh gradient, so its color is
 /// chosen for contrast against the mesh (DESIGN.md §7.1, point 4).
 struct WebCardTypography {
+    let fontFamily: ThemeFont
     let primary: NSColor
     let secondary: NSColor
     let tertiary: NSColor
@@ -16,7 +17,9 @@ struct WebCardTypography {
     /// mesh; the others sit on the theme's card color with a hint of it.
     init(appearance: CanvasAppearance, palette: LinkPalette, fullMesh: Bool) {
         let backdrop = WebCardArt.meshBackdrop(palette: palette, appearance: appearance, full: fullMesh)
-        let lightText = WebCardArt.prefersLightText(on: backdrop)
+        fontFamily = appearance.design.font
+        let themedBackdrop = backdrop.mixed(with: appearance.cardFill.from, 1 - appearance.design.webMeshOpacity)
+        let lightText = WebCardArt.prefersLightText(on: themedBackdrop)
         let ink = lightText ? Self.lightInk : Self.darkInk
         primary = ink.nsColor
         secondary = ink.opacity(0.72).nsColor
@@ -35,7 +38,7 @@ struct WebCardTypography {
 
     func title(_ text: String, size: CGFloat) -> NSAttributedString {
         NSAttributedString(string: text, attributes: [
-            .font: NSFont.systemFont(ofSize: size, weight: .semibold),
+            .font: ThemeTypography.font(fontFamily, size: size, weight: .semibold),
             .foregroundColor: primary,
             .paragraphStyle: paragraph(lineHeight: 1.08),
             .kern: -0.2,
@@ -44,10 +47,10 @@ struct WebCardTypography {
 
     /// The big title of compact cards ("Display 20 Bold").
     func display(_ text: String, size: CGFloat) -> NSAttributedString {
-        let base = NSFont.systemFont(ofSize: size, weight: .bold)
+        let base = ThemeTypography.font(fontFamily, size: size, weight: .bold)
         let rounded = base.fontDescriptor.withDesign(.rounded).flatMap { NSFont(descriptor: $0, size: size) } ?? base
         return NSAttributedString(string: text, attributes: [
-            .font: rounded,
+            .font: fontFamily == .system ? rounded : base,
             .foregroundColor: primary,
             .paragraphStyle: paragraph(lineHeight: 1.05),
             .kern: -0.3,
@@ -56,7 +59,7 @@ struct WebCardTypography {
 
     func body(_ text: String, size: CGFloat) -> NSAttributedString {
         NSAttributedString(string: text, attributes: [
-            .font: NSFont.systemFont(ofSize: size),
+            .font: ThemeTypography.font(fontFamily, size: size),
             .foregroundColor: secondary,
             .paragraphStyle: paragraph(lineHeight: 1.15),
         ])
@@ -64,7 +67,7 @@ struct WebCardTypography {
 
     func secondary(_ text: String, size: CGFloat) -> NSAttributedString {
         NSAttributedString(string: text, attributes: [
-            .font: NSFont.systemFont(ofSize: size),
+            .font: ThemeTypography.font(fontFamily, size: size),
             .foregroundColor: secondary,
             .paragraphStyle: paragraph(singleLine: true),
         ])
@@ -72,7 +75,7 @@ struct WebCardTypography {
 
     func tertiary(_ text: String, size: CGFloat) -> NSAttributedString {
         NSAttributedString(string: text, attributes: [
-            .font: NSFont.systemFont(ofSize: size, weight: .medium),
+            .font: ThemeTypography.font(fontFamily, size: size, weight: .medium),
             .foregroundColor: tertiary,
             .paragraphStyle: paragraph(singleLine: true),
         ])
@@ -80,11 +83,11 @@ struct WebCardTypography {
 
     /// A social post's text, set like a pull quote in New York.
     func quote(_ text: String, size: CGFloat) -> NSAttributedString {
-        let base = NSFont.systemFont(ofSize: size)
+        let base = ThemeTypography.font(fontFamily, size: size)
         let serif = base.fontDescriptor.withDesign(.serif).flatMap { NSFont(descriptor: $0, size: size) } ?? base
         let trimmed = text.trimmingCharacters(in: CharacterSet(charactersIn: "\"“”«» ").union(.whitespacesAndNewlines))
         return NSAttributedString(string: "“\(trimmed)”", attributes: [
-            .font: serif,
+            .font: fontFamily == .system ? serif : base,
             .foregroundColor: primary,
             .paragraphStyle: paragraph(lineHeight: 1.18),
         ])

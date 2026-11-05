@@ -86,8 +86,19 @@ public struct Viewport: Sendable, Equatable, Codable {
 }
 
 public enum ThemeID: String, Sendable, CaseIterable, DefaultedEnum {
-    case system, noir, cork, blueprint, daylight, forest, midnight, parchment
+    case system, noir, cork, blueprint, daylight, parchment
+    case chalkboard, fieldNotes, crimeLab, circuit, scrapbook, newsroom, observatory
     public static let unknownValue: ThemeID = .system
+
+    public init(from decoder: any Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        // Retired color variants migrate to complete themes when older boards open.
+        switch raw {
+        case "forest": self = .fieldNotes
+        case "midnight": self = .observatory
+        default: self = Self(rawValue: raw) ?? .unknownValue
+        }
+    }
 }
 
 extension Date {

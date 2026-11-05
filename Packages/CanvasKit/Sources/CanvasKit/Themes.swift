@@ -3,60 +3,51 @@ import BoardKit
 /// The themes' canvas tokens (DESIGN.md §6.1, §6.2). The app wraps each in a `Theme`
 /// with its window colors; keeping the canvas part here lets tests check their contrast.
 public extension CanvasAppearance {
-    /// Deep green, cream ink and brass pins, with a quiet dotted grid.
-    static let forest: CanvasAppearance = {
-        var theme = noir
-        theme.background = GradientPair(RGBA(0x0C211C), RGBA(0x16372D))
-        theme.cardFill = GradientPair(RGBA(0x203E32), RGBA(0x142E25))
-        theme.cardStroke = GradientPair(RGBA(0xB8D8B0, alpha: 0.3), RGBA(0xB8D8B0, alpha: 0.08))
-        theme.text = RGBA(0xF1F5E7)
-        theme.codeText = RGBA(0xBDE9C3)
-        theme.pin = GradientPair(RGBA(0xE5C779), RGBA(0xA78134))
-        theme.selection = GradientPair(RGBA(0x81D9AD), RGBA(0xD9D590))
-        theme.labelFill = GradientPair(RGBA(0x18382C), RGBA(0x102A21))
-        theme.labelText = RGBA(0xF1F5E7)
-        theme.string = GradientPair(RGBA(0xE5C779), RGBA(0xBF9851))
-        theme.shadow = RGBA(0x04140E, alpha: 0.85)
-        return theme
-    }()
+    static let parchment = materialTheme(.parchment, dark: false,
+        board: (0xEDE1C8, 0xD8C7A6), card: (0xFFFAEF, 0xF5EBD6), ink: 0x362A20, accent: 0xA34732)
+    static let chalkboard = materialTheme(.chalkboard, dark: true,
+        board: (0x172927, 0x101F1E), card: (0x243A35, 0x1A2C28), ink: 0xF3F0DA, accent: 0xE8D89C)
+    static let fieldNotes = materialTheme(.fieldNotes, dark: false,
+        board: (0xE4EBD5, 0xD2DDCA), card: (0xFFFFE5, 0xF9F3CF), ink: 0x263A4C, accent: 0x426B93)
+    static let crimeLab = materialTheme(.crimeLab, dark: false,
+        board: (0xE6ECED, 0xC9D5D8), card: (0xF9FCFC, 0xE9F0F2), ink: 0x152B33, accent: 0x1A7280)
+    static let circuit = materialTheme(.circuit, dark: true,
+        board: (0x071A16, 0x0A2820), card: (0x0E3028, 0x09221C), ink: 0xBDECD2, accent: 0x53DCA4)
+    static let scrapbook = materialTheme(.scrapbook, dark: false,
+        board: (0xD8BFA9, 0xC3AB9B), card: (0xFFF4DF, 0xF4DECA), ink: 0x49332E, accent: 0xA34E57)
+    static let newsroom = materialTheme(.newsroom, dark: false,
+        board: (0xD5D1C5, 0xBEB9AA), card: (0xF6F2E6, 0xEAE4D5), ink: 0x24231F, accent: 0x8E302B)
+    static let observatory = materialTheme(.observatory, dark: true,
+        board: (0x080F25, 0x182442), card: (0x172442, 0x101A33), ink: 0xF2EBD6, accent: 0xDEBD77)
 
-    /// Violet night sky with lavender highlights and luminous pink thread.
-    static let midnight: CanvasAppearance = {
-        var theme = noir
-        theme.background = GradientPair(RGBA(0x171125), RGBA(0x2C1B40))
-        theme.cardFill = GradientPair(RGBA(0x30223F), RGBA(0x21182F))
-        theme.cardStroke = GradientPair(RGBA(0xCFB5F8, alpha: 0.3), RGBA(0xCFB5F8, alpha: 0.07))
-        theme.text = RGBA(0xF6EFFF)
-        theme.codeText = RGBA(0xDCC2FF)
-        theme.pin = GradientPair(RGBA(0xF69BC5), RGBA(0xA65390))
-        theme.selection = GradientPair(RGBA(0xBFA0FF), RGBA(0xF6A7D3))
-        theme.labelFill = GradientPair(RGBA(0x302140), RGBA(0x21172F))
-        theme.labelText = RGBA(0xF6EFFF)
-        theme.string = GradientPair(RGBA(0xF69BC5), RGBA(0xBE8EF2))
-        theme.shadow = RGBA(0x10071D, alpha: 0.9)
+    private static func materialTheme(
+        _ id: ThemeID, dark: Bool, board: (UInt32, UInt32), card: (UInt32, UInt32), ink: UInt32, accent: UInt32
+    ) -> CanvasAppearance {
+        let text = RGBA(ink)
+        let color = RGBA(accent)
+        let fill = GradientPair(RGBA(card.0), RGBA(card.1))
+        var theme = CanvasAppearance(
+            background: GradientPair(RGBA(board.0), RGBA(board.1)),
+            vignette: RGBA.black.opacity(dark ? 0.3 : 0.08),
+            gridDot: text.opacity(dark ? 0.23 : 0.16),
+            cardFill: fill,
+            cardStroke: GradientPair(text.opacity(0.5), text.opacity(0.3)),
+            skeleton: text.opacity(0.12),
+            pin: GradientPair(color, color.mixed(with: .black, 0.3)),
+            lockedPin: GradientPair(RGBA(0xD5AA52), RGBA(0x9C682A)),
+            tints: dark ? tints : lightTints,
+            text: text, codeText: text.mixed(with: color, 0.15),
+            paperFill: fill, paperText: text,
+            selection: GradientPair(color, color.mixed(with: dark ? .white : .black, 0.2)),
+            photoPaper: fill, captionInk: text,
+            labelFill: fill, labelText: text,
+            texture: id.texture,
+            shadow: RGBA.black.opacity(id == .chalkboard ? 0 : (dark ? 0.7 : 0.4)),
+            string: GradientPair(color, color.mixed(with: dark ? .white : .black, 0.12))
+        )
+        theme.design = id.design
         return theme
-    }()
-
-    /// An archival desk: pale parchment, warm paper cards and sepia ink.
-    static let parchment: CanvasAppearance = {
-        var theme = daylight
-        theme.background = GradientPair(RGBA(0xEDE1C8), RGBA(0xD8C7A6))
-        theme.vignette = RGBA(0x7B5B35, alpha: 0.2)
-        theme.gridDot = RGBA(0x735A3A, alpha: 0.12)
-        theme.cardFill = GradientPair(RGBA(0xFFFAEF), RGBA(0xF5EBD6))
-        theme.cardStroke = GradientPair(RGBA(0x7B5B35, alpha: 0.22), RGBA(0x7B5B35, alpha: 0.1))
-        theme.text = RGBA(0x362A20)
-        theme.codeText = RGBA(0x784018)
-        theme.paperFill = GradientPair(RGBA(0xF4E3BE), RGBA(0xEAD5AC))
-        theme.paperText = RGBA(0x3C2B18)
-        theme.pin = GradientPair(RGBA(0xB7653D), RGBA(0x7A3426))
-        theme.selection = GradientPair(RGBA(0x946132), RGBA(0x9D4C47))
-        theme.labelFill = GradientPair(RGBA(0xFFFAEF), RGBA(0xF2E5C9))
-        theme.labelText = RGBA(0x362A20)
-        theme.string = GradientPair(RGBA(0xA34732), RGBA(0xC27A4A))
-        theme.shadow = RGBA(0x533A1B, alpha: 0.4)
-        return theme
-    }()
+    }
 
     static let tints: [Tint: GradientPair] = [
         .red: GradientPair(RGBA(0xFF3B4E), RGBA(0xFF7A59)),

@@ -31,6 +31,13 @@ public enum BoardRenderer {
         context.scaleBy(x: zoom, y: zoom)
         context.translateBy(x: -content.minX, y: -content.minY)
         let pixelsPerPoint = zoom * scale
+        if let surface = ThemeArtwork.surfaceTile(appearance.texture, color: appearance.gridDot, scale: 2) {
+            context.saveGState()
+            context.clip(to: content)
+            context.setAlpha(min(max(zoom / 0.3, 0.15), 1))
+            context.drawTiledImage(in: CGRect(x: 0, y: 0, width: 256, height: 256), image: surface)
+            context.restoreGState()
+        }
 
         let cards = board.cards.sorted { $0.z < $1.z }
         for card in cards {
@@ -82,8 +89,7 @@ public enum BoardRenderer {
     private static func draw(_ card: Card, board: Board, in context: CGContext, appearance: CanvasAppearance, pixelsPerPoint: CGFloat) {
         let size = CGSize(width: card.frame.width, height: card.frame.height)
         let bounds = CGRect(origin: .zero, size: size)
-        let radius = CanvasGeometry.cornerRadius(of: card)
-        let outline = CGPath(roundedRect: bounds, cornerWidth: radius, cornerHeight: radius, transform: nil)
+        let outline = ThemeArtwork.outline(bounds, card: card, appearance: appearance)
 
         context.saveGState()
         defer { context.restoreGState() }
@@ -95,7 +101,7 @@ public enum BoardRenderer {
         let fill = bodyFill(of: card, appearance: appearance)
         context.saveGState()
         context.setShadow(
-            offset: CGSize(width: 0, height: -6 * pixelsPerPoint), blur: 16 * pixelsPerPoint,
+            offset: CGSize(width: 0, height: -6 * pixelsPerPoint * appearance.design.shadowOffset), blur: 16 * pixelsPerPoint * appearance.design.shadowBlur,
             color: appearance.shadow.opacity(0.4 * appearance.shadow.alpha).cgColor
         )
         context.addPath(outline)
@@ -111,6 +117,10 @@ public enum BoardRenderer {
             let color = appearance.gradient(for: tint).from
             drawVertical(GradientPair(color.opacity(0.3), color.opacity(0)), in: CGRect(x: 0, y: 0, width: size.width, height: min(64, size.height)), context: context)
         }
+        context.addPath(ThemeArtwork.ornament(in: bounds, style: appearance.design.ornament))
+        context.setStrokeColor(appearance.text.opacity(appearance.design.ornament == .chalk ? 0.3 : 0.16).cgColor)
+        context.setLineWidth(0.8)
+        context.strokePath()
         switch card.content {
         case .text(let text):
             drawText(text, size: size, context: context, appearance: appearance, pixelsPerPoint: pixelsPerPoint)
@@ -121,11 +131,9 @@ public enum BoardRenderer {
         }
         context.restoreGState()
 
-        context.addPath(CGPath(
-            roundedRect: bounds.insetBy(dx: 0.5, dy: 0.5), cornerWidth: max(radius - 0.5, 0), cornerHeight: max(radius - 0.5, 0), transform: nil
-        ))
+        context.addPath(ThemeArtwork.outline(bounds.insetBy(dx: appearance.design.borderWidth / 2, dy: appearance.design.borderWidth / 2), card: card, appearance: appearance))
         context.setStrokeColor(appearance.cardStroke.from.cgColor)
-        context.setLineWidth(1)
+        context.setLineWidth(appearance.design.borderWidth)
         context.strokePath()
     }
 
@@ -157,6 +165,7 @@ public enum BoardRenderer {
             asset: photo.asset, crop: photo.crop, in: area, cornerRadius: ImageCardLayout.photoCornerRadius(for: photo.frameStyle),
             board: board, context: context, placeholder: appearance.skeleton, pixelsPerPoint: pixelsPerPoint
         )
+        drawPhotoMount(in: area, context: context, appearance: appearance)
         guard let caption = photo.caption, !caption.isEmpty, pixelsPerPoint >= legibleScale else { return }
         let rect = ImageCardLayout.captionRect(for: photo.frameStyle, in: size)
         let image = TextCardTypography.renderCaption(
@@ -172,13 +181,17 @@ public enum BoardRenderer {
         let content = WebCardContent(payload: web, assets: board.assets, isLoading: false)
         let layout = WebCardLayout(content: content, width: size.width, appearance: appearance)
         let mesh = WebCardArt.meshImage(WebCardArt.meshColors(palette: content.palette, appearance: appearance, full: layout.fullMesh))
+        context.saveGState()
+        context.setAlpha(appearance.design.webMeshOpacity)
         draw(mesh, in: CGRect(origin: .zero, size: size), context: context)
+        context.restoreGState()
         if let area = layout.image, let id = web.snapshot?.image {
             drawPicture(
                 asset: id, crop: nil, in: area, cornerRadius: WebCardLayout.heroCornerRadius, board: board, context: context,
                 placeholder: RGBA(hex: content.palette.darkMuted) ?? appearance.skeleton, pixelsPerPoint: pixelsPerPoint
             )
         }
+        if let area = layout.image { drawPhotoMount(in: area, context: context, appearance: appearance) }
         if let area = layout.icon, let id = web.snapshot?.icon {
             drawPicture(
                 asset: id, crop: nil, in: area, cornerRadius: layout.iconIsRound ? area.width / 2 : area.width * 0.24,
@@ -190,6 +203,15 @@ public enum BoardRenderer {
             return
         }
         draw(WebCardTypography.render(layout, scale: min(pixelsPerPoint, 4)), in: CGRect(origin: .zero, size: size), context: context)
+    }
+
+    private static func drawPhotoMount(in rect: CGRect, context: CGContext, appearance: CanvasAppearance) {
+        context.saveGState()
+        context.addPath(ThemeArtwork.photoMount(in: rect, style: appearance.design.photoMount))
+        context.setStrokeColor(appearance.captionInk.opacity(0.7).cgColor)
+        context.setLineWidth(1.2)
+        context.strokePath()
+        context.restoreGState()
     }
 
     /// An asset decoded at about the size it's drawn, filling `area`.
@@ -238,16 +260,37 @@ public enum BoardRenderer {
                 from: CanvasGeometry.pinPoint(of: from), to: CanvasGeometry.pinPoint(of: to),
                 sag: CGFloat(string.sag), fan: fans[string.id] ?? 0
             )
-            let width = CGFloat(string.thickness + appearance.stringBoost)
+            let width = CGFloat(string.thickness * appearance.design.connection.widthScale + appearance.stringBoost)
             context.setLineWidth(width)
             switch string.stroke {
-            case .solid: context.setLineDash(phase: 0, lengths: [])
+            case .solid: context.setLineDash(phase: 0, lengths: appearance.design.connection.dashPattern.map { $0 * width })
             case .dashed: context.setLineDash(phase: 0, lengths: [width * 3, width * 2.5])
             case .dotted: context.setLineDash(phase: 0, lengths: [0, width * 2.2])
             }
             context.setStrokeColor(appearance.gradient(for: string.color).from.cgColor)
             context.addPath(curve.path)
             context.strokePath()
+            if let text = string.label, !text.isEmpty {
+                let size = StringLabelStyle.capsuleSize(for: text, appearance: appearance)
+                let middle = curve.point(at: 0.5)
+                context.saveGState()
+                context.translateBy(x: middle.x - size.width / 2, y: middle.y - size.height / 2)
+                context.setLineDash(phase: 0, lengths: [])
+                let bounds = CGRect(origin: .zero, size: size)
+                let radius = ThemeArtwork.labelRadius(appearance.design.label, height: size.height)
+                if appearance.design.label != .underline {
+                    context.addPath(CGPath(roundedRect: bounds, cornerWidth: radius, cornerHeight: radius, transform: nil))
+                    context.setFillColor(appearance.labelFill.from.cgColor)
+                    context.fillPath()
+                }
+                context.addPath(ThemeArtwork.labelDecoration(in: bounds, style: appearance.design.label))
+                context.setLineWidth(0.8)
+                context.setStrokeColor(appearance.labelText.opacity(0.7).cgColor)
+                context.strokePath()
+                let textRect = StringLabelStyle.textRect(in: size)
+                draw(StringLabelStyle.render(text, size: textRect.size, scale: 2, appearance: appearance), in: textRect, context: context)
+                context.restoreGState()
+            }
         }
     }
 
@@ -258,6 +301,18 @@ public enum BoardRenderer {
         let head = CGRect(x: point.x - radius, y: point.y - radius, width: radius * 2, height: radius * 2)
         context.saveGState()
         defer { context.restoreGState() }
+        if appearance.design.fastener != .pushpin {
+            let paths = ThemeArtwork.fastener(appearance.design.fastener, in: head)
+            context.addPath(paths.body)
+            context.setFillColor(colors.from.cgColor)
+            context.fillPath()
+            context.addPath(paths.detail)
+            let ink = [.chalkCross, .paperclip].contains(appearance.design.fastener) ? colors.from : colors.to.mixed(with: .black, 0.4)
+            context.setStrokeColor(ink.cgColor)
+            context.setLineWidth(1.4)
+            context.strokePath()
+            return
+        }
         context.addEllipse(in: head)
         context.clip()
         if let gradient = CGGradient(
@@ -302,9 +357,14 @@ public extension CanvasAppearance {
         case .cork: .cork
         case .blueprint: .blueprint
         case .daylight: .daylight
-        case .forest: .forest
-        case .midnight: .midnight
         case .parchment: .parchment
+        case .chalkboard: .chalkboard
+        case .fieldNotes: .fieldNotes
+        case .crimeLab: .crimeLab
+        case .circuit: .circuit
+        case .scrapbook: .scrapbook
+        case .newsroom: .newsroom
+        case .observatory: .observatory
         }
     }
 }

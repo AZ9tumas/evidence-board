@@ -23,9 +23,9 @@ struct Theme: Sendable {
         case .cork: .cork
         case .blueprint: .blueprint
         case .daylight: .daylight
-        case .forest: .forest
-        case .midnight: .midnight
         case .parchment: .parchment
+        case .chalkboard, .fieldNotes, .crimeLab, .circuit, .scrapbook, .newsroom, .observatory:
+            .material(id)
         }
     }
 
@@ -40,9 +40,14 @@ extension ThemeID {
         case .cork: "Cork"
         case .blueprint: "Blueprint"
         case .daylight: "Daylight"
-        case .forest: "Forest"
-        case .midnight: "Midnight"
         case .parchment: "Parchment"
+        case .chalkboard: "Chalkboard"
+        case .fieldNotes: "Field Notes"
+        case .crimeLab: "Crime Lab"
+        case .circuit: "Circuit"
+        case .scrapbook: "Scrapbook"
+        case .newsroom: "Newsroom"
+        case .observatory: "Observatory"
         }
     }
 
@@ -53,31 +58,29 @@ extension ThemeID {
         case .cork: "Classic corkboard"
         case .blueprint: "Engineering drawing"
         case .daylight: "Light and airy"
-        case .forest: "Evergreen and brass"
-        case .midnight: "Violet after dark"
-        case .parchment: "Warm archival paper"
+        case .parchment: "Deckled paper, wax seals and archival lettering"
+        case .chalkboard: "Chalk dust, hand lettering and chalk marks"
+        case .fieldNotes: "Ruled notes, masking tape and pencil lines"
+        case .crimeLab: "Specimen panels, steel screws and film mounts"
+        case .circuit: "Circuit traces, solder pads and segmented links"
+        case .scrapbook: "Woven linen, stitched cards, buttons and twine"
+        case .newsroom: "Newsprint, editorial type and paperclips"
+        case .observatory: "Star charts, instrument panels and orbital links"
         }
     }
 }
 
 extension Theme {
-    static let forest = Theme(
-        id: .forest, isDark: true, canvas: .forest,
-        textPrimary: RGBA(0xF1F5E7), textSecondary: RGBA(0xB3CDBC), textTertiary: RGBA(0x88AA99),
-        accentString: CanvasAppearance.forest.string!, accentSelect: CanvasAppearance.forest.selection
-    )
+    static let parchment = material(.parchment)
 
-    static let midnight = Theme(
-        id: .midnight, isDark: true, canvas: .midnight,
-        textPrimary: RGBA(0xF6EFFF), textSecondary: RGBA(0xCDB8DF), textTertiary: RGBA(0xA38BBA),
-        accentString: CanvasAppearance.midnight.string!, accentSelect: CanvasAppearance.midnight.selection
-    )
-
-    static let parchment = Theme(
-        id: .parchment, isDark: false, canvas: .parchment,
-        textPrimary: RGBA(0x362A20), textSecondary: RGBA(0x6A5038), textTertiary: RGBA(0x806448),
-        accentString: CanvasAppearance.parchment.string!, accentSelect: CanvasAppearance.parchment.selection
-    )
+    private static func material(_ id: ThemeID) -> Theme {
+        let canvas = CanvasAppearance.forTheme(id, dark: false)
+        let dark = [.chalkboard, .circuit, .observatory].contains(id)
+        let ink = canvas.text
+        return Theme(id: id, isDark: dark, canvas: canvas,
+                     textPrimary: ink, textSecondary: ink.opacity(0.8), textTertiary: ink.opacity(0.65),
+                     accentString: canvas.string ?? canvas.pin, accentSelect: canvas.selection)
+    }
 
     static let tints = CanvasAppearance.tints
     static let lightTints = CanvasAppearance.lightTints

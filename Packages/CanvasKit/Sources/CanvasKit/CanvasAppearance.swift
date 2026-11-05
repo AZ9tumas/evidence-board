@@ -67,18 +67,9 @@ public struct GradientPair: Sendable, Hashable {
     var cgColors: [CGColor] { [from.cgColor, to.cgColor] }
 }
 
-/// What the board's background is textured with.
-public enum BoardTexture: Sendable, Hashable {
-    /// A dot grid (Noir, Daylight).
-    case dots
-    /// A drafting grid with a heavier line every fifth (Blueprint).
-    case lines
-    /// Cork grain (Cork).
-    case grain
-}
-
 /// The color tokens the canvas draws with. The app builds one from its active theme.
 public struct CanvasAppearance: Sendable, Hashable {
+    public var design: ThemeDesign = .standard
     public var background: GradientPair
     public var vignette: RGBA
     public var gridDot: RGBA

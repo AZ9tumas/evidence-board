@@ -26,8 +26,8 @@ struct TextFormattingControlTests {
         let small = TextPayload(content: "A long clue that should wrap over several lines on the card.")
         var large = small
         large.fontSize = 48
-        #expect(TextCardTypography.fittingHeight(for: large, width: 260, appearance: .forest)
-                > TextCardTypography.fittingHeight(for: small, width: 260, appearance: .forest))
+        #expect(TextCardTypography.fittingHeight(for: large, width: 260, appearance: .fieldNotes)
+                > TextCardTypography.fittingHeight(for: small, width: 260, appearance: .fieldNotes))
     }
 
     @Test func selectionFormattingSkipsLockedCardsAndSupportsUndo() throws {
@@ -143,7 +143,7 @@ struct TextFormattingControlTests {
                            card(.web(WebPayload(url: URL(string: "https://example.com")!)))]
             store = BoardStore(board: board)
             controller = CanvasController(store: store)
-            view = BoardCanvasView(store: store, appearance: .forest)
+            view = BoardCanvasView(store: store, appearance: .fieldNotes)
             window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 800, height: 600),
                               styleMask: [.borderless], backing: .buffered, defer: false)
             window.isReleasedWhenClosed = false

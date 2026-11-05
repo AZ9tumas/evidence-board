@@ -43,7 +43,7 @@ struct BoardToolbar: ToolbarContent {
             Menu {
                 Picker("Theme", selection: Binding(get: { controller.theme }, set: { controller.setTheme($0) })) {
                     ForEach(ThemeID.allCases, id: \.self) { id in
-                        Text(id.title).tag(id)
+                        Text(id.title).help(id.subtitle).tag(id)
                     }
                 }
                 .pickerStyle(.inline)

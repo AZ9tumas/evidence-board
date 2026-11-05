@@ -44,6 +44,7 @@ final class StringNode {
     private let label = CAGradientLayer()
     private let labelDot = CAGradientLayer()
     private let labelText = CALayer()
+    private let labelAccent = CAShapeLayer()
 
     private var appearance: CanvasAppearance
     private var detail: DetailLevel
@@ -92,6 +93,9 @@ final class StringNode {
         labelDot.cornerRadius = StringLabelStyle.dot / 2
         label.addSublayer(labelDot)
         label.addSublayer(labelText)
+        labelAccent.fillColor = nil
+        labelAccent.lineWidth = 0.8
+        label.addSublayer(labelAccent)
 
         let stack: [CALayer] = [shadow, halo, thread, gradient, fibers, arrows[0], arrows[1], knots[0], knots[1], label]
         for item in stack { layer.addSublayer(item) }
@@ -117,7 +121,7 @@ final class StringNode {
         string: BoardString, from a: CGPoint, to b: CGPoint, fan: CGFloat,
         droopScale: CGFloat = 1, appearance: CanvasAppearance, live: Bool = false
     ) {
-        if string.label != self.string.label || appearance != self.appearance { renderedLabel = nil }
+        if string.label != self.string.label || appearance != self.appearance { renderedLabel = nil; labelSize = nil }
         let styleUnchanged = string == self.string && appearance == self.appearance
         self.string = string
         self.appearance = appearance
@@ -172,7 +176,7 @@ final class StringNode {
     /// sure they're routed before they show.
     private func applyGeometry(live: Bool = false) {
         let path = curve.path
-        let width = CGFloat(string.thickness + appearance.stringBoost)
+        let width = CGFloat(string.thickness * appearance.design.connection.widthScale + appearance.stringBoost)
         let box = curve.bounds.insetBy(dx: -(width * 2 + 12), dy: -(width * 2 + 12))
         let center = CGPoint(x: box.midX, y: box.midY)
         func needed(_ layer: CALayer) -> Bool {
@@ -240,13 +244,16 @@ final class StringNode {
             let bounds = CGRect(origin: .zero, size: size)
             label.bounds = bounds
             label.position = middle
-            label.cornerRadius = size.height / 2
-            label.shadowPath = CGPath(roundedRect: bounds, cornerWidth: size.height / 2, cornerHeight: size.height / 2, transform: nil)
+            let radius = ThemeArtwork.labelRadius(appearance.design.label, height: size.height)
+            label.cornerRadius = radius
+            label.shadowPath = CGPath(roundedRect: bounds, cornerWidth: radius, cornerHeight: radius, transform: nil)
             labelDot.frame = CGRect(
                 x: StringLabelStyle.leading, y: (size.height - StringLabelStyle.dot) / 2,
                 width: StringLabelStyle.dot, height: StringLabelStyle.dot
             )
             labelText.frame = StringLabelStyle.textRect(in: size)
+            labelAccent.frame = bounds
+            labelAccent.path = ThemeArtwork.labelDecoration(in: bounds, style: appearance.design.label)
         } else {
             labelFrame = nil
         }
@@ -281,7 +288,7 @@ final class StringNode {
 
     private func dashes(for width: CGFloat) -> [NSNumber]? {
         let lengths: [CGFloat]? = switch string.stroke {
-        case .solid: nil
+        case .solid: appearance.design.connection.dashPattern.isEmpty ? nil : appearance.design.connection.dashPattern.map { CGFloat($0) * width }
         case .dashed: [width * 3, width * 2.5]
         case .dotted: [0, width * 2.2] // zero-length dashes with round caps draw dots
         }
@@ -290,7 +297,7 @@ final class StringNode {
 
     private func applyStyle() {
         if hiddenGeometryIsStale { applyGeometry() }
-        let width = CGFloat(string.thickness + appearance.stringBoost)
+        let width = CGFloat(string.thickness * appearance.design.connection.widthScale + appearance.stringBoost)
         let colors = appearance.gradient(for: string.color)
         let dimmed = emphasis == .dimmed
         let full = detail == .full && !dimmed
@@ -310,15 +317,15 @@ final class StringNode {
         gradientMask.lineDashPattern = pattern
 
         // Twisted-fiber highlights, only close enough to see them.
-        fibers.isHidden = !full || zoom < 0.6 || string.stroke != .solid
+        fibers.isHidden = !full || zoom < 0.6 || string.stroke != .solid || !appearance.design.connection.hasFibers
         fibers.lineWidth = max(width * 0.45, 0.5)
         fibers.lineDashPattern = [NSNumber(value: Double(width * 0.5)), NSNumber(value: Double(width))]
         fibers.setAffineTransform(CGAffineTransform(translationX: 0, y: -width * 0.2))
 
-        shadow.isHidden = !full || string.stroke == .dotted
+        shadow.isHidden = !full || string.stroke == .dotted || !appearance.design.connection.hasShadow
         if !shadow.isHidden && shadowIsStale {
             var source = curve.path
-            if string.stroke == .dashed, let pattern {
+            if let pattern {
                 source = source.copy(dashingWithPhase: 0, lengths: pattern.map { CGFloat($0.doubleValue) })
             }
             shadow.shadowPath = source.copy(strokingWithWidth: width, lineCap: .round, lineJoin: .round, miterLimit: 10)
@@ -328,7 +335,7 @@ final class StringNode {
         for (index, color) in [colors.from, colors.to].enumerated() {
             let fill = color.opacity(color.alpha * fade).cgColor
             knots[index].fillColor = fill
-            knots[index].isHidden = minimal
+            knots[index].isHidden = minimal || !appearance.design.connection.hasKnots
             arrows[index].fillColor = fill
             arrows[index].isHidden = minimal
         }
@@ -341,15 +348,22 @@ final class StringNode {
             halo.isHidden = false
             halo.strokeColor = colors.from.opacity(0.35).cgColor
             halo.lineWidth = width + 9 / zoom
+        } else if appearance.design.connection.glows && full {
+            halo.isHidden = false
+            halo.strokeColor = colors.from.opacity(0.16).cgColor
+            halo.lineWidth = width + 4
         } else {
             halo.isHidden = true
         }
 
         label.isHidden = labelFrame == nil || detail != .full || dimmed || isEditingLabel
-        label.colors = appearance.labelFill.cgColors
+        label.colors = appearance.design.label == .underline ? [RGBA.clear.cgColor, RGBA.clear.cgColor] : appearance.labelFill.cgColors
+        label.shadowOpacity = appearance.design.connection.hasShadow ? 0.4 : 0
+        labelDot.isHidden = [.underline, .bracket, .plaque].contains(appearance.design.label)
         label.borderColor = (isSelected ? appearance.selection.from : RGBA.white.opacity(0.16)).cgColor
-        label.borderWidth = (isSelected ? 1.5 : 0.75) / zoom
+        label.borderWidth = (isSelected ? 1.5 : (appearance.design.label == .underline ? 0 : 0.75)) / zoom
         labelDot.colors = colors.cgColors
+        labelAccent.strokeColor = appearance.labelText.opacity(0.7).cgColor
         renderLabelIfNeeded()
     }
 

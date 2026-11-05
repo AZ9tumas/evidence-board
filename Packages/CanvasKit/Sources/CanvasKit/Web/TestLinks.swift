@@ -1,4 +1,3 @@
-#if DEBUG
 import AppKit
 import BoardKit
 import LinkPreviewKit
@@ -327,4 +326,3 @@ enum TestLinks {
         }
     }
 }
-#endif
