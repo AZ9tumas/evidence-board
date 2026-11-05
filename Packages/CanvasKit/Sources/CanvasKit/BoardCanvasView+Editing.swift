@@ -39,7 +39,7 @@ extension BoardCanvasView {
     }
 
     func beginEditing(_ id: UUID, isNewCard: Bool, selectAll: Bool) {
-        guard textEditor == nil, let card = store.card(id), case .text = card.content else { return }
+        guard textEditor == nil, let card = store.card(id), !card.locked, case .text = card.content else { return }
         select([id])
         let editor = CardTextEditor(card: card, isNewCard: isNewCard, appearance: canvasAppearance)
         editor.onTextChange = { [weak self] text in self?.editorTextDidChange(text) }
@@ -67,9 +67,8 @@ extension BoardCanvasView {
         editor.layout(cardFrame: card.frame, viewRect: convert(rect, to: superview), zoom: camera.zoom)
     }
 
-    private func editorTextDidChange(_ text: String) {
-        guard var card = editingCard, case .text(var payload) = card.content else { return }
-        payload.content = text
+    private func editorTextDidChange(_ payload: TextPayload) {
+        guard var card = editingCard else { return }
         card.content = .text(payload)
         if payload.autoHeight {
             card.frame.height = TextCardTypography.fittingHeight(
@@ -83,6 +82,7 @@ extension BoardCanvasView {
             layoutStrings(attachedTo: [card.id])
         }
         layoutEditor()
+        updateTextFormattingSelection()
     }
 
     /// Closes the editor and commits the text as one undoable step.

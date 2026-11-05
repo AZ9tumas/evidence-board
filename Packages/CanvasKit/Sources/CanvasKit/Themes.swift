@@ -1,8 +1,63 @@
 import BoardKit
 
-/// The four themes' canvas tokens (DESIGN.md §6.1, §6.2). The app wraps each in a `Theme`
+/// The themes' canvas tokens (DESIGN.md §6.1, §6.2). The app wraps each in a `Theme`
 /// with its window colors; keeping the canvas part here lets tests check their contrast.
 public extension CanvasAppearance {
+    /// Deep green, cream ink and brass pins, with a quiet dotted grid.
+    static let forest: CanvasAppearance = {
+        var theme = noir
+        theme.background = GradientPair(RGBA(0x0C211C), RGBA(0x16372D))
+        theme.cardFill = GradientPair(RGBA(0x203E32), RGBA(0x142E25))
+        theme.cardStroke = GradientPair(RGBA(0xB8D8B0, alpha: 0.3), RGBA(0xB8D8B0, alpha: 0.08))
+        theme.text = RGBA(0xF1F5E7)
+        theme.codeText = RGBA(0xBDE9C3)
+        theme.pin = GradientPair(RGBA(0xE5C779), RGBA(0xA78134))
+        theme.selection = GradientPair(RGBA(0x81D9AD), RGBA(0xD9D590))
+        theme.labelFill = GradientPair(RGBA(0x18382C), RGBA(0x102A21))
+        theme.labelText = RGBA(0xF1F5E7)
+        theme.string = GradientPair(RGBA(0xE5C779), RGBA(0xBF9851))
+        theme.shadow = RGBA(0x04140E, alpha: 0.85)
+        return theme
+    }()
+
+    /// Violet night sky with lavender highlights and luminous pink thread.
+    static let midnight: CanvasAppearance = {
+        var theme = noir
+        theme.background = GradientPair(RGBA(0x171125), RGBA(0x2C1B40))
+        theme.cardFill = GradientPair(RGBA(0x30223F), RGBA(0x21182F))
+        theme.cardStroke = GradientPair(RGBA(0xCFB5F8, alpha: 0.3), RGBA(0xCFB5F8, alpha: 0.07))
+        theme.text = RGBA(0xF6EFFF)
+        theme.codeText = RGBA(0xDCC2FF)
+        theme.pin = GradientPair(RGBA(0xF69BC5), RGBA(0xA65390))
+        theme.selection = GradientPair(RGBA(0xBFA0FF), RGBA(0xF6A7D3))
+        theme.labelFill = GradientPair(RGBA(0x302140), RGBA(0x21172F))
+        theme.labelText = RGBA(0xF6EFFF)
+        theme.string = GradientPair(RGBA(0xF69BC5), RGBA(0xBE8EF2))
+        theme.shadow = RGBA(0x10071D, alpha: 0.9)
+        return theme
+    }()
+
+    /// An archival desk: pale parchment, warm paper cards and sepia ink.
+    static let parchment: CanvasAppearance = {
+        var theme = daylight
+        theme.background = GradientPair(RGBA(0xEDE1C8), RGBA(0xD8C7A6))
+        theme.vignette = RGBA(0x7B5B35, alpha: 0.2)
+        theme.gridDot = RGBA(0x735A3A, alpha: 0.12)
+        theme.cardFill = GradientPair(RGBA(0xFFFAEF), RGBA(0xF5EBD6))
+        theme.cardStroke = GradientPair(RGBA(0x7B5B35, alpha: 0.22), RGBA(0x7B5B35, alpha: 0.1))
+        theme.text = RGBA(0x362A20)
+        theme.codeText = RGBA(0x784018)
+        theme.paperFill = GradientPair(RGBA(0xF4E3BE), RGBA(0xEAD5AC))
+        theme.paperText = RGBA(0x3C2B18)
+        theme.pin = GradientPair(RGBA(0xB7653D), RGBA(0x7A3426))
+        theme.selection = GradientPair(RGBA(0x946132), RGBA(0x9D4C47))
+        theme.labelFill = GradientPair(RGBA(0xFFFAEF), RGBA(0xF2E5C9))
+        theme.labelText = RGBA(0x362A20)
+        theme.string = GradientPair(RGBA(0xA34732), RGBA(0xC27A4A))
+        theme.shadow = RGBA(0x533A1B, alpha: 0.4)
+        return theme
+    }()
+
     static let tints: [Tint: GradientPair] = [
         .red: GradientPair(RGBA(0xFF3B4E), RGBA(0xFF7A59)),
         .amber: GradientPair(RGBA(0xFFB547), RGBA(0xFF8A3D)),

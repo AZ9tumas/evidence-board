@@ -302,6 +302,9 @@ public extension CanvasAppearance {
         case .cork: .cork
         case .blueprint: .blueprint
         case .daylight: .daylight
+        case .forest: .forest
+        case .midnight: .midnight
+        case .parchment: .parchment
         }
     }
 }

@@ -30,6 +30,15 @@ struct BoardCommands: Commands {
                 .disabled(!(canvas?.isSearching ?? false))
         }
 
+        CommandMenu("Format") {
+            if let canvas {
+                TextFormattingMenu(controller: canvas)
+            } else {
+                Button("Select a Text Card to Format") {}
+                    .disabled(true)
+            }
+        }
+
         CommandMenu("Insert") {
             Button("Text Card") { canvas?.newTextCard() }
                 .keyboardShortcut("t", modifiers: [.command, .shift])

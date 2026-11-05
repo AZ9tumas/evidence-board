@@ -43,6 +43,7 @@ extension BoardCanvasView {
     }
 
     func selectionDidChange() {
+        updateTextFormattingSelection()
         withoutAnimation {
             rings.show(selection.compactMap { liveCard($0) }, zoom: camera.zoom, appearance: canvasAppearance)
             for (id, node) in stringNodes { node.setSelected(selectedStrings.contains(id)) }

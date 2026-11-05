@@ -11,7 +11,7 @@
     "title": { "type": "string", "maxLength": 512 },
     "createdAt": { "type": "string", "format": "date-time" },
     "modifiedAt": { "type": "string", "format": "date-time" },
-    "theme": { "enum": ["system", "noir", "cork", "blueprint", "daylight"], "default": "system" },
+    "theme": { "enum": ["system", "noir", "cork", "blueprint", "daylight", "forest", "midnight", "parchment"], "default": "system" },
     "viewport": {
       "type": "object",
       "required": ["x", "y", "zoom"],
@@ -90,7 +90,12 @@
         "content": { "type": "string", "maxLength": 100000 },
         "style": { "enum": ["note", "headline", "typewriter"], "default": "note" },
         "alignment": { "enum": ["leading", "center", "trailing"], "default": "leading" },
-        "autoHeight": { "type": "boolean", "default": true }
+        "autoHeight": { "type": "boolean", "default": true },
+        "fontSize": { "type": "number", "minimum": 8, "maximum": 96, "description": "Point size; omitted to use the card style's default." },
+        "bold": { "type": "boolean", "description": "Omitted to use the card style's default weight." },
+        "italic": { "type": "boolean", "default": false },
+        "underline": { "type": "boolean", "default": false },
+        "strikethrough": { "type": "boolean", "default": false }
       }
     },
 

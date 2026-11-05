@@ -14,7 +14,8 @@ A native macOS app for building detective-style evidence boards. You place **tex
 - Only three card types: Text, Image and Web
 - Rich, gradient-driven link previews built from each page's own color palette
 - Physical-looking strings with sag, labels, and **Focus** and **Trace** modes to follow connections
-- Four themes: Noir (default), Cork, Blueprint and Daylight, with Liquid Glass on macOS 26
+- Seven themes: Noir, Cork, Blueprint, Daylight, Forest, Midnight and Parchment, with Liquid Glass on macOS 26
+- Text-card formatting: 8–96 pt sizes, bold, italic, underline, strikethrough and alignment, from the toolbar or **Format** menu
 - `.evboard` is plain JSON. Images and link snapshots are embedded, so a board opens offline exactly as you saved it
 
 Built with Swift 6, SwiftUI, AppKit and Core Animation in Xcode, targeting macOS 15 and later.
@@ -117,6 +118,8 @@ Its 30 link cards carry the headline and outlet, but no page images. To fetch th
 **Text (M1)**
 - **Create:** double-click empty canvas, press **T**, use **Insert ▸ Text Card** (⌘⇧T), or paste text.
 - **Edit:** double-click a card or press **↩**. **Esc** or **⌘↩** finishes. Markdown `**bold**`, `*italic*` and `` `code` `` render on the card.
+- **Format:** select one or more text cards and use the **Text Format** toolbar button or **Format** menu. Choose a size (8–96 pt), bold (**⌘B**), italic (**⌘I**), underline (**⌘U**), strikethrough, alignment or card style. Controls apply to all text in the selected unlocked cards, and also work while typing. **Style Default** restores the style's font size; **Reset Card Formatting** restores Note style, left alignment and default typography while keeping the content and inline Markdown. Changes are saved with the board and can be undone.
+- **More themes:** **Board ▸ Theme** or the theme toolbar menu includes Forest (green and brass), Midnight (violet and pink), and Parchment (warm paper and sepia), alongside the original four themes. **⌥⌘T** cycles through all themes.
 - **Select, move, resize:** click, ⇧/⌘-click, marquee, ⌘A, drag, arrow keys, and corner handles.
 - **Arrange:** front/back, lock, duplicate, copy, cut and paste between boards, plus style and color from the right-click menu. Every change is one undo step.
 

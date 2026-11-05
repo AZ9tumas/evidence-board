@@ -103,6 +103,10 @@ enum BoardValidator {
         switch content {
         case .text(var text):
             limit(&text.content, to: maxTextLength, report: &report)
+            if var size = text.fontSize {
+                clamp(&size, to: TextPayload.fontSizeRange, report: &report)
+                text.fontSize = size
+            }
             content = .text(text)
         case .image(var image):
             if var caption = image.caption {

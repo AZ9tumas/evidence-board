@@ -86,7 +86,7 @@ public struct Viewport: Sendable, Equatable, Codable {
 }
 
 public enum ThemeID: String, Sendable, CaseIterable, DefaultedEnum {
-    case system, noir, cork, blueprint, daylight
+    case system, noir, cork, blueprint, daylight, forest, midnight, parchment
     public static let unknownValue: ThemeID = .system
 }
 

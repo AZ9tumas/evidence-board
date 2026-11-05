@@ -19,6 +19,13 @@ struct BoardToolbar: ToolbarContent {
             .help("Select (V), Connect (C) or Hand (H)")
         }
         ToolbarItemGroup(placement: .primaryAction) {
+            Menu {
+                TextFormattingMenu(controller: controller)
+            } label: {
+                Label("Text Format", systemImage: "textformat")
+            }
+            .disabled(!controller.hasTextSelection)
+            .help("Format all text in selected text cards")
             Button { controller.newTextCard() } label: {
                 Label("New Text Card", systemImage: "note.text.badge.plus")
             }

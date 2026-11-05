@@ -8,6 +8,7 @@ import BoardKit
 struct ThemeContrastTests {
     static let themes: [(String, CanvasAppearance)] = [
         ("Noir", .noir), ("Cork", .cork), ("Blueprint", .blueprint), ("Daylight", .daylight),
+        ("Forest", .forest), ("Midnight", .midnight), ("Parchment", .parchment),
     ]
 
     /// `color` laid over `backdrop`, for translucent fills.

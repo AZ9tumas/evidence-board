@@ -136,11 +136,7 @@ extension BoardCanvasView: NSMenuItemValidation {
     }
 
     func setStyleOnSelection(_ style: TextCardStyle) {
-        updateSelectedCards(actionName: "Change Style") { card in
-            guard case .text(var text) = card.content else { return }
-            text.style = style
-            card.content = .text(text)
-        }
+        formatSelectedText(actionName: "Change Style") { $0.style = style }
     }
 
     func setTintOnSelection(_ tint: Tint?) {
@@ -157,12 +153,13 @@ extension BoardCanvasView: NSMenuItemValidation {
     }
 
     /// Applies `change` to every selected card and re-fits text cards whose height is automatic.
-    private func updateSelectedCards(actionName: String, _ change: (inout Card) -> Void) {
+    func updateSelectedCards(actionName: String, _ change: (inout Card) -> Void) {
         let now = Date.now
         let updated = selection.compactMap { id -> Card? in
             guard var card = store.card(id) else { return nil }
             let before = card
             change(&card)
+            guard card != before else { return nil }
             if case .text(let text) = card.content, text.autoHeight {
                 card.frame.height = TextCardTypography.fittingHeight(
                     for: text, width: CGFloat(card.frame.width), appearance: canvasAppearance

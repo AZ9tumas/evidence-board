@@ -17,9 +17,10 @@ final class CardTextEditor: NSObject, NSTextViewDelegate {
     let scrollView = NSScrollView()
     private let textView = EditorTextView()
     private let localUndo = UndoManager()
-    private let style: TextCardStyle
+    private var payload: TextPayload
+    private let appearance: CanvasAppearance
 
-    var onTextChange: ((String) -> Void)?
+    var onTextChange: ((TextPayload) -> Void)?
     var onFinish: (() -> Void)?
 
     init(card: Card, isNewCard: Bool, appearance: CanvasAppearance) {
@@ -30,7 +31,8 @@ final class CardTextEditor: NSObject, NSTextViewDelegate {
         case .text(let text): text
         default: TextPayload(content: "")
         }
-        style = text.style
+        payload = text
+        self.appearance = appearance
         super.init()
 
         scrollView.drawsBackground = false
@@ -55,20 +57,51 @@ final class CardTextEditor: NSObject, NSTextViewDelegate {
         textView.isVerticallyResizable = true
         textView.isHorizontallyResizable = false
         textView.autoresizingMask = [.width]
-        let attributes = TextCardTypography.baseAttributes(style: text.style, alignment: text.alignment, appearance: appearance)
+        let attributes = TextCardTypography.baseAttributes(for: text, appearance: appearance)
         textView.typingAttributes = attributes
         textView.defaultParagraphStyle = attributes[.paragraphStyle] as? NSParagraphStyle
-        textView.font = TextCardTypography.font(for: text.style)
+        textView.font = TextCardTypography.font(for: text)
         textView.textColor = TextCardTypography.textColor(for: text.style, appearance: appearance)
         textView.insertionPointColor = appearance.selection.from.nsColor
         textView.selectedTextAttributes = [.backgroundColor: appearance.selection.from.opacity(0.35).nsColor]
         textView.string = text.content
+        textView.textStorage?.setAttributes(attributes, range: NSRange(location: 0, length: textView.textStorage?.length ?? 0))
+        textView.typingAttributes = attributes
         textView.delegate = self
         textView.onCommandReturn = { [weak self] in self?.onFinish?() }
+        textView.onFormat = { [weak self] format in
+            guard let self else { return }
+            var updated = self.payload
+            updated.set(format, enabled: !updated.isEnabled(format))
+            self.applyFormatting(updated)
+        }
         scrollView.documentView = textView
     }
 
     var text: String { textView.string }
+
+    /// Formatting keeps the insertion point and participates in the editor's undo stack.
+    func applyFormatting(_ updated: TextPayload) {
+        let previous = payload
+        var updated = updated
+        updated.content = textView.string
+        guard updated != previous else { return }
+        if !localUndo.isUndoing && !localUndo.isRedoing { textView.breakUndoCoalescing() }
+        localUndo.registerUndo(withTarget: self) { editor in
+            MainActor.assumeIsolated { editor.applyFormatting(previous) }
+        }
+        localUndo.setActionName("Format Text")
+        payload = updated
+        let attributes = TextCardTypography.baseAttributes(for: payload, appearance: appearance)
+        let selection = textView.selectedRanges
+        textView.font = TextCardTypography.font(for: payload)
+        textView.textColor = TextCardTypography.textColor(for: payload.style, appearance: appearance)
+        textView.textStorage?.setAttributes(attributes, range: NSRange(location: 0, length: textView.textStorage?.length ?? 0))
+        textView.defaultParagraphStyle = attributes[.paragraphStyle] as? NSParagraphStyle
+        textView.selectedRanges = selection
+        textView.typingAttributes = attributes
+        onTextChange?(payload)
+    }
 
     /// Places the editor over the card: `rect` is the card's unrotated frame in view space.
     func layout(cardFrame: Rect, viewRect: CGRect, zoom: CGFloat) {
@@ -93,7 +126,8 @@ final class CardTextEditor: NSObject, NSTextViewDelegate {
     // MARK: NSTextViewDelegate
 
     func textDidChange(_ notification: Notification) {
-        onTextChange?(textView.string)
+        payload.content = textView.string
+        onTextChange?(payload)
     }
 
     func textView(_ textView: NSTextView, doCommandBy selector: Selector) -> Bool {
@@ -113,8 +147,14 @@ final class CardTextEditor: NSObject, NSTextViewDelegate {
 /// Ends editing on ⌘↩; a plain ↩ starts a new line.
 private final class EditorTextView: NSTextView {
     var onCommandReturn: (() -> Void)?
+    var onFormat: ((TextFormat) -> Void)?
 
     override func keyDown(with event: NSEvent) {
+        if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
+           let format = ["b": TextFormat.bold, "i": .italic, "u": .underline][event.charactersIgnoringModifiers ?? ""] {
+            onFormat?(format)
+            return
+        }
         let isReturn = event.keyCode == 36 || event.keyCode == 76
         if isReturn, event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command {
             onCommandReturn?()

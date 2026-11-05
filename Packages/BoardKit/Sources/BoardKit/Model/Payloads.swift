@@ -3,21 +3,38 @@ import Foundation
 // MARK: - Text
 
 public struct TextPayload: Sendable, Equatable, Codable {
+    public static let fontSizeRange: ClosedRange<Double> = 8...96
     public var content: String
     public var style: TextCardStyle
     public var alignment: TextCardAlignment
     public var autoHeight: Bool
+    /// Nil follows the card style, preserving the appearance of older boards.
+    public var fontSize: Double?
+    public var bold: Bool?
+    public var italic: Bool
+    public var underline: Bool
+    public var strikethrough: Bool
 
     public init(
         content: String,
         style: TextCardStyle = .note,
         alignment: TextCardAlignment = .leading,
-        autoHeight: Bool = true
+        autoHeight: Bool = true,
+        fontSize: Double? = nil,
+        bold: Bool? = nil,
+        italic: Bool = false,
+        underline: Bool = false,
+        strikethrough: Bool = false
     ) {
         self.content = content
         self.style = style
         self.alignment = alignment
         self.autoHeight = autoHeight
+        self.fontSize = fontSize
+        self.bold = bold
+        self.italic = italic
+        self.underline = underline
+        self.strikethrough = strikethrough
     }
 
     public init(from decoder: any Decoder) throws {
@@ -26,12 +43,62 @@ public struct TextPayload: Sendable, Equatable, Codable {
         style = try c.decodeIfPresent(TextCardStyle.self, forKey: .style) ?? .note
         alignment = try c.decodeIfPresent(TextCardAlignment.self, forKey: .alignment) ?? .leading
         autoHeight = try c.decodeIfPresent(Bool.self, forKey: .autoHeight) ?? true
+        fontSize = try c.decodeIfPresent(Double.self, forKey: .fontSize)
+        bold = try c.decodeIfPresent(Bool.self, forKey: .bold)
+        italic = try c.decodeIfPresent(Bool.self, forKey: .italic) ?? false
+        underline = try c.decodeIfPresent(Bool.self, forKey: .underline) ?? false
+        strikethrough = try c.decodeIfPresent(Bool.self, forKey: .strikethrough) ?? false
     }
+
+    public var resolvedFontSize: Double {
+        guard let fontSize, fontSize.isFinite else { return style.defaultFontSize }
+        return min(max(fontSize, Self.fontSizeRange.lowerBound), Self.fontSizeRange.upperBound)
+    }
+
+    public func isEnabled(_ format: TextFormat) -> Bool {
+        switch format {
+        case .bold: bold ?? (style == .headline)
+        case .italic: italic
+        case .underline: underline
+        case .strikethrough: strikethrough
+        }
+    }
+
+    public mutating func set(_ format: TextFormat, enabled: Bool) {
+        switch format {
+        case .bold: bold = enabled
+        case .italic: italic = enabled
+        case .underline: underline = enabled
+        case .strikethrough: strikethrough = enabled
+        }
+    }
+
+    public mutating func resetFormatting() {
+        style = .note
+        alignment = .leading
+        fontSize = nil
+        bold = nil
+        italic = false
+        underline = false
+        strikethrough = false
+    }
+}
+
+public enum TextFormat: String, Sendable, CaseIterable {
+    case bold, italic, underline, strikethrough
 }
 
 public enum TextCardStyle: String, Sendable, CaseIterable, DefaultedEnum {
     case note, headline, typewriter
     public static let unknownValue: TextCardStyle = .note
+
+    public var defaultFontSize: Double {
+        switch self {
+        case .note: 15
+        case .headline: 28
+        case .typewriter: 14
+        }
+    }
 }
 
 public enum TextCardAlignment: String, Sendable, CaseIterable, DefaultedEnum {

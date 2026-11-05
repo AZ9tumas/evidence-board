@@ -13,12 +13,15 @@ enum TextCardTypography {
     static let defaultWidth: CGFloat = 260
     static let minimumSize = CGSize(width: 120, height: 64)
 
-    static func font(for style: TextCardStyle) -> NSFont {
-        switch style {
-        case .note: .systemFont(ofSize: 15)
-        case .headline: .systemFont(ofSize: 28, weight: .bold)
-        case .typewriter: .monospacedSystemFont(ofSize: 14, weight: .regular)
-        }
+    static func font(for text: TextPayload) -> NSFont {
+        let size = CGFloat(text.resolvedFontSize)
+        let weight: NSFont.Weight = text.isEnabled(.bold) ? .bold : .regular
+        let base: NSFont = text.style == .typewriter
+            ? .monospacedSystemFont(ofSize: size, weight: weight)
+            : .systemFont(ofSize: size, weight: weight)
+        guard text.italic else { return base }
+        let traits = base.fontDescriptor.symbolicTraits.union(.italic)
+        return NSFont(descriptor: base.fontDescriptor.withSymbolicTraits(traits), size: size) ?? base
     }
 
     static func textColor(for style: TextCardStyle, appearance: CanvasAppearance) -> NSColor {
@@ -27,27 +30,29 @@ enum TextCardTypography {
 
     /// The attributes for unformatted text, also used while typing.
     static func baseAttributes(
-        style: TextCardStyle, alignment: TextCardAlignment, appearance: CanvasAppearance
+        for text: TextPayload, appearance: CanvasAppearance
     ) -> [NSAttributedString.Key: Any] {
         let paragraph = NSMutableParagraphStyle()
-        paragraph.alignment = switch alignment {
+        paragraph.alignment = switch text.alignment {
         case .leading: .left
         case .center: .center
         case .trailing: .right
         }
-        paragraph.lineHeightMultiple = style == .headline ? 1.05 : 1.25
+        paragraph.lineHeightMultiple = text.style == .headline ? 1.05 : 1.25
         paragraph.lineBreakMode = .byWordWrapping
         return [
-            .font: font(for: style),
-            .foregroundColor: textColor(for: style, appearance: appearance),
+            .font: font(for: text),
+            .foregroundColor: textColor(for: text.style, appearance: appearance),
             .paragraphStyle: paragraph,
-            .kern: style == .headline ? -0.4 : 0,
+            .kern: text.style == .headline ? -0.4 : 0,
+            .underlineStyle: text.underline ? NSUnderlineStyle.single.rawValue : 0,
+            .strikethroughStyle: text.strikethrough ? NSUnderlineStyle.single.rawValue : 0,
         ]
     }
 
     /// The card's text with `**bold**`, `*italic*`, `` `code` `` and `~~strike~~` applied.
     static func attributedText(for text: TextPayload, appearance: CanvasAppearance) -> NSAttributedString {
-        let base = baseAttributes(style: text.style, alignment: text.alignment, appearance: appearance)
+        let base = baseAttributes(for: text, appearance: appearance)
         let plain = NSAttributedString(string: text.content, attributes: base)
         guard text.content.contains(where: { "*_`~".contains($0) }),
               let parsed = try? AttributedString(
@@ -56,19 +61,19 @@ enum TextCardTypography {
               )
         else { return plain }
 
-        let baseFont = font(for: text.style)
+        let baseFont = font(for: text)
         let styled = NSMutableAttributedString(string: String(parsed.characters), attributes: base)
         for run in parsed.runs {
             guard let intent = run.inlinePresentationIntent else { continue }
             let range = NSRange(run.range, in: parsed)
             var runFont = baseFont
             if intent.contains(.code) {
-                runFont = .monospacedSystemFont(ofSize: baseFont.pointSize * 0.92, weight: .medium)
+                runFont = .monospacedSystemFont(ofSize: baseFont.pointSize * 0.92, weight: text.bold == true ? .bold : .medium)
                 styled.addAttribute(.foregroundColor, value: appearance.codeText.nsColor, range: range)
             }
             var traits = runFont.fontDescriptor.symbolicTraits
             if intent.contains(.stronglyEmphasized) { traits.insert(.bold) }
-            if intent.contains(.emphasized) { traits.insert(.italic) }
+            if text.italic || intent.contains(.emphasized) { traits.insert(.italic) }
             if traits != runFont.fontDescriptor.symbolicTraits {
                 runFont = NSFont(descriptor: runFont.fontDescriptor.withSymbolicTraits(traits), size: runFont.pointSize) ?? runFont
             }
@@ -87,7 +92,7 @@ enum TextCardTypography {
         if attributed.length == 0 {
             // An empty card is still one line tall.
             attributed = NSAttributedString(
-                string: " ", attributes: baseAttributes(style: text.style, alignment: text.alignment, appearance: appearance)
+                string: " ", attributes: baseAttributes(for: text, appearance: appearance)
             )
         }
         let measured = attributed.boundingRect(

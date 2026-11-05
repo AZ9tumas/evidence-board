@@ -23,6 +23,9 @@ struct Theme: Sendable {
         case .cork: .cork
         case .blueprint: .blueprint
         case .daylight: .daylight
+        case .forest: .forest
+        case .midnight: .midnight
+        case .parchment: .parchment
         }
     }
 
@@ -37,6 +40,9 @@ extension ThemeID {
         case .cork: "Cork"
         case .blueprint: "Blueprint"
         case .daylight: "Daylight"
+        case .forest: "Forest"
+        case .midnight: "Midnight"
+        case .parchment: "Parchment"
         }
     }
 
@@ -47,11 +53,32 @@ extension ThemeID {
         case .cork: "Classic corkboard"
         case .blueprint: "Engineering drawing"
         case .daylight: "Light and airy"
+        case .forest: "Evergreen and brass"
+        case .midnight: "Violet after dark"
+        case .parchment: "Warm archival paper"
         }
     }
 }
 
 extension Theme {
+    static let forest = Theme(
+        id: .forest, isDark: true, canvas: .forest,
+        textPrimary: RGBA(0xF1F5E7), textSecondary: RGBA(0xB3CDBC), textTertiary: RGBA(0x88AA99),
+        accentString: CanvasAppearance.forest.string!, accentSelect: CanvasAppearance.forest.selection
+    )
+
+    static let midnight = Theme(
+        id: .midnight, isDark: true, canvas: .midnight,
+        textPrimary: RGBA(0xF6EFFF), textSecondary: RGBA(0xCDB8DF), textTertiary: RGBA(0xA38BBA),
+        accentString: CanvasAppearance.midnight.string!, accentSelect: CanvasAppearance.midnight.selection
+    )
+
+    static let parchment = Theme(
+        id: .parchment, isDark: false, canvas: .parchment,
+        textPrimary: RGBA(0x362A20), textSecondary: RGBA(0x6A5038), textTertiary: RGBA(0x806448),
+        accentString: CanvasAppearance.parchment.string!, accentSelect: CanvasAppearance.parchment.selection
+    )
+
     static let tints = CanvasAppearance.tints
     static let lightTints = CanvasAppearance.lightTints
 

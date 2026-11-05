@@ -15,6 +15,8 @@ public final class CanvasController {
     /// How many of the selected cards are web cards.
     public private(set) var linkSelectionCount = 0
     public private(set) var isEditingText = false
+    /// Editable text cards, including the live payload while a card is being typed into.
+    public private(set) var selectedTextPayloads: [TextPayload] = []
     public private(set) var tool = CanvasTool.select
     /// What the banner over the canvas says while Focus, Trace or the Connect tool is on.
     public private(set) var modeStatus: CanvasModeStatus?
@@ -67,6 +69,22 @@ public final class CanvasController {
     /// ⌘K ties two selected cards, or one selected card to the card focused before it.
     public private(set) var canConnectSelection = false
     public var hasLinkSelection: Bool { linkSelectionCount > 0 }
+    public var hasTextSelection: Bool { !selectedTextPayloads.isEmpty }
+
+    public func textFormatIsEnabled(_ format: TextFormat) -> Bool {
+        hasTextSelection && selectedTextPayloads.allSatisfy { $0.isEnabled(format) }
+    }
+
+    public func setTextFormat(_ format: TextFormat, enabled: Bool) { view?.setTextFormat(format, enabled: enabled) }
+    public func setTextFontSize(_ size: Double?) { view?.setTextFontSize(size) }
+    public func changeTextFontSize(by amount: Double) { view?.changeTextFontSize(by: amount) }
+    public func setTextAlignment(_ alignment: TextCardAlignment) { view?.setTextAlignment(alignment) }
+    public func setTextStyle(_ style: TextCardStyle) { view?.setStyleOnSelection(style) }
+    public func resetTextFormatting() { view?.resetTextFormatting() }
+
+    func textFormattingDidChange(_ text: [TextPayload]) {
+        if text != selectedTextPayloads { selectedTextPayloads = text }
+    }
 
     // MARK: Commands
 
@@ -138,7 +156,7 @@ public final class CanvasController {
     /// Switches the board to `theme`, as one undoable step.
     public func setTheme(_ theme: ThemeID) { view?.setTheme(theme) }
 
-    /// ⌥⌘T: Automatic, Noir, Cork, Blueprint, Daylight, and around again.
+    /// ⌥⌘T cycles through every available theme, including Automatic.
     public func cycleTheme() {
         let all = ThemeID.allCases
         let next = all[((all.firstIndex(of: theme) ?? 0) + 1) % all.count]
