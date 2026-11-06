@@ -43,7 +43,8 @@ jobs:
             sleep 1
           }
           capture overview 250 200 0.14
-          capture people -430 -490 0.52
+          capture opening -330 -780 0.30
+          capture people -350 -520 0.42
           capture court -30 1190 0.45
           capture chabad 2050 1080 0.42
       - uses: actions/upload-artifact@v4

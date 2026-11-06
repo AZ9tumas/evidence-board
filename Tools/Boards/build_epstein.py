@@ -14,7 +14,7 @@ import uuid
 
 
 ROOT = Path(__file__).resolve().parents[2]
-STAMP = "2026-11-06T20:29:53Z"
+STAMP = "2026-11-06T20:32:41Z"
 NS = uuid.UUID("2888A465-BE75-4346-A49C-294C3A3CB2C6")
 IDS = {
     "title": "BF8090FD-F8E0-4F76-826E-8B381FD1904D",
@@ -174,7 +174,7 @@ def build(board):
 
     # The central hub uses the real subject cards; there is no duplicate map.
     picture("epstein", -390, -850, 330)
-    note("case_overview", -450, -420,
+    note("case_overview", -420, -1270,
          "**JEFFREY EPSTEIN**\n2008: Florida guilty plea.\n2019: federal trafficking charges; died before trial.\n"
          "Follow the blue threads to the court record and the red thread to his financial authority.\n[E01–E03, W01]", "red", w=340, size=18)
     note("maxwell", 230, -510,
@@ -182,7 +182,6 @@ def build(board):
          "Convicted for her role in recruiting, grooming and facilitating the abuse of minors with Epstein. [E05]", "azure", w=330, size=18)
     source("E05", 650, -210)
     link("maxwell", "epstein", "convicted scheme · E05", "azure", weight=3)
-    link("epstein", "case_overview", color="azure", weight=1.5)
     cites("maxwell", "E05")
 
     # Upper left: an institutional lead, not a claimed criminal organization.
@@ -253,8 +252,8 @@ def build(board):
          "**2023 / CUSTODY FAILURES**\nThe Inspector General documented serious supervision and prison failures. "
          "Its report records the medical examiner’s suicide finding for **10 Aug 2019**, and the FBI’s finding of no criminality in how Epstein died. [E06]", "azure", w=340)
     source("E06", 850, 1950)
-    link("case_overview", "florida", "guilty plea", "azure", weight=2.6)
-    link("case_overview", "charges", "federal charges", "azure", weight=2.6)
+    link("epstein", "florida", "guilty plea", "azure", weight=2.6)
+    link("epstein", "charges", "federal charges", "azure", weight=2.6)
     link("florida", "charges", "later prosecution", "azure", weight=1.8)
     link("charges", "dismissal", "case closed after death", "azure", arrow="forward", weight=1.8)
     link("opr", "florida", "reviewed the deal", "azure", weight=1.8)
@@ -328,7 +327,7 @@ def build(board):
 
     assert set(IDS.values()) <= {c["id"] for c in cards}, "An original card was lost"
     board.update(title="The Epstein Files", modifiedAt=STAMP, theme="cork",
-                 viewport={"x": -340, "y": -720, "zoom": 0.36}, cards=cards, strings=strings)
+                 viewport={"x": -330, "y": -780, "zoom": 0.30}, cards=cards, strings=strings)
     return board
 
 
