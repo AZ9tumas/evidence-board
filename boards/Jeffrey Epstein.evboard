@@ -75,53 +75,76 @@
     {
       "createdAt" : "2026-11-05T15:10:23Z",
       "frame" : {
-        "height" : 98,
-        "width" : 1300,
-        "x" : 0,
-        "y" : -650
+        "height" : 120,
+        "width" : 950,
+        "x" : -560,
+        "y" : -1810
       },
       "id" : "BF8090FD-F8E0-4F76-826E-8B381FD1904D",
       "locked" : true,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
+      "modifiedAt" : "2026-11-06T20:29:53Z",
       "rotation" : 0,
       "text" : {
         "alignment" : "leading",
         "autoHeight" : true,
         "content" : "THE EPSTEIN FILES",
+        "fontSize" : 44,
         "style" : "headline"
       },
-      "tint" : "red",
       "type" : "text",
       "z" : 1
     },
     {
-      "createdAt" : "2026-11-05T15:14:38Z",
+      "createdAt" : "2026-11-06T19:00:00Z",
       "frame" : {
-        "height" : 402,
-        "width" : 350,
-        "x" : 2800,
-        "y" : 2570
+        "height" : 216,
+        "width" : 640,
+        "x" : -550,
+        "y" : -1640
       },
-      "id" : "0D00B8A3-7AE8-4861-96E7-A76252D77466",
-      "image" : {
-        "asset" : "sha256-748ce267500cda67e1f2e10aca43e3cd8b69b2b433f6e1160dfa8fb097e795dd",
-        "caption" : "David Rockefeller",
-        "frameStyle" : "polaroid"
-      },
+      "id" : "B1BE21A3-7CA9-51FD-AB36-FFE7220F2A0A",
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "graphite",
-      "type" : "image",
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -1.4,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**THE CASE · THE MONEY · THE RECORDS**\nJeffrey Epstein, Ghislaine Maxwell, Leslie Wexner, and the institutional leads. Schneerson / Chabad: a separate context cluster.\nSources reviewed 7 Nov 2026. A curated case overview, not a full review of the releases.",
+        "fontSize" : 18,
+        "style" : "note"
+      },
+      "type" : "text",
       "z" : 2
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 232,
+        "width" : 300,
+        "x" : 160,
+        "y" : -1620
+      },
+      "id" : "CC5F311E-CFBD-5252-9899-4654373AA408",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0.3,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "THREAD KEY\nRed — financial relationships\nBlue — case / court history\nPurple — religious history\nThin gray — sources\nDashed — unresolved lead\nA listed contact is not proof of a crime.",
+        "fontSize" : 15,
+        "style" : "typewriter"
+      },
+      "type" : "text",
+      "z" : 3
     },
     {
       "createdAt" : "2026-11-05T15:15:44Z",
       "frame" : {
-        "height" : 294,
-        "width" : 350,
-        "x" : 0,
-        "y" : 0
+        "height" : 275,
+        "width" : 330,
+        "x" : -390,
+        "y" : -850
       },
       "id" : "6FF215B8-0ED5-4260-8222-092B378E2D53",
       "image" : {
@@ -130,19 +153,131 @@
         "frameStyle" : "polaroid"
       },
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "graphite",
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 1.6,
       "type" : "image",
-      "z" : 3
+      "z" : 4
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 291,
+        "width" : 340,
+        "x" : -450,
+        "y" : -420
+      },
+      "id" : "C04F60E5-67E4-59BF-A754-B15D4C5EFBDB",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.5,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**JEFFREY EPSTEIN**\n2008: Florida guilty plea.\n2019: federal trafficking charges; died before trial.\nFollow the blue threads to the court record and the red thread to his financial authority.\n[E01–E03, W01]",
+        "fontSize" : 18,
+        "style" : "note"
+      },
+      "tint" : "red",
+      "type" : "text",
+      "z" : 5
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 266,
+        "width" : 330,
+        "x" : 230,
+        "y" : -510
+      },
+      "id" : "157459CC-5BC5-58DA-99CD-10186513ABC4",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0.1,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**GHISLAINE MAXWELL**\nJury verdict: **29 Dec 2021**.\nSentence: **20 years**, 28 Jun 2022.\nConvicted for her role in recruiting, grooming and facilitating the abuse of minors with Epstein. [E05]",
+        "fontSize" : 18,
+        "style" : "note"
+      },
+      "tint" : "azure",
+      "type" : "text",
+      "z" : 6
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : 650,
+        "y" : -210
+      },
+      "id" : "F6395876-5D45-5AEE-973E-B8A4419FBEA9",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.4,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Official sentencing announcement · 28 June 2022 · Also records the 29 December 2021 jury verdict.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "DOJ · SDNY",
+          "title" : "[E05] Ghislaine Maxwell sentenced to 20 years",
+          "variant" : "compact"
+        },
+        "url" : "https://www.justice.gov/usao-sdny/pr/ghislaine-maxwell-sentenced-20-years-prison-conspiring-jeffrey-epstein-sexually-abuse"
+      },
+      "z" : 7
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 106,
+        "width" : 870,
+        "x" : -2300,
+        "y" : -1770
+      },
+      "id" : "E7A803C8-64C4-59DA-A600-0F97A768AB23",
+      "locked" : true,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "ACCESS & INSTITUTIONS",
+        "fontSize" : 30,
+        "style" : "headline"
+      },
+      "type" : "text",
+      "z" : 8
+    },
+    {
+      "createdAt" : "2026-11-05T15:14:38Z",
+      "frame" : {
+        "height" : 296,
+        "width" : 250,
+        "x" : -1960,
+        "y" : -1390
+      },
+      "id" : "0D00B8A3-7AE8-4861-96E7-A76252D77466",
+      "image" : {
+        "asset" : "sha256-748ce267500cda67e1f2e10aca43e3cd8b69b2b433f6e1160dfa8fb097e795dd",
+        "caption" : "David Rockefeller",
+        "frameStyle" : "polaroid"
+      },
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0.8,
+      "type" : "image",
+      "z" : 9
     },
     {
       "createdAt" : "2026-11-05T15:17:15Z",
       "frame" : {
-        "height" : 389,
-        "width" : 350,
-        "x" : 3450,
-        "y" : 2570
+        "height" : 307,
+        "width" : 270,
+        "x" : -1250,
+        "y" : -1500
       },
       "id" : "4E4805A9-0071-4C20-9165-2A54A893144D",
       "image" : {
@@ -151,25 +286,70 @@
         "frameStyle" : "polaroid"
       },
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "graphite",
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0.6,
       "type" : "image",
-      "z" : 4
+      "z" : 10
+    },
+    {
+      "createdAt" : "2026-11-05T15:18:03Z",
+      "frame" : {
+        "height" : 255,
+        "width" : 310,
+        "x" : -1590,
+        "y" : -1080
+      },
+      "id" : "7B437909-ED9A-4D36-ADEA-65BB93451458",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0.3,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**TRILATERAL COMMISSION**\nFounded by David Rockefeller in **1973**. A forum for policymakers, business, media and academics across North America, Europe and Asia, according to its own history. [T01]",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "type" : "text",
+      "z" : 11
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : -2330,
+        "y" : -920
+      },
+      "id" : "B385F190-A3E5-5808-A349-9DEC21D4DC15",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 1.5,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Organization’s own history · Founding in 1973 by David Rockefeller; stated purpose and membership model.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "The Trilateral Commission",
+          "title" : "[T01] About the Trilateral Commission",
+          "variant" : "compact"
+        },
+        "url" : "https://www.trilateral.org/about/"
+      },
+      "z" : 12
     },
     {
       "createdAt" : "2026-11-05T15:17:36Z",
       "frame" : {
-        "height" : 390,
-        "width" : 400,
-        "x" : 3450,
-        "y" : 3650
+        "height" : 290,
+        "width" : 310,
+        "x" : -2380,
+        "y" : -1530
       },
       "id" : "244893CF-BB3E-4E13-876D-9ABC8688BC3A",
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "amber",
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0.6,
       "type" : "web",
       "web" : {
         "snapshot" : {
@@ -188,37 +368,60 @@
         },
         "url" : "https://en.wikipedia.org/wiki/Trilateral_Commission"
       },
-      "z" : 5
+      "z" : 13
     },
     {
-      "createdAt" : "2026-11-05T15:18:03Z",
+      "createdAt" : "2026-11-06T19:00:00Z",
       "frame" : {
-        "height" : 284,
-        "width" : 400,
-        "x" : 2800,
-        "y" : 3110
+        "height" : 302,
+        "width" : 300,
+        "x" : -1100,
+        "y" : -980
       },
-      "id" : "7B437909-ED9A-4D36-ADEA-65BB93451458",
+      "id" : "1A662CB0-A2D8-5CFA-B4E4-C33D50168318",
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.5,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**WHO INVITED EPSTEIN?**\nThe original ‘Rockefeller invited him at 30’ claim remains unverified here. A dated invitation or reliable membership record is needed.\nKeep this as an open lead, not an established relationship.",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "tint" : "amber",
+      "type" : "text",
+      "z" : 14
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 106,
+        "width" : 960,
+        "x" : -2330,
+        "y" : -390
+      },
+      "id" : "498C1E14-0B5C-572B-BEFF-96917EA20B0B",
+      "locked" : true,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
       "rotation" : 0,
       "text" : {
         "alignment" : "leading",
         "autoHeight" : true,
-        "content" : "**THE TRILATERAL COMMISSION**\nFounded by David Rockefeller in 1973. The organization describes itself as a forum for policymakers, business leaders, media and academics across North America, Europe and Asia.\nIts institutional history supports the founding relationship above, not a criminal inference about members.\nSource: [T01] →",
-        "style" : "note"
+        "content" : "THE MONEY & THE AUTHORITY",
+        "fontSize" : 30,
+        "style" : "headline"
       },
-      "tint" : "teal",
       "type" : "text",
-      "z" : 6
+      "z" : 15
     },
     {
       "createdAt" : "2026-11-05T15:28:55Z",
       "frame" : {
-        "height" : 402,
-        "width" : 350,
-        "x" : 2800,
-        "y" : 0
+        "height" : 326,
+        "width" : 280,
+        "x" : -1050,
+        "y" : -100
       },
       "id" : "6315EECC-4E0C-411B-BEA4-7535149FAD93",
       "image" : {
@@ -227,19 +430,114 @@
         "frameStyle" : "polaroid"
       },
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "graphite",
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.4,
       "type" : "image",
-      "z" : 7
+      "z" : 16
+    },
+    {
+      "createdAt" : "2026-11-05T15:31:09Z",
+      "frame" : {
+        "height" : 302,
+        "width" : 330,
+        "x" : -1600,
+        "y" : -50
+      },
+      "id" : "1599780C-790B-4F2C-8372-C4F080912A1C",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0.4,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**POWER OF ATTORNEY**\nWexner acknowledged giving Epstein broad authority over his personal finances. He also described an early-1990s foundation trusteeship without executive responsibilities.\nHis letter does not establish authority over ‘life and death.’ [W01]",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "tint" : "red",
+      "type" : "text",
+      "z" : 17
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : -2170,
+        "y" : 20
+      },
+      "id" : "ED3A861D-CEB8-5F1B-96B9-16FC56AAF9A2",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0.6,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "First-person account · 8 August 2019 · Wexner describes financial authority, a trusteeship and his account of the separation.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "The Wexner Foundation",
+          "title" : "[W01] Letter from Les",
+          "variant" : "compact"
+        },
+        "url" : "https://www.wexnerfoundation.org/letter-from-les/"
+      },
+      "z" : 18
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 255,
+        "width" : 320,
+        "x" : -1750,
+        "y" : 530
+      },
+      "id" : "DD3D970F-555B-5BA5-AB53-10F7256933F6",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.9,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**WEXNER’S ACCOUNT**\nHe says he was deceived, and denies knowing about or participating in the abuse. AP dates the financial power of attorney to **1991**.\nAn attributed response, not an independent finding. [W02]",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "tint" : "amber",
+      "type" : "text",
+      "z" : 19
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : -2250,
+        "y" : 610
+      },
+      "id" : "459C059C-1D3F-5C0A-89DB-C92440D3ECAC",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 1.0,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Independent reporting · Wexner’s denial of knowledge of abuse and reporting on the financial relationship.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "Associated Press",
+          "title" : "[W02] Wexner says he was duped by Epstein",
+          "variant" : "compact"
+        },
+        "url" : "https://apnews.com/article/733833f6d648c09e6b3473eb1cd4009d"
+      },
+      "z" : 20
     },
     {
       "createdAt" : "2026-11-05T15:29:22Z",
       "frame" : {
-        "height" : 430,
-        "width" : 260,
-        "x" : 2800,
-        "y" : 1640
+        "height" : 364,
+        "width" : 220,
+        "x" : -1030,
+        "y" : 680
       },
       "id" : "645AC788-E6A8-4B6B-A9E1-EEAEB1B47E4E",
       "image" : {
@@ -248,107 +546,558 @@
         "frameStyle" : "polaroid"
       },
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "graphite",
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.2,
       "type" : "image",
-      "z" : 8
+      "z" : 21
     },
     {
-      "createdAt" : "2026-11-05T15:31:09Z",
+      "createdAt" : "2026-11-06T19:00:00Z",
       "frame" : {
-        "height" : 306,
-        "width" : 400,
-        "x" : 2800,
-        "y" : 580
+        "height" : 255,
+        "width" : 320,
+        "x" : -1470,
+        "y" : 1060
       },
-      "id" : "1599780C-790B-4F2C-8372-C4F080912A1C",
+      "id" : "0230A819-227F-518F-A8F0-5B7EDEB5B486",
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0.9,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**VICTORIA’S SECRET**\nThe ‘owns’ shorthand is outdated. The business separated from L Brands in **August 2021** as an independent public company. The former parent retained no ownership interest. [W03]",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "type" : "text",
+      "z" : 22
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : -2070,
+        "y" : 1110
+      },
+      "id" : "0DB99C47-BB7D-5396-B364-1E4A5B6F676D",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -1.3,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Corporate filing · August 2021 · Victoria’s Secret becomes a separate publicly traded company.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "SEC · Victoria’s Secret & Co.",
+          "title" : "[W03] Form 8-K: separation from L Brands",
+          "variant" : "compact"
+        },
+        "url" : "https://www.sec.gov/Archives/edgar/data/1856437/000114036121026649/nt10026698x8_8k.htm"
+      },
+      "z" : 23
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 106,
+        "width" : 1000,
+        "x" : -10,
+        "y" : 100
+      },
+      "id" : "F4CD6FAC-1D45-5E0A-AD78-D7425CC12AAF",
+      "locked" : true,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
       "rotation" : 0,
       "text" : {
         "alignment" : "leading",
         "autoHeight" : true,
-        "content" : "**WHAT THE AUTHORITY COVERED**\nWexner said Epstein had broad authority over his personal finances. The letter does not support the original note’s claim of power over ‘life and death.’\nWexner also described an early-1990s foundation trusteeship and said Epstein had no executive responsibilities there. These are Wexner’s statements.\nSource: [W01] →",
+        "content" : "THE CASE & ITS AFTERMATH",
+        "fontSize" : 30,
+        "style" : "headline"
+      },
+      "type" : "text",
+      "z" : 24
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 302,
+        "width" : 340,
+        "x" : -630,
+        "y" : 600
+      },
+      "id" : "57367E69-989E-5E15-B0FE-20BA2938F096",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.6,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**2005 → 2008 / FLORIDA**\nPolice investigation began in 2005. A federal non-prosecution agreement followed on **24 Sep 2007**. On **30 Jun 2008**, Epstein pleaded guilty to felony solicitation of prostitution and procurement of minors to engage in prostitution; the court imposed **18 months**. [E01]",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "tint" : "azure",
+      "type" : "text",
+      "z" : 25
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : -1020,
+        "y" : 1510
+      },
+      "id" : "EFBD83F8-34AC-5D57-B894-B99D81C07068",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -1.5,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Primary report · November 2020 · PDF pp. 2–3, printed pp. ii–iii: investigation, agreement and guilty plea.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "DOJ · OPR",
+          "title" : "[E01] 2006–2008 investigation: executive summary",
+          "variant" : "compact"
+        },
+        "url" : "https://www.justice.gov/opr/page/file/1336471/dl?inline="
+      },
+      "z" : 26
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 255,
+        "width" : 310,
+        "x" : -80,
+        "y" : 690
+      },
+      "id" : "C9CF61E6-F21D-5F64-9F70-EE00D1F5DF41",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.3,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**8 JUL 2019 / FEDERAL CHARGES**\nSDNY alleged sex trafficking of minors and conspiracy, involving paid recruitment and abuse in New York and Florida in 2002–2005.\n**Allegations; Epstein was not tried.** [E02]",
+        "fontSize" : 17,
         "style" : "note"
       },
       "tint" : "amber",
       "type" : "text",
-      "z" : 9
+      "z" : 27
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : 330,
+        "y" : 560
+      },
+      "id" : "B4B125D9-B911-59EE-9C28-1FA7B6A091CB",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.8,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Prosecution announcement · 8 July 2019 · Describes allegations in the indictment, not a verdict.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "DOJ · SDNY",
+          "title" : "[E02] Jeffrey Epstein charged in Manhattan federal court",
+          "variant" : "compact"
+        },
+        "url" : "https://www.justice.gov/usao-sdny/pr/jeffrey-epstein-charged-manhattan-federal-court-sex-trafficking-minors"
+      },
+      "z" : 28
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 279,
+        "width" : 310,
+        "x" : 510,
+        "y" : 1030
+      },
+      "id" : "FEE72022-FAA8-5FFD-A261-8C8897BB81F0",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.5,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**29 AUG 2019 / DISMISSAL**\nThe federal case was dismissed following Epstein’s death. Victims spoke at an August hearing.\nThis was not an acquittal or a finding that the allegations were false. [E03]",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "tint" : "azure",
+      "type" : "text",
+      "z" : 29
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : 870,
+        "y" : 1420
+      },
+      "id" : "495892B0-4ABC-56C3-866E-4E9E75D14FCE",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.9,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Official case page · Records the 29 August 2019 dismissal following Epstein’s death.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "DOJ · SDNY",
+          "title" : "[E03] United States v. Jeffrey Epstein, 19 Cr. 490",
+          "variant" : "compact"
+        },
+        "url" : "https://www.justice.gov/usao-sdny/programs/victim-witness-services/united-states-v-jeffrey-epstein-19-cr-490-rmb"
+      },
+      "z" : 30
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 255,
+        "width" : 330,
+        "x" : -620,
+        "y" : 1600
+      },
+      "id" : "56CEC72A-3850-58D9-A898-EBC79698023D",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 1.1,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**2020 / THE DEAL REVIEWED**\nDOJ’s OPR found poor judgment by Alexander Acosta over the deal and victim notification, and criticized the treatment of victims. It did **not** find professional misconduct by DOJ attorneys. [E04]",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "tint" : "azure",
+      "type" : "text",
+      "z" : 31
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : -110,
+        "y" : 1770
+      },
+      "id" : "6876D303-5920-5410-A467-706B0E3244C0",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0.4,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Official findings summary · 12 November 2020 · Poor judgment and treatment of victims; no professional misconduct finding.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "DOJ · OPR",
+          "title" : "[E04] Statement on review of the 2006–2008 investigation",
+          "variant" : "compact"
+        },
+        "url" : "https://www.justice.gov/archives/opa/pr/statement-doj-office-professional-responsibility-report-jeffrey-epstein-2006-2008"
+      },
+      "z" : 32
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 279,
+        "width" : 340,
+        "x" : 360,
+        "y" : 1650
+      },
+      "id" : "56FF36D1-28B5-5EE8-A2E9-68302A516ED4",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.5,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**2023 / CUSTODY FAILURES**\nThe Inspector General documented serious supervision and prison failures. Its report records the medical examiner’s suicide finding for **10 Aug 2019**, and the FBI’s finding of no criminality in how Epstein died. [E06]",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "tint" : "azure",
+      "type" : "text",
+      "z" : 33
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : 850,
+        "y" : 1950
+      },
+      "id" : "7B6982F2-0C9A-5034-B482-A6A06D760693",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.0,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Primary report 23-085 · June 2023 · Executive summary, printed pp. i–iv: death investigation and prison failures.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "DOJ · Inspector General",
+          "title" : "[E06] Custody, care and supervision of Jeffrey Epstein",
+          "variant" : "compact"
+        },
+        "url" : "https://oig.justice.gov/sites/default/files/reports/23-085.pdf"
+      },
+      "z" : 34
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 106,
+        "width" : 750,
+        "x" : 780,
+        "y" : -1810
+      },
+      "id" : "A9FD01F6-4E72-5BDF-9D3E-90E4B718FFD3",
+      "locked" : true,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "FOLLOW THE FILES",
+        "fontSize" : 30,
+        "style" : "headline"
+      },
+      "type" : "text",
+      "z" : 35
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 279,
+        "width" : 310,
+        "x" : 770,
+        "y" : -1350
+      },
+      "id" : "90C1FCCC-D556-51E9-AAFC-221849EE4958",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -1.0,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**THE OFFICIAL LIBRARY**\nDOJ and House disclosures, with the portal showing an update of **11 Sep 2026**. Handwriting and other formats can defeat electronic search. A missing result is not proof of absence. [F01]",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "tint" : "teal",
+      "type" : "text",
+      "z" : 36
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : 1240,
+        "y" : -1120
+      },
+      "id" : "0BD350C1-8A9A-5960-A128-315C88398981",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 1.4,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Official release portal · Displayed update: 11 September 2026 · Includes search limitations and privacy notice.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "U.S. Department of Justice",
+          "title" : "[F01] Epstein Library",
+          "variant" : "compact"
+        },
+        "url" : "https://www.justice.gov/epstein"
+      },
+      "z" : 37
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 255,
+        "width" : 310,
+        "x" : 1790,
+        "y" : -1570
+      },
+      "id" : "F935ECA9-E8B5-5D2E-9B2D-FD808E424E0C",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 1.3,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**27 FEB 2025 / FIRST PHASE**\nEvidence list, flight logs and redacted lists. DOJ said much had previously leaked.\nA contact entry or flight log alone does not establish participation in a crime. [F02]",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "type" : "text",
+      "z" : 38
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : 2160,
+        "y" : -1210
+      },
+      "id" : "739E8E5B-7148-5126-A5FF-775DE861E744",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0.2,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Release announcement · 27 February 2025 · Links to an evidence list, flight logs and redacted lists.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "U.S. Department of Justice",
+          "title" : "[F02] First phase of declassified files announced",
+          "variant" : "compact"
+        },
+        "url" : "https://www.justice.gov/opa/pr/attorney-general-pamela-bondi-releases-first-phase-declassified-epstein-files"
+      },
+      "z" : 39
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 255,
+        "width" : 330,
+        "x" : 1700,
+        "y" : -960
+      },
+      "id" : "63D95976-6793-5102-ADF7-946C1D9C51C5",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -1.1,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**30 JAN 2026 / EXPANDED RELEASE**\nDOJ announced over 3 million additional pages: nearly **3.5 million** in total. Multiple cases and investigations contributed. DOJ cautions that public submissions can contain false material. [F03]",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "tint" : "teal",
+      "type" : "text",
+      "z" : 40
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : 1210,
+        "y" : -730
+      },
+      "id" : "EBED5AC1-9A85-5B7B-90BF-F57FBDC06217",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 1.5,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Release announcement · 30 January 2026 · DOJ’s stated totals and caveats about public submissions.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "U.S. Department of Justice",
+          "title" : "[F03] DOJ announces nearly 3.5 million released pages",
+          "variant" : "compact"
+        },
+        "url" : "https://www.justice.gov/opa/pr/department-justice-publishes-35-million-responsive-pages-compliance-epstein-files"
+      },
+      "z" : 41
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 253,
+        "width" : 285,
+        "x" : 2140,
+        "y" : -680
+      },
+      "id" : "7DE55CB1-E14A-5599-9D35-E461DF242D73",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.9,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "READ THE RECORD\nJudgment: court outcome.\nIndictment: allegation.\nTestimony: a witness’s account.\nTip: may be unverified.\nFor a claim, keep the document ID, page and context.",
+        "fontSize" : 15,
+        "style" : "typewriter"
+      },
+      "type" : "text",
+      "z" : 42
     },
     {
       "createdAt" : "2026-11-05T15:44:40Z",
       "frame" : {
-        "height" : 98,
-        "width" : 1050,
-        "x" : 4200,
-        "y" : 2700
+        "height" : 106,
+        "width" : 920,
+        "x" : 1450,
+        "y" : -70
       },
       "id" : "90920C40-8DAA-4C51-A5D1-E7E77E1BF470",
       "locked" : true,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
+      "modifiedAt" : "2026-11-06T20:29:53Z",
       "rotation" : 0,
       "text" : {
         "alignment" : "leading",
         "autoHeight" : true,
-        "content" : "TERMS & OPEN QUESTIONS",
+        "content" : "SCHNEERSON & CHABAD",
+        "fontSize" : 30,
         "style" : "headline"
       },
-      "tint" : "violet",
       "type" : "text",
-      "z" : 10
+      "z" : 43
     },
     {
-      "createdAt" : "2026-11-05T15:45:39Z",
+      "createdAt" : "2026-11-06T19:00:00Z",
       "frame" : {
-        "height" : 284,
-        "width" : 400,
-        "x" : 4200,
-        "y" : 2860
+        "height" : 106,
+        "width" : 860,
+        "x" : 1450,
+        "y" : 80
       },
-      "id" : "80882E27-3E4E-46CF-B12F-283011D931AE",
+      "id" : "F53D4C16-F7B5-5DEF-A2AE-C6FD78D4B890",
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -1.4,
       "text" : {
         "alignment" : "leading",
         "autoHeight" : true,
-        "content" : "**RELIGIOUS CONTEXT**\nChabad’s account discusses Jewish mysticism alongside study and religious practice. Its stated intellectual framework is described in [R02].\nThe original occult heading was not a source establishing a criminal relationship. Keep descriptions of beliefs distinct from evidence about conduct.",
-        "style" : "note"
+        "content" : "HISTORICAL CONTEXT\nThese sources do not establish involvement by Schneerson or Chabad in Epstein’s crimes.",
+        "fontSize" : 15,
+        "style" : "typewriter"
       },
-      "tint" : "violet",
       "type" : "text",
-      "z" : 11
-    },
-    {
-      "createdAt" : "2026-11-05T15:51:06Z",
-      "frame" : {
-        "height" : 262,
-        "width" : 400,
-        "x" : 4850,
-        "y" : 2860
-      },
-      "id" : "E579604B-E58C-42E5-A8DF-0829DB99A2B1",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**ORIGINAL RESEARCH KEYWORDS**\nAstrology · alchemy · sacred geometry · reincarnation · possession.\nRetained as questions from the initial board. No cited source here establishes these as Epstein’s interests or as a description of Chabad’s practices. Each would need its own specific source.",
-        "style" : "note"
-      },
-      "tint" : "graphite",
-      "type" : "text",
-      "z" : 12
+      "z" : 44
     },
     {
       "createdAt" : "2026-11-05T15:58:29Z",
       "frame" : {
-        "height" : 467,
-        "width" : 300,
-        "x" : 4200,
-        "y" : 0
+        "height" : 390,
+        "width" : 250,
+        "x" : 1760,
+        "y" : 390
       },
       "id" : "EE9AE81F-AFC3-48A8-982B-1A5ABFF5B56E",
       "image" : {
@@ -357,41 +1106,139 @@
         "frameStyle" : "polaroid"
       },
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "graphite",
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.3,
       "type" : "image",
-      "z" : 13
+      "z" : 45
     },
     {
       "createdAt" : "2026-11-05T15:59:38Z",
       "frame" : {
-        "height" : 240,
-        "width" : 400,
-        "x" : 4850,
-        "y" : 0
+        "height" : 241,
+        "width" : 300,
+        "x" : 1310,
+        "y" : 390
       },
       "id" : "15FDF91F-2434-4D85-8014-5A761105D5C1",
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.4,
       "text" : {
         "alignment" : "leading",
         "autoHeight" : true,
-        "content" : "**MENACHEM MENDEL SCHNEERSON**\n1902–1994. Known as the Lubavitcher Rebbe; seventh leader of Chabad-Lubavitch. Led the movement from 1951 until his death in 1994.\nThis identifies the rabbi already pictured on the board.\nSources: [R01], [R04] below.",
+        "content" : "**MENACHEM M. SCHNEERSON**\n**1902–1994** · The Lubavitcher Rebbe.\nSeventh leader of Chabad-Lubavitch; led the movement from **1951 to 1994**. [R01, R04]",
+        "fontSize" : 18,
         "style" : "note"
       },
       "tint" : "violet",
       "type" : "text",
-      "z" : 14
+      "z" : 46
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : 2190,
+        "y" : 320
+      },
+      "id" : "10227FB1-2F05-5265-87E8-E802E373035F",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 1.1,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Institutional biography · Schneerson’s life, arrival in the U.S. and leadership. Chabad’s own perspective.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "Chabad.org",
+          "title" : "[R01] The Rebbe: a brief biography",
+          "variant" : "compact"
+        },
+        "url" : "https://www.chabad.org/therebbe/article_cdo/aid/244372/jewish/The-Rebbe-A-Brief-Biography.htm"
+      },
+      "z" : 47
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : 1230,
+        "y" : 900
+      },
+      "id" : "A510298F-B76A-5867-B232-1C64FDDB62DF",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -1.1,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Independent biographical reporting · Schneerson led Chabad from 1951 until his death in 1994.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "Associated Press",
+          "title" : "[R04] Who was the revered rabbi?",
+          "variant" : "compact"
+        },
+        "url" : "https://apnews.com/article/67e2cf3e81165b4b8491ef67fb72b21f"
+      },
+      "z" : 48
+    },
+    {
+      "createdAt" : "2026-11-06T19:00:00Z",
+      "frame" : {
+        "height" : 302,
+        "width" : 330,
+        "x" : 2160,
+        "y" : 800
+      },
+      "id" : "CD2D92F5-2C63-5D43-8A44-927EC3270367",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -1.4,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**THE MESSIAH BELIEF**\nSome followers identified Schneerson as the Messiah. Enzo Pace’s study says he did not proclaim himself the Messiah and examines the belief’s persistence after his death.\nFollowers’ belief ≠ a self-declaration. [R03]",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "tint" : "violet",
+      "type" : "text",
+      "z" : 49
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : 2590,
+        "y" : 1060
+      },
+      "id" : "B4752570-8463-578F-9A5C-65DBFAB4180F",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.2,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Academic analysis · 2007 · Distinguishes followers’ messianic belief from a declaration by Schneerson.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "Enzo Pace · Horizontes Antropológicos",
+          "title" : "[R03] Extreme messianism: Chabad and charisma",
+          "variant" : "compact"
+        },
+        "url" : "https://socialsciences.scielo.org/scielo.php?pid=S0104-71832007000100005&script=sci_arttext"
+      },
+      "z" : 50
     },
     {
       "createdAt" : "2026-11-05T16:05:29Z",
       "frame" : {
-        "height" : 327,
-        "width" : 400,
-        "x" : 4200,
-        "y" : 2190
+        "height" : 294,
+        "width" : 360,
+        "x" : 1700,
+        "y" : 1150
       },
       "id" : "E695D062-F5F3-4D84-810C-43A1593FEC15",
       "image" : {
@@ -400,24 +1247,71 @@
         "frameStyle" : "polaroid"
       },
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "graphite",
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -1.5,
       "type" : "image",
-      "z" : 15
+      "z" : 51
+    },
+    {
+      "createdAt" : "2026-11-05T16:06:11Z",
+      "frame" : {
+        "height" : 255,
+        "width" : 310,
+        "x" : 1320,
+        "y" : 1430
+      },
+      "id" : "53B98635-5AD4-4E5B-BBAA-D031110D00BF",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 0.5,
+      "text" : {
+        "alignment" : "leading",
+        "autoHeight" : true,
+        "content" : "**CHABAD-LUBAVITCH**\nA Hasidic movement founded by Shneur Zalman of Liadi in the late 18th century. Its institutional account describes religious learning, education and social services. [R02]",
+        "fontSize" : 17,
+        "style" : "note"
+      },
+      "tint" : "violet",
+      "type" : "text",
+      "z" : 52
+    },
+    {
+      "createdAt" : "2026-11-06T18:49:38Z",
+      "frame" : {
+        "height" : 225,
+        "width" : 310,
+        "x" : 1660,
+        "y" : 1750
+      },
+      "id" : "FD19826E-7CD9-5D2E-9C2C-293CDA75C773",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.0,
+      "type" : "web",
+      "web" : {
+        "snapshot" : {
+          "description" : "Institutional account · Founder, religious philosophy and educational/social-service organizations.",
+          "fetchedAt" : "2026-11-06T20:29:53Z",
+          "siteName" : "Chabad.org",
+          "title" : "[R02] Background: history and ideology",
+          "variant" : "compact"
+        },
+        "url" : "https://www.chabad.org/library/article_cdo/aid/2346204/jewish/Background-History-and-Ideology.htm"
+      },
+      "z" : 53
     },
     {
       "createdAt" : "2026-11-05T16:06:02Z",
       "frame" : {
-        "height" : 390,
-        "width" : 400,
-        "x" : 4850,
-        "y" : 2190
+        "height" : 290,
+        "width" : 310,
+        "x" : 2200,
+        "y" : 1380
       },
       "id" : "8EA71D49-E848-4498-8B6F-C952B09F8E0D",
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 1.2,
       "type" : "web",
       "web" : {
         "snapshot" : {
@@ -436,1607 +1330,557 @@
         },
         "url" : "https://en.wikipedia.org/wiki/Chabad"
       },
-      "z" : 16
-    },
-    {
-      "createdAt" : "2026-11-05T16:06:11Z",
-      "frame" : {
-        "height" : 306,
-        "width" : 400,
-        "x" : 4200,
-        "y" : 1120
-      },
-      "id" : "53B98635-5AD4-4E5B-BBAA-D031110D00BF",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**CHABAD-LUBAVITCH**\nA Hasidic Jewish movement founded by Rabbi Shneur Zalman of Liadi in the late 18th century. Chabad’s institutional history emphasizes religious learning, education and social services.\nThe name is an acronym for wisdom, understanding and knowledge. This is the organization’s account of its philosophy.\nSource: [R02] →",
-        "style" : "note"
-      },
-      "tint" : "violet",
-      "type" : "text",
-      "z" : 17
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 152,
-        "width" : 1050,
-        "x" : 0,
-        "y" : -490
-      },
-      "id" : "B1BE21A3-7CA9-51FD-AB36-FFE7220F2A0A",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**A sourced case board**\nCourt milestones · released records · financial relationships · Schneerson and Chabad context.\nReviewed 7 Nov 2026 (Asia/Kolkata). A curated overview; the full release has not been reviewed. Existing photos retained.",
-        "style" : "note"
-      },
-      "tint" : "graphite",
-      "type" : "text",
-      "z" : 18
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 218,
-        "width" : 1050,
-        "x" : 1400,
-        "y" : -650
-      },
-      "id" : "CC5F311E-CFBD-5252-9899-4654373AA408",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**READ THE STATUS FIRST**\nTEAL — documented outcome / official finding\nAMBER — allegation or attributed account\nVIOLET — religious / historical context\nGRAPHITE — open question / reading guide\nBlue arrows lead to sources. Dashed arrows mark unverified claims. A name in a file does not by itself establish wrongdoing.",
-        "style" : "note"
-      },
-      "tint" : "graphite",
-      "type" : "text",
-      "z" : 19
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 174,
-        "width" : 1050,
-        "x" : 2800,
-        "y" : -650
-      },
-      "id" : "73F05D6C-0353-5421-A904-C5AEE664557B",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**FOLLOW THE SOURCE**\nSource IDs match the linked web cards. Card descriptions are curated summaries. Court allegations, findings, institutional histories and first-person statements are labeled separately.\nThe religious-history section supplies context; the cited material does not establish participation by Schneerson or Chabad in Epstein’s crimes.",
-        "style" : "note"
-      },
-      "tint" : "graphite",
-      "type" : "text",
-      "z" : 20
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 218,
-        "width" : 1050,
-        "x" : 4200,
-        "y" : -650
-      },
-      "id" : "3179C9F4-BD60-5D3B-9CFE-8411ACF9DCAE",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**EXPLORE THE BOARD**\n1. Case timeline\n2. The released files\n3. Money and institutions\n4. The rabbi and Chabad\nOpen a web card for its source. Select connected cards and use Trace (⌘T). Refresh All Previews (⇧⌘R) can fetch page imagery.",
-        "style" : "note"
-      },
-      "tint" : "graphite",
-      "type" : "text",
-      "z" : 21
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 98,
-        "width" : 1050,
-        "x" : 0,
-        "y" : -160
-      },
-      "id" : "F4CD6FAC-1D45-5E0A-AD78-D7425CC12AAF",
-      "locked" : true,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "01 / THE CASE",
-        "style" : "headline"
-      },
-      "tint" : "red",
-      "type" : "text",
-      "z" : 22
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 284,
-        "width" : 400,
-        "x" : 650,
-        "y" : 0
-      },
-      "id" : "C04F60E5-67E4-59BF-A754-B15D4C5EFBDB",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**JEFFREY EPSTEIN**\n2008: pleaded guilty to Florida state offenses.\n2019: federally charged; died before trial.\nThe 2019 prosecution ended without a trial verdict. Maxwell’s later conviction is a separate adjudication.\nSources: [E01], [E02], [E03], [E05] below.",
-        "style" : "note"
-      },
-      "tint" : "teal",
-      "type" : "text",
-      "z" : 23
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 306,
-        "width" : 400,
-        "x" : 0,
-        "y" : 580
-      },
-      "id" : "57367E69-989E-5E15-B0FE-20BA2938F096",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**2005–2008 / FLORIDA**\nPalm Beach police began investigating in 2005. A federal non-prosecution agreement was signed on 24 Sep 2007. On 30 Jun 2008, Epstein pleaded guilty to felony solicitation of prostitution and procurement of minors to engage in prostitution, the offenses’ statutory labels. He received an 18-month jail sentence.\nSource: [E01] →",
-        "style" : "note"
-      },
-      "tint" : "teal",
-      "type" : "text",
-      "z" : 24
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 650,
-        "y" : 580
-      },
-      "id" : "85C9CBE9-9F6C-5CC7-972D-B88776B4A166",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Primary report · November 2020 · PDF pp. 2–3, printed pp. ii–iii: investigation, agreement and guilty plea.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "DOJ · OPR",
-          "title" : "[E01] 2006–2008 investigation: executive summary",
-          "variant" : "compact"
-        },
-        "url" : "https://www.justice.gov/opr/page/file/1336471/dl?inline="
-      },
-      "z" : 25
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 262,
-        "width" : 400,
-        "x" : 0,
-        "y" : 1120
-      },
-      "id" : "C9CF61E6-F21D-5F64-9F70-EE00D1F5DF41",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**8 JUL 2019 / FEDERAL CHARGES**\nSDNY unsealed charges of sex trafficking of minors and conspiracy. Prosecutors alleged abuse and paid recruitment of girls in New York and Florida during 2002–2005.\nStatus: indictment allegations, never tried against Epstein.\nSource: [E02] →",
-        "style" : "note"
-      },
-      "tint" : "amber",
-      "type" : "text",
-      "z" : 26
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 650,
-        "y" : 1120
-      },
-      "id" : "CFC12C1A-162F-5F11-BF34-E42AAF2B690A",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Prosecution announcement · 8 July 2019 · Describes allegations in the indictment, not a verdict.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "DOJ · SDNY",
-          "title" : "[E02] Jeffrey Epstein charged in Manhattan federal court",
-          "variant" : "compact"
-        },
-        "url" : "https://www.justice.gov/usao-sdny/pr/jeffrey-epstein-charged-manhattan-federal-court-sex-trafficking-minors"
-      },
-      "z" : 27
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 240,
-        "width" : 400,
-        "x" : 0,
-        "y" : 1640
-      },
-      "id" : "FEE72022-FAA8-5FFD-A261-8C8897BB81F0",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**29 AUG 2019 / CASE DISMISSED**\nThe court formally dismissed United States v. Epstein following his death. The dismissal followed an August hearing at which victims could speak. It was not an acquittal or a determination that the allegations were false.\nSource: [E03] →",
-        "style" : "note"
-      },
-      "tint" : "teal",
-      "type" : "text",
-      "z" : 28
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 650,
-        "y" : 1640
-      },
-      "id" : "80121745-9719-5470-882E-D7532251A2F8",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Official case page · Records the 29 August 2019 dismissal following Epstein’s death.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "DOJ · SDNY",
-          "title" : "[E03] United States v. Jeffrey Epstein, 19 Cr. 490",
-          "variant" : "compact"
-        },
-        "url" : "https://www.justice.gov/usao-sdny/programs/victim-witness-services/united-states-v-jeffrey-epstein-19-cr-490-rmb"
-      },
-      "z" : 29
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 262,
-        "width" : 400,
-        "x" : 0,
-        "y" : 2140
-      },
-      "id" : "56CEC72A-3850-58D9-A898-EBC79698023D",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**12 NOV 2020 / PROSECUTOR REVIEW**\nOPR found that Alexander Acosta exercised poor judgment in the non-prosecution deal and handling victim notification. It did not find professional misconduct by DOJ attorneys. The review criticized how victims were treated.\nSource: [E04] →",
-        "style" : "note"
-      },
-      "tint" : "teal",
-      "type" : "text",
-      "z" : 30
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 650,
-        "y" : 2140
-      },
-      "id" : "D913E408-F963-517F-9786-E75E5087545D",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Official findings summary · 12 November 2020 · Poor judgment and treatment of victims; no professional misconduct finding.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "DOJ · OPR",
-          "title" : "[E04] Statement on review of the 2006–2008 investigation",
-          "variant" : "compact"
-        },
-        "url" : "https://www.justice.gov/archives/opa/pr/statement-doj-office-professional-responsibility-report-jeffrey-epstein-2006-2008"
-      },
-      "z" : 31
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 262,
-        "width" : 400,
-        "x" : 0,
-        "y" : 2640
-      },
-      "id" : "157459CC-5BC5-58DA-99CD-10186513ABC4",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**2021–2022 / MAXWELL CONVICTED**\nA jury found Ghislaine Maxwell guilty on 29 Dec 2021. On 28 Jun 2022 she was sentenced to 20 years for her role in recruiting, grooming and facilitating abuse of minors with Epstein.\nStatus: jury verdict and sentence; not merely a contact or association.\nSource: [E05] →",
-        "style" : "note"
-      },
-      "tint" : "teal",
-      "type" : "text",
-      "z" : 32
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 650,
-        "y" : 2640
-      },
-      "id" : "D25581A4-3599-5638-813E-7D57772271DC",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Official sentencing announcement · 28 June 2022 · Also records the 29 December 2021 jury verdict.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "DOJ · SDNY",
-          "title" : "[E05] Ghislaine Maxwell sentenced to 20 years",
-          "variant" : "compact"
-        },
-        "url" : "https://www.justice.gov/usao-sdny/pr/ghislaine-maxwell-sentenced-20-years-prison-conspiring-jeffrey-epstein-sexually-abuse"
-      },
-      "z" : 33
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 328,
-        "width" : 400,
-        "x" : 0,
-        "y" : 3160
-      },
-      "id" : "56FF36D1-28B5-5EE8-A2E9-68302A516ED4",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**JUN 2023 / CUSTODY REVIEW**\nThe Inspector General documented serious prison staffing, supervision and other failures. Its report records the medical examiner’s suicide finding for Epstein’s 10 Aug 2019 death and the FBI’s finding of no criminality in how he died.\nInstitutional failures and the cause-of-death findings are distinct issues.\nSource: [E06] →",
-        "style" : "note"
-      },
-      "tint" : "teal",
-      "type" : "text",
-      "z" : 34
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 650,
-        "y" : 3160
-      },
-      "id" : "C3C26023-D349-5BFF-8E1C-E489D9810EC8",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Primary report 23-085 · June 2023 · Executive summary, printed pp. i–iv: death investigation and prison failures.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "DOJ · Inspector General",
-          "title" : "[E06] Custody, care and supervision of Jeffrey Epstein",
-          "variant" : "compact"
-        },
-        "url" : "https://oig.justice.gov/sites/default/files/reports/23-085.pdf"
-      },
-      "z" : 35
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 98,
-        "width" : 1050,
-        "x" : 1400,
-        "y" : -160
-      },
-      "id" : "A9FD01F6-4E72-5BDF-9D3E-90E4B718FFD3",
-      "locked" : true,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "02 / THE FILES",
-        "style" : "headline"
-      },
-      "tint" : "azure",
-      "type" : "text",
-      "z" : 36
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 262,
-        "width" : 400,
-        "x" : 1400,
-        "y" : 0
-      },
-      "id" : "90C1FCCC-D556-51E9-AAFC-221849EE4958",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**START WITH THE OFFICIAL LIBRARY**\nThe DOJ portal links to DOJ and House disclosures. Its displayed update is 11 Sep 2026. It cautions that handwriting and other formats can make search unreliable.\nA missing search result is not proof that a document or name is absent.\nSource: [F01] →",
-        "style" : "note"
-      },
-      "tint" : "teal",
-      "type" : "text",
-      "z" : 37
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 2050,
-        "y" : 0
-      },
-      "id" : "435CDD98-F505-584B-AA57-A06509B1B363",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Official release portal · Displayed update: 11 September 2026 · Includes search limitations and privacy notice.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "U.S. Department of Justice",
-          "title" : "[F01] Epstein Library",
-          "variant" : "compact"
-        },
-        "url" : "https://www.justice.gov/epstein"
-      },
-      "z" : 38
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 284,
-        "width" : 400,
-        "x" : 1400,
-        "y" : 580
-      },
-      "id" : "F935ECA9-E8B5-5D2E-9B2D-FD808E424E0C",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**27 FEB 2025 / FIRST PHASE**\nDOJ released an evidence list, flight logs and redacted contact-related lists. DOJ said much of this material had previously leaked.\nReading rule: a contact entry records a listed contact; a flight entry records reported travel. Neither alone proves participation in a crime.\nSource: [F02] →",
-        "style" : "note"
-      },
-      "tint" : "teal",
-      "type" : "text",
-      "z" : 39
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 2050,
-        "y" : 580
-      },
-      "id" : "9B027DD5-A66B-5B77-85F7-A4711CD81756",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Release announcement · 27 February 2025 · Links to an evidence list, flight logs and redacted lists.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "U.S. Department of Justice",
-          "title" : "[F02] First phase of declassified files announced",
-          "variant" : "compact"
-        },
-        "url" : "https://www.justice.gov/opa/pr/attorney-general-pamela-bondi-releases-first-phase-declassified-epstein-files"
-      },
-      "z" : 40
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 306,
-        "width" : 400,
-        "x" : 1400,
-        "y" : 1120
-      },
-      "id" : "63D95976-6793-5102-ADF7-946C1D9C51C5",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**30 JAN 2026 / EXPANDED RELEASE**\nDOJ announced more than 3 million additional pages, bringing its stated total to nearly 3.5 million. The release draws on several investigations and cases.\nDOJ cautions that responsive public submissions may contain false material. Publication is not verification of every assertion.\nSource: [F03] →",
-        "style" : "note"
-      },
-      "tint" : "teal",
-      "type" : "text",
-      "z" : 41
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 2050,
-        "y" : 1120
-      },
-      "id" : "E5B828A3-121D-5E2C-B612-46BADE835F4F",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Release announcement · 30 January 2026 · DOJ’s stated totals and caveats about public submissions.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "U.S. Department of Justice",
-          "title" : "[F03] DOJ announces nearly 3.5 million released pages",
-          "variant" : "compact"
-        },
-        "url" : "https://www.justice.gov/opa/pr/department-justice-publishes-35-million-responsive-pages-compliance-epstein-files"
-      },
-      "z" : 42
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 350,
-        "width" : 400,
-        "x" : 1400,
-        "y" : 1640
-      },
-      "id" : "7DE55CB1-E14A-5599-9D35-E461DF242D73",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**WHAT KIND OF RECORD IS IT?**\nJudgment → adjudicated outcome.\nIndictment or complaint → allegations.\nDeposition → a witness’s testimony.\nEmail → a communication requiring context.\nTip → information submitted, possibly unverified.\nContact or flight log → a limited record of contact or travel.\nBoard method: establish provenance before drawing a conclusion.",
-        "style" : "note"
-      },
-      "tint" : "graphite",
-      "type" : "text",
-      "z" : 43
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 262,
-        "width" : 400,
-        "x" : 2050,
-        "y" : 1640
-      },
-      "id" : "533DBFBA-BD9E-5A7C-A029-201302C24A44",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**FOR EACH CLAIM, CAPTURE**\nDocument ID and URL\nPage number and relevant passage\nAuthor, date and recipient\nFirsthand knowledge or hearsay?\nCorroboration and any denial\nLater court outcome or correction\nAvoid copying private victim identifiers into research notes.",
-        "style" : "note"
-      },
-      "tint" : "graphite",
-      "type" : "text",
-      "z" : 44
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 306,
-        "width" : 400,
-        "x" : 1400,
-        "y" : 2240
-      },
-      "id" : "2DDAB0B0-8A30-5426-8A88-03CA2E1A9C53",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**NEXT DOCUMENT WORK**\n1. Trace a specific assertion to its original page.\n2. Compare the release copy with the court exhibit.\n3. Read the surrounding exchange.\n4. Record contradictions and gaps.\n5. Update the status only when the evidence warrants it.\nThis board does not claim a full review of millions of pages.",
-        "style" : "note"
-      },
-      "tint" : "graphite",
-      "type" : "text",
-      "z" : 45
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 306,
-        "width" : 400,
-        "x" : 2050,
-        "y" : 2240
-      },
-      "id" : "0BE46BD2-F5D7-5DE5-8314-6CDFB9FC0571",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**CURRENT BOUNDARY**\nThe case timeline rests on the linked official records. The Wexner section includes his own account and reporting. The Rockefeller invitation detail remains an open lead. Schneerson and Chabad have a separate historical context section.\nNo connection is evidence of criminal conduct without a source supporting that particular claim.",
-        "style" : "note"
-      },
-      "tint" : "graphite",
-      "type" : "text",
-      "z" : 46
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 98,
-        "width" : 1050,
-        "x" : 2800,
-        "y" : -160
-      },
-      "id" : "498C1E14-0B5C-572B-BEFF-96917EA20B0B",
-      "locked" : true,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "03 / MONEY & INSTITUTIONS",
-        "style" : "headline"
-      },
-      "tint" : "amber",
-      "type" : "text",
-      "z" : 47
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 262,
-        "width" : 400,
-        "x" : 3450,
-        "y" : 0
-      },
-      "id" : "1C962BC7-9261-5394-91EB-3844038EEB95",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**LESLIE WEXNER**\nEpstein managed Wexner’s personal finances and held power of attorney, according to Wexner’s 2019 letter. Wexner says he was deceived.\nThe authority and relationship are relevant financial history; assess specific conduct from the records.\nSource: [W01] below.",
-        "style" : "note"
-      },
-      "tint" : "amber",
-      "type" : "text",
-      "z" : 48
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 3450,
-        "y" : 580
-      },
-      "id" : "C1B672FE-0AC6-5FC3-9B56-9DF84D055ADC",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "First-person account · 8 August 2019 · Wexner describes financial authority, a trusteeship and his account of the separation.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "The Wexner Foundation",
-          "title" : "[W01] Letter from Les",
-          "variant" : "compact"
-        },
-        "url" : "https://www.wexnerfoundation.org/letter-from-les/"
-      },
-      "z" : 49
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 284,
-        "width" : 400,
-        "x" : 2800,
-        "y" : 1120
-      },
-      "id" : "DD3D970F-555B-5BA5-AB53-10F7256933F6",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**WEXNER’S RESPONSE**\nAP reports that Wexner denied knowing about Epstein’s crimes or participating in abuse. It dates the power of attorney to 1991.\nRecord the denial alongside the financial connection. A denial is an attributed statement, not an independent finding.\nSource: [W02] →",
-        "style" : "note"
-      },
-      "tint" : "amber",
-      "type" : "text",
-      "z" : 50
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 3450,
-        "y" : 1120
-      },
-      "id" : "E0051B17-1045-5334-8E07-699E637C5356",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Independent reporting · Wexner’s denial of knowledge of abuse and reporting on the financial relationship.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "Associated Press",
-          "title" : "[W02] Wexner says he was duped by Epstein",
-          "variant" : "compact"
-        },
-        "url" : "https://apnews.com/article/733833f6d648c09e6b3473eb1cd4009d"
-      },
-      "z" : 51
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 262,
-        "width" : 400,
-        "x" : 3450,
-        "y" : 1640
-      },
-      "id" : "0230A819-227F-518F-A8F0-5B7EDEB5B486",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**VICTORIA’S SECRET / CORPORATE HISTORY**\nThe original ‘owns’ link oversimplified the history. Victoria’s Secret separated from L Brands in August 2021 as an independent publicly traded company.\nThe filing says the former parent retained no ownership interest.\nSource: [W03] below.",
-        "style" : "note"
-      },
-      "tint" : "teal",
-      "type" : "text",
-      "z" : 52
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 2800,
-        "y" : 2130
-      },
-      "id" : "7E965153-640F-598B-8C06-71F2D919DF18",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Corporate filing · August 2021 · Victoria’s Secret becomes a separate publicly traded company.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "SEC · Victoria’s Secret & Co.",
-          "title" : "[W03] Form 8-K: separation from L Brands",
-          "variant" : "compact"
-        },
-        "url" : "https://www.sec.gov/Archives/edgar/data/1856437/000114036121026649/nt10026698x8_8k.htm"
-      },
-      "z" : 53
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 3450,
-        "y" : 3110
-      },
-      "id" : "7457DD97-96AB-5337-A2D8-72A6E66B0969",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Organization’s own history · Founding in 1973 by David Rockefeller; stated purpose and membership model.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "The Trilateral Commission",
-          "title" : "[T01] About the Trilateral Commission",
-          "variant" : "compact"
-        },
-        "url" : "https://www.trilateral.org/about/"
-      },
       "z" : 54
     },
     {
-      "createdAt" : "2026-11-06T19:00:00Z",
+      "createdAt" : "2026-11-05T15:45:39Z",
       "frame" : {
-        "height" : 262,
-        "width" : 400,
-        "x" : 2800,
-        "y" : 3650
+        "height" : 279,
+        "width" : 320,
+        "x" : 2180,
+        "y" : 1860
       },
-      "id" : "1A662CB0-A2D8-5CFA-B4E4-C33D50168318",
+      "id" : "80882E27-3E4E-46CF-B12F-283011D931AE",
       "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : 1.4,
       "text" : {
         "alignment" : "leading",
         "autoHeight" : true,
-        "content" : "**OPEN LEAD / THE INVITATION**\nThe original board said Rockefeller invited Epstein at age 30. That age, invitation and inviter are not established by the sources cited here.\nNext: obtain a dated membership roster and the original invitation or a reliable account. Keep Epstein’s own recollections attributed.",
+        "content" : "**WHAT THE TEACHING SAYS**\nChabad describes ‘wisdom, understanding and knowledge’ as its intellectual framework and discusses Jewish mysticism. This supplies religious context, not evidence of criminal conduct. [R02]",
+        "fontSize" : 17,
         "style" : "note"
       },
-      "tint" : "graphite",
+      "tint" : "violet",
       "type" : "text",
       "z" : 55
     },
     {
-      "createdAt" : "2026-11-06T19:00:00Z",
+      "createdAt" : "2026-11-05T15:51:06Z",
       "frame" : {
-        "height" : 98,
-        "width" : 1050,
-        "x" : 4200,
-        "y" : -160
+        "height" : 302,
+        "width" : 300,
+        "x" : 2670,
+        "y" : 1550
       },
-      "id" : "ABF649EE-F864-5118-A2F3-699C713C1894",
-      "locked" : true,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
+      "id" : "E579604B-E58C-42E5-A8DF-0829DB99A2B1",
+      "locked" : false,
+      "modifiedAt" : "2026-11-06T20:29:53Z",
+      "rotation" : -0.9,
       "text" : {
         "alignment" : "leading",
         "autoHeight" : true,
-        "content" : "04 / THE RABBI & CHABAD",
-        "style" : "headline"
-      },
-      "tint" : "violet",
-      "type" : "text",
-      "z" : 56
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 4200,
-        "y" : 580
-      },
-      "id" : "5F39AE24-DE7D-5556-8933-D9FCBDB4DDB1",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "violet",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Institutional biography · Schneerson’s life, arrival in the U.S. and leadership. Chabad’s own perspective.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "Chabad.org",
-          "title" : "[R01] The Rebbe: a brief biography",
-          "variant" : "compact"
-        },
-        "url" : "https://www.chabad.org/therebbe/article_cdo/aid/244372/jewish/The-Rebbe-A-Brief-Biography.htm"
-      },
-      "z" : 57
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 4850,
-        "y" : 580
-      },
-      "id" : "9F107E36-1EB0-5BA0-9AEE-E37FE2D1FE22",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "violet",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Independent biographical reporting · Schneerson led Chabad from 1951 until his death in 1994.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "Associated Press",
-          "title" : "[R04] Who was the revered rabbi?",
-          "variant" : "compact"
-        },
-        "url" : "https://apnews.com/article/67e2cf3e81165b4b8491ef67fb72b21f"
-      },
-      "z" : 58
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 4850,
-        "y" : 1120
-      },
-      "id" : "C9EDC9B1-EB6B-50A3-8297-F25EDD656E1F",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Institutional account · Founder, religious philosophy and educational/social-service organizations.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "Chabad.org",
-          "title" : "[R02] Background: history and ideology",
-          "variant" : "compact"
-        },
-        "url" : "https://www.chabad.org/library/article_cdo/aid/2346204/jewish/Background-History-and-Ideology.htm"
-      },
-      "z" : 59
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 306,
-        "width" : 400,
-        "x" : 4200,
-        "y" : 1640
-      },
-      "id" : "CD2D92F5-2C63-5D43-8A44-927EC3270367",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**THE MESSIAH CLAIM / CORRECTION**\nSome followers identified Schneerson as the Messiah. Enzo Pace’s academic study says Schneerson did not proclaim himself the Messiah and examines the persistence of this belief after his death.\nThe original ‘claimed to be a Messiah’ note conflated a leader’s declaration with followers’ beliefs.\nSource: [R03] →",
-        "style" : "note"
-      },
-      "tint" : "violet",
-      "type" : "text",
-      "z" : 60
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 290,
-        "width" : 400,
-        "x" : 4850,
-        "y" : 1640
-      },
-      "id" : "47CA0830-1D14-5AFC-855D-7579D872D21D",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "tint" : "azure",
-      "type" : "web",
-      "web" : {
-        "snapshot" : {
-          "description" : "Academic analysis · 2007 · Distinguishes followers’ messianic belief from a declaration by Schneerson.",
-          "fetchedAt" : "2026-11-06T18:49:38Z",
-          "siteName" : "Enzo Pace · Horizontes Antropológicos",
-          "title" : "[R03] Extreme messianism: Chabad and charisma",
-          "variant" : "compact"
-        },
-        "url" : "https://socialsciences.scielo.org/scielo.php?pid=S0104-71832007000100005&script=sci_arttext"
-      },
-      "z" : 61
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 174,
-        "width" : 1050,
-        "x" : 4200,
-        "y" : 3440
-      },
-      "id" : "F53D4C16-F7B5-5DEF-A2AE-C6FD78D4B890",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**WHAT IS THE ACTUAL CONNECTION?**\nThe sources cited in this section establish religious history and debates about belief. They do not establish involvement by Schneerson or Chabad in Epstein’s crimes.\nA proposed link needs a named person, dated act and traceable document. This remains a research boundary, not a finding from an exhaustive search.",
-        "style" : "note"
-      },
-      "tint" : "graphite",
-      "type" : "text",
-      "z" : 62
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 98,
-        "width" : 2450,
-        "x" : 0,
-        "y" : 4300
-      },
-      "id" : "64580A52-EE7F-57EC-96E3-2694BC5E8A39",
-      "locked" : true,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "DOCUMENTED RELATIONSHIPS / SOURCE KEY ABOVE",
-        "style" : "headline"
-      },
-      "tint" : "azure",
-      "type" : "text",
-      "z" : 63
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 152,
-        "width" : 400,
-        "x" : 0,
-        "y" : 4480
-      },
-      "id" : "3D208780-3077-512F-841A-819AE722B023",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**GHISLAINE MAXWELL**\nConvicted for her role in the abuse scheme with Epstein.\nSource: [E05]",
-        "style" : "note"
-      },
-      "tint" : "teal",
-      "type" : "text",
-      "z" : 64
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 174,
-        "width" : 400,
-        "x" : 650,
-        "y" : 4480
-      },
-      "id" : "EBF933F8-08DD-545C-8BF0-2610456C7AE5",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**JEFFREY EPSTEIN**\nThe criminal case and financial relationships have different evidentiary bases.\nSources: [E01–E05], [W01]",
-        "style" : "note"
-      },
-      "tint" : "red",
-      "type" : "text",
-      "z" : 65
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 174,
-        "width" : 400,
-        "x" : 1300,
-        "y" : 4480
-      },
-      "id" : "7C7B56A3-901C-559C-BB49-531F99226E36",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**LESLIE WEXNER**\nAcknowledged giving Epstein authority over personal finances. Denies knowledge of abuse.\nSources: [W01], [W02]",
+        "content" : "**UNSOURCED KEYWORDS**\nAstrology, alchemy, sacred geometry, reincarnation and possession were on the initial board. The cited sources do not establish these as Epstein’s interests or Chabad practices. Each needs its own source.",
+        "fontSize" : 17,
         "style" : "note"
       },
       "tint" : "amber",
       "type" : "text",
-      "z" : 66
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 130,
-        "width" : 400,
-        "x" : 2800,
-        "y" : 4480
-      },
-      "id" : "8FD134D8-058B-567E-9F5B-DDBE4CE06AF1",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**DAVID ROCKEFELLER**\nFounder of the Trilateral Commission.\nSource: [T01]",
-        "style" : "note"
-      },
-      "tint" : "teal",
-      "type" : "text",
-      "z" : 67
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 174,
-        "width" : 400,
-        "x" : 3450,
-        "y" : 4480
-      },
-      "id" : "DFD5D540-DD22-51BE-ABA3-F91238B20771",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**TRILATERAL COMMISSION**\nInstitutional history. The precise Epstein invitation remains unverified here.\nSource: [T01] / open lead above.",
-        "style" : "note"
-      },
-      "tint" : "graphite",
-      "type" : "text",
-      "z" : 68
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 130,
-        "width" : 400,
-        "x" : 4200,
-        "y" : 4480
-      },
-      "id" : "5FB7D14B-B9D9-52D0-9051-0AB39D6B1BB9",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**MENACHEM M. SCHNEERSON**\nSeventh rebbe of Chabad-Lubavitch.\nSources: [R01], [R04]",
-        "style" : "note"
-      },
-      "tint" : "violet",
-      "type" : "text",
-      "z" : 69
-    },
-    {
-      "createdAt" : "2026-11-06T19:00:00Z",
-      "frame" : {
-        "height" : 152,
-        "width" : 400,
-        "x" : 4850,
-        "y" : 4480
-      },
-      "id" : "90D185F7-C5DA-5C5D-8811-4EFB57C2D104",
-      "locked" : false,
-      "modifiedAt" : "2026-11-06T18:49:38Z",
-      "rotation" : 0,
-      "text" : {
-        "alignment" : "leading",
-        "autoHeight" : true,
-        "content" : "**CHABAD-LUBAVITCH**\nReligious movement and institutions; historical context.\nSource: [R02]",
-        "style" : "note"
-      },
-      "tint" : "violet",
-      "type" : "text",
-      "z" : 70
+      "z" : 56
     }
   ],
   "createdAt" : "2026-11-05T15:09:30Z",
   "format" : "evidenceboard",
   "formatVersion" : 1,
   "id" : "2888A465-BE75-4346-A49C-294C3A3CB2C6",
-  "modifiedAt" : "2026-11-06T18:49:38Z",
+  "modifiedAt" : "2026-11-06T20:29:53Z",
   "strings" : [
     {
-      "arrow" : "forward",
+      "arrow" : "none",
+      "color" : "azure",
+      "from" : "157459CC-5BC5-58DA-99CD-10186513ABC4",
+      "id" : "B769564E-73E2-549B-A925-E0610B607C70",
+      "label" : "convicted scheme · E05",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 3,
+      "to" : "6FF215B8-0ED5-4260-8222-092B378E2D53"
+    },
+    {
+      "arrow" : "none",
       "color" : "azure",
       "from" : "6FF215B8-0ED5-4260-8222-092B378E2D53",
-      "id" : "BEB90992-D553-5991-B439-67168B85147F",
-      "label" : "case summary",
-      "sag" : 0,
+      "id" : "F893EEB9-A66D-5B1A-949F-FF0DBBE841CF",
+      "sag" : 0.35,
       "style" : "solid",
-      "thickness" : 2,
+      "thickness" : 1.5,
       "to" : "C04F60E5-67E4-59BF-A754-B15D4C5EFBDB"
     },
     {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "157459CC-5BC5-58DA-99CD-10186513ABC4",
+      "id" : "7C6DF346-7E01-5745-9603-FC468C6DEF84",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "F6395876-5D45-5AEE-973E-B8A4419FBEA9"
+    },
+    {
+      "arrow" : "none",
+      "color" : "teal",
+      "from" : "0D00B8A3-7AE8-4861-96E7-A76252D77466",
+      "id" : "DF9B0C18-C3E2-5911-B560-C547064EB976",
+      "label" : "founded · 1973",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 2.2,
+      "to" : "4E4805A9-0071-4C20-9165-2A54A893144D"
+    },
+    {
+      "arrow" : "none",
+      "color" : "teal",
+      "from" : "4E4805A9-0071-4C20-9165-2A54A893144D",
+      "id" : "77D7D3F8-3AAA-5BB2-925A-3B81C39E859A",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 2.2,
+      "to" : "7B437909-ED9A-4D36-ADEA-65BB93451458"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "4E4805A9-0071-4C20-9165-2A54A893144D",
+      "id" : "24DB5356-2F08-5725-AA33-2598E5EDA81C",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "244893CF-BB3E-4E13-876D-9ABC8688BC3A"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "7B437909-ED9A-4D36-ADEA-65BB93451458",
+      "id" : "B6034CB4-5FE3-5285-A610-5435D229FF78",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "B385F190-A3E5-5808-A349-9DEC21D4DC15"
+    },
+    {
+      "arrow" : "none",
+      "color" : "amber",
+      "from" : "1A662CB0-A2D8-5CFA-B4E4-C33D50168318",
+      "id" : "2090639B-F5B1-50C1-8803-0E074FC84BAF",
+      "sag" : 0.35,
+      "style" : "dashed",
+      "thickness" : 1.5,
+      "to" : "4E4805A9-0071-4C20-9165-2A54A893144D"
+    },
+    {
+      "arrow" : "none",
+      "color" : "amber",
+      "from" : "1A662CB0-A2D8-5CFA-B4E4-C33D50168318",
+      "id" : "5F5F5BB8-9438-54A2-9D32-CE6B1A3192CD",
+      "label" : "invitation unverified",
+      "sag" : 0.35,
+      "style" : "dashed",
+      "thickness" : 1.8,
+      "to" : "6FF215B8-0ED5-4260-8222-092B378E2D53"
+    },
+    {
       "arrow" : "forward",
+      "color" : "red",
+      "from" : "6315EECC-4E0C-411B-BEA4-7535149FAD93",
+      "id" : "30F43F7F-420D-59EB-92B5-D0CE97A0D105",
+      "label" : "financial authority · W01",
+      "sag" : 0.6,
+      "style" : "solid",
+      "thickness" : 3.2,
+      "to" : "6FF215B8-0ED5-4260-8222-092B378E2D53"
+    },
+    {
+      "arrow" : "none",
+      "color" : "red",
+      "from" : "6315EECC-4E0C-411B-BEA4-7535149FAD93",
+      "id" : "A333A5A2-ED73-5761-B2F0-CB20301E4D81",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 2.2,
+      "to" : "1599780C-790B-4F2C-8372-C4F080912A1C"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "1599780C-790B-4F2C-8372-C4F080912A1C",
+      "id" : "880D619A-2517-59B0-A86D-B0D1F7DE27BE",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "ED3A861D-CEB8-5F1B-96B9-16FC56AAF9A2"
+    },
+    {
+      "arrow" : "none",
+      "color" : "amber",
+      "from" : "6315EECC-4E0C-411B-BEA4-7535149FAD93",
+      "id" : "18BC899E-96E3-55CD-B61E-E93FFD623B71",
+      "label" : "his response",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 1.8,
+      "to" : "DD3D970F-555B-5BA5-AB53-10F7256933F6"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "DD3D970F-555B-5BA5-AB53-10F7256933F6",
+      "id" : "CAD3B288-8A6B-5687-A5F5-29C315AC89C3",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "459C059C-1D3F-5C0A-89DB-C92440D3ECAC"
+    },
+    {
+      "arrow" : "none",
+      "color" : "teal",
+      "from" : "645AC788-E6A8-4B6B-A9E1-EEAEB1B47E4E",
+      "id" : "3424FC24-4D59-544E-87B9-5FB5CB45C764",
+      "label" : "2021 separation",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 2.2,
+      "to" : "0230A819-227F-518F-A8F0-5B7EDEB5B486"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "6315EECC-4E0C-411B-BEA4-7535149FAD93",
+      "id" : "7D42C0F6-28C0-5B06-952B-75BBA1AC2880",
+      "label" : "retail context",
+      "sag" : 0.35,
+      "style" : "dotted",
+      "thickness" : 1.4,
+      "to" : "0230A819-227F-518F-A8F0-5B7EDEB5B486"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "0230A819-227F-518F-A8F0-5B7EDEB5B486",
+      "id" : "693AC467-39EB-5CF7-88CC-1BDECF099D2A",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "0DB99C47-BB7D-5396-B364-1E4A5B6F676D"
+    },
+    {
+      "arrow" : "none",
+      "color" : "azure",
+      "from" : "C04F60E5-67E4-59BF-A754-B15D4C5EFBDB",
+      "id" : "8F575A2A-13BF-5743-BA40-C0FDFBCB3BAF",
+      "label" : "guilty plea",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 2.6,
+      "to" : "57367E69-989E-5E15-B0FE-20BA2938F096"
+    },
+    {
+      "arrow" : "none",
+      "color" : "azure",
+      "from" : "C04F60E5-67E4-59BF-A754-B15D4C5EFBDB",
+      "id" : "42C04158-08BA-5839-9A98-501D48E69FBA",
+      "label" : "federal charges",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 2.6,
+      "to" : "C9CF61E6-F21D-5F64-9F70-EE00D1F5DF41"
+    },
+    {
+      "arrow" : "none",
       "color" : "azure",
       "from" : "57367E69-989E-5E15-B0FE-20BA2938F096",
-      "id" : "BBECA5D3-49BA-5FFE-BC84-9CAD55D4FD83",
-      "label" : "source",
-      "sag" : 0,
+      "id" : "1B9BC142-2FB8-5069-B4BE-79B374C0CEFE",
+      "label" : "later prosecution",
+      "sag" : 0.35,
       "style" : "solid",
-      "thickness" : 2,
-      "to" : "85C9CBE9-9F6C-5CC7-972D-B88776B4A166"
+      "thickness" : 1.8,
+      "to" : "C9CF61E6-F21D-5F64-9F70-EE00D1F5DF41"
     },
     {
       "arrow" : "forward",
       "color" : "azure",
       "from" : "C9CF61E6-F21D-5F64-9F70-EE00D1F5DF41",
-      "id" : "1653BADF-0EC4-511C-9A3B-9D9A4CACDF9B",
-      "label" : "source",
-      "sag" : 0,
+      "id" : "FB4C0A86-C9D3-5ADC-A1D4-112C05237D72",
+      "label" : "case closed after death",
+      "sag" : 0.35,
       "style" : "solid",
-      "thickness" : 2,
-      "to" : "CFC12C1A-162F-5F11-BF34-E42AAF2B690A"
+      "thickness" : 1.8,
+      "to" : "FEE72022-FAA8-5FFD-A261-8C8897BB81F0"
     },
     {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "FEE72022-FAA8-5FFD-A261-8C8897BB81F0",
-      "id" : "20F82D65-A1A2-536A-9157-8E3B779E14C0",
-      "label" : "source",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "80121745-9719-5470-882E-D7532251A2F8"
-    },
-    {
-      "arrow" : "forward",
+      "arrow" : "none",
       "color" : "azure",
       "from" : "56CEC72A-3850-58D9-A898-EBC79698023D",
-      "id" : "14745199-1561-5BF7-A4D8-3062120CFB35",
-      "label" : "source",
-      "sag" : 0,
+      "id" : "447AFECF-748B-5749-A1FA-0F31B2F78A91",
+      "label" : "reviewed the deal",
+      "sag" : 0.35,
       "style" : "solid",
-      "thickness" : 2,
-      "to" : "D913E408-F963-517F-9786-E75E5087545D"
+      "thickness" : 1.8,
+      "to" : "57367E69-989E-5E15-B0FE-20BA2938F096"
     },
     {
-      "arrow" : "forward",
+      "arrow" : "none",
       "color" : "azure",
-      "from" : "157459CC-5BC5-58DA-99CD-10186513ABC4",
-      "id" : "13948781-8815-5C25-8AEE-8690C8CDDFDB",
-      "label" : "source",
-      "sag" : 0,
+      "from" : "FEE72022-FAA8-5FFD-A261-8C8897BB81F0",
+      "id" : "7E268928-3BC7-5B6C-BBF7-3FB17B7A00DA",
+      "label" : "custody review",
+      "sag" : 0.35,
       "style" : "solid",
-      "thickness" : 2,
-      "to" : "D25581A4-3599-5638-813E-7D57772271DC"
+      "thickness" : 1.8,
+      "to" : "56FF36D1-28B5-5EE8-A2E9-68302A516ED4"
     },
     {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "56FF36D1-28B5-5EE8-A2E9-68302A516ED4",
-      "id" : "CEBC00AE-ECA3-576A-B5FC-421D5C671447",
-      "label" : "source",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "C3C26023-D349-5BFF-8E1C-E489D9810EC8"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "90C1FCCC-D556-51E9-AAFC-221849EE4958",
-      "id" : "038F7B39-5BFC-5ADC-805E-98672670780A",
-      "label" : "source",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "435CDD98-F505-584B-AA57-A06509B1B363"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "F935ECA9-E8B5-5D2E-9B2D-FD808E424E0C",
-      "id" : "84D441D8-8B9B-5958-93D4-215690A07737",
-      "label" : "source",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "9B027DD5-A66B-5B77-85F7-A4711CD81756"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "63D95976-6793-5102-ADF7-946C1D9C51C5",
-      "id" : "ED2F49A8-CA4E-54E9-9B50-84FD0E156977",
-      "label" : "source",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "E5B828A3-121D-5E2C-B612-46BADE835F4F"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "7DE55CB1-E14A-5599-9D35-E461DF242D73",
-      "id" : "72FB039E-B431-5D0E-9076-61ABC76F3972",
-      "label" : "evaluate",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "533DBFBA-BD9E-5A7C-A029-201302C24A44"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "2DDAB0B0-8A30-5426-8A88-03CA2E1A9C53",
-      "id" : "06466819-C4A1-56F1-A7C7-228B20DA5F19",
-      "label" : "scope",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "0BE46BD2-F5D7-5DE5-8314-6CDFB9FC0571"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "6315EECC-4E0C-411B-BEA4-7535149FAD93",
-      "id" : "83C4A482-52CE-583F-A60D-90BAD6BF8011",
-      "label" : "financial history",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "1C962BC7-9261-5394-91EB-3844038EEB95"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "1599780C-790B-4F2C-8372-C4F080912A1C",
-      "id" : "D7491F9B-A23C-52FA-8AAB-397A09B9DC32",
-      "label" : "source",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "C1B672FE-0AC6-5FC3-9B56-9DF84D055ADC"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "DD3D970F-555B-5BA5-AB53-10F7256933F6",
-      "id" : "D62EE4BE-8060-5C66-8703-7AD06F948FB3",
-      "label" : "source",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "E0051B17-1045-5334-8E07-699E637C5356"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "645AC788-E6A8-4B6B-A9E1-EEAEB1B47E4E",
-      "id" : "2E5BA061-F110-56A3-BEAC-A1324EC8A97E",
-      "label" : "2021 separation",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "0230A819-227F-518F-A8F0-5B7EDEB5B486"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "0230A819-227F-518F-A8F0-5B7EDEB5B486",
-      "id" : "FD9B4AE5-6FD4-505B-93F2-B0517D94F02B",
-      "label" : "filing",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "7E965153-640F-598B-8C06-71F2D919DF18"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "teal",
-      "from" : "0D00B8A3-7AE8-4861-96E7-A76252D77466",
-      "id" : "DDC158B1-5C49-4F7C-8E96-191F43EC9DD7",
-      "label" : "founded in 1973",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "4E4805A9-0071-4C20-9165-2A54A893144D"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "7B437909-ED9A-4D36-ADEA-65BB93451458",
-      "id" : "CE6B6997-9127-5D44-ADD3-EE16F3271049",
-      "label" : "source",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "7457DD97-96AB-5337-A2D8-72A6E66B0969"
-    },
-    {
-      "arrow" : "forward",
+      "arrow" : "none",
       "color" : "graphite",
-      "from" : "1A662CB0-A2D8-5CFA-B4E4-C33D50168318",
-      "id" : "2C92E3A8-982E-5023-864D-51A19950812F",
-      "label" : "background only",
-      "sag" : 0,
-      "style" : "dashed",
-      "thickness" : 2,
-      "to" : "244893CF-BB3E-4E13-876D-9ABC8688BC3A"
+      "from" : "57367E69-989E-5E15-B0FE-20BA2938F096",
+      "id" : "C4D95EFE-D34C-51CE-B64E-A666826193AB",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "EFBD83F8-34AC-5D57-B894-B99D81C07068"
     },
     {
-      "arrow" : "forward",
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "C9CF61E6-F21D-5F64-9F70-EE00D1F5DF41",
+      "id" : "FC0941C4-E178-57B2-924A-A4B36413D827",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "B4B125D9-B911-59EE-9C28-1FA7B6A091CB"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "FEE72022-FAA8-5FFD-A261-8C8897BB81F0",
+      "id" : "681994F4-D656-5382-8179-C800FFD10C64",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "495892B0-4ABC-56C3-866E-4E9E75D14FCE"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "56CEC72A-3850-58D9-A898-EBC79698023D",
+      "id" : "9A198029-F225-5F82-9A6B-5A9F5E9EA0AE",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "6876D303-5920-5410-A467-706B0E3244C0"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "56FF36D1-28B5-5EE8-A2E9-68302A516ED4",
+      "id" : "7F03CC28-0584-50A8-997E-DCEB899DFC30",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "7B6982F2-0C9A-5034-B482-A6A06D760693"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "90C1FCCC-D556-51E9-AAFC-221849EE4958",
+      "id" : "8D93959F-DE91-5690-BAD1-EA66A960B7E7",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "0BD350C1-8A9A-5960-A128-315C88398981"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "F935ECA9-E8B5-5D2E-9B2D-FD808E424E0C",
+      "id" : "ED44C16B-42AB-5EC6-8F62-9E6081182315",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "739E8E5B-7148-5126-A5FF-775DE861E744"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "63D95976-6793-5102-ADF7-946C1D9C51C5",
+      "id" : "13D940D3-21C6-5F30-9390-A6B2125F678C",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "EBED5AC1-9A85-5B7B-90BF-F57FBDC06217"
+    },
+    {
+      "arrow" : "none",
+      "color" : "teal",
+      "from" : "90C1FCCC-D556-51E9-AAFC-221849EE4958",
+      "id" : "9B752A64-DF95-53F1-88A7-10E56FEE42EF",
+      "label" : "2025 release",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 1.6,
+      "to" : "F935ECA9-E8B5-5D2E-9B2D-FD808E424E0C"
+    },
+    {
+      "arrow" : "none",
+      "color" : "teal",
+      "from" : "F935ECA9-E8B5-5D2E-9B2D-FD808E424E0C",
+      "id" : "F6A13115-AEEF-5027-8B02-34567E1BF6E0",
+      "label" : "2026 expansion",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 1.8,
+      "to" : "63D95976-6793-5102-ADF7-946C1D9C51C5"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "63D95976-6793-5102-ADF7-946C1D9C51C5",
+      "id" : "C1B16A32-7237-5F28-9AAA-CC10AD926EE0",
+      "sag" : 0.35,
+      "style" : "dotted",
+      "thickness" : 1.3,
+      "to" : "7DE55CB1-E14A-5599-9D35-E461DF242D73"
+    },
+    {
+      "arrow" : "none",
+      "color" : "teal",
+      "from" : "90C1FCCC-D556-51E9-AAFC-221849EE4958",
+      "id" : "994E8579-E634-54DF-8384-6721609C81A1",
+      "label" : "investigation records",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 2,
+      "to" : "6FF215B8-0ED5-4260-8222-092B378E2D53"
+    },
+    {
+      "arrow" : "none",
+      "color" : "teal",
+      "from" : "F6395876-5D45-5AEE-973E-B8A4419FBEA9",
+      "id" : "21D9CA92-82C5-5AD6-A473-B215054E520F",
+      "label" : "Maxwell case records",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 1.6,
+      "to" : "90C1FCCC-D556-51E9-AAFC-221849EE4958"
+    },
+    {
+      "arrow" : "none",
       "color" : "violet",
       "from" : "EE9AE81F-AFC3-48A8-982B-1A5ABFF5B56E",
-      "id" : "0F437CC9-AFBF-4AB0-9A8C-623C4FFEC2FE",
-      "label" : "biography",
-      "sag" : 0,
+      "id" : "269A879C-5E35-5DF1-88AF-0E7FEADE1AA4",
+      "sag" : 0.35,
       "style" : "solid",
-      "thickness" : 2,
+      "thickness" : 1.6,
       "to" : "15FDF91F-2434-4D85-8014-5A761105D5C1"
     },
     {
-      "arrow" : "forward",
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "EE9AE81F-AFC3-48A8-982B-1A5ABFF5B56E",
+      "id" : "EC191AAC-198B-5BA1-A983-E22C4F2EB808",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "10227FB1-2F05-5265-87E8-E802E373035F"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "15FDF91F-2434-4D85-8014-5A761105D5C1",
+      "id" : "813A5154-8384-5023-8BD0-BAFD4F8FC511",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "A510298F-B76A-5867-B232-1C64FDDB62DF"
+    },
+    {
+      "arrow" : "none",
       "color" : "violet",
-      "from" : "5F39AE24-DE7D-5556-8933-D9FCBDB4DDB1",
-      "id" : "8A15B0CB-87BB-5623-B5FF-940C9D6B7413",
-      "label" : "compare accounts",
-      "sag" : 0,
+      "from" : "EE9AE81F-AFC3-48A8-982B-1A5ABFF5B56E",
+      "id" : "FA4F2069-2FB9-5A82-90F2-CF219316C046",
+      "label" : "led the movement",
+      "sag" : 0.35,
       "style" : "solid",
-      "thickness" : 2,
-      "to" : "9F107E36-1EB0-5BA0-9AEE-E37FE2D1FE22"
+      "thickness" : 2.6,
+      "to" : "E695D062-F5F3-4D84-810C-43A1593FEC15"
     },
     {
-      "arrow" : "forward",
-      "color" : "azure",
-      "from" : "53B98635-5AD4-4E5B-BBAA-D031110D00BF",
-      "id" : "0CD13FCB-018B-54C6-AECE-C69BA6A258EF",
-      "label" : "source",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "C9EDC9B1-EB6B-50A3-8297-F25EDD656E1F"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "azure",
+      "arrow" : "none",
+      "color" : "violet",
       "from" : "CD2D92F5-2C63-5D43-8A44-927EC3270367",
-      "id" : "409B9BED-20D1-56E7-BA86-788BE5DB7F09",
-      "label" : "source",
-      "sag" : 0,
+      "id" : "99C38EA8-1116-5706-B264-DB7F7B7E1CFA",
+      "label" : "some followers’ belief",
+      "sag" : 0.35,
       "style" : "solid",
-      "thickness" : 2,
-      "to" : "47CA0830-1D14-5AFC-855D-7579D872D21D"
+      "thickness" : 1.8,
+      "to" : "EE9AE81F-AFC3-48A8-982B-1A5ABFF5B56E"
     },
     {
-      "arrow" : "forward",
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "CD2D92F5-2C63-5D43-8A44-927EC3270367",
+      "id" : "6497261C-B3A8-527D-A956-B73D1D32BA3F",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "B4752570-8463-578F-9A5C-65DBFAB4180F"
+    },
+    {
+      "arrow" : "none",
       "color" : "violet",
       "from" : "E695D062-F5F3-4D84-810C-43A1593FEC15",
-      "id" : "B76506CE-011F-4CFD-A6A2-EDAE99A90A10",
-      "label" : "background",
-      "sag" : 0,
+      "id" : "055FF534-77ED-51CD-9879-6B5DE9C37A36",
+      "sag" : 0.35,
       "style" : "solid",
-      "thickness" : 2,
+      "thickness" : 1.8,
+      "to" : "53B98635-5AD4-4E5B-BBAA-D031110D00BF"
+    },
+    {
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "E695D062-F5F3-4D84-810C-43A1593FEC15",
+      "id" : "833F77BD-9661-57D1-BF7A-0466201E7FFA",
+      "sag" : 0.35,
+      "style" : "solid",
+      "thickness" : 1.2,
       "to" : "8EA71D49-E848-4498-8B6F-C952B09F8E0D"
     },
     {
-      "arrow" : "forward",
+      "arrow" : "none",
+      "color" : "graphite",
+      "from" : "53B98635-5AD4-4E5B-BBAA-D031110D00BF",
+      "id" : "51B75DD1-00DE-500A-853E-9BAEC8F45A80",
+      "sag" : 0.15,
+      "style" : "solid",
+      "thickness" : 1.2,
+      "to" : "FD19826E-7CD9-5D2E-9C2C-293CDA75C773"
+    },
+    {
+      "arrow" : "none",
       "color" : "graphite",
       "from" : "80882E27-3E4E-46CF-B12F-283011D931AE",
-      "id" : "2E1F3E74-FD15-47B3-917F-2C4114489997",
-      "label" : "unverified leads",
-      "sag" : 0,
-      "style" : "dashed",
-      "thickness" : 2,
-      "to" : "E579604B-E58C-42E5-A8DF-0829DB99A2B1"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "teal",
-      "from" : "3D208780-3077-512F-841A-819AE722B023",
-      "id" : "272D5B10-AE39-552A-B063-41090F60C581",
-      "label" : "convicted role [E05]",
-      "sag" : 0,
+      "id" : "76E64FE4-181A-5870-9335-B3B7E288439F",
+      "sag" : 0.15,
       "style" : "solid",
-      "thickness" : 2,
-      "to" : "EBF933F8-08DD-545C-8BF0-2610456C7AE5"
+      "thickness" : 1.2,
+      "to" : "FD19826E-7CD9-5D2E-9C2C-293CDA75C773"
     },
     {
-      "arrow" : "forward",
+      "arrow" : "none",
       "color" : "amber",
-      "from" : "7C7B56A3-901C-559C-BB49-531F99226E36",
-      "id" : "ADC2FFBC-18FC-5EE1-9D35-0EF97534E76C",
-      "label" : "financial authority [W01]",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "EBF933F8-08DD-545C-8BF0-2610456C7AE5"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "teal",
-      "from" : "8FD134D8-058B-567E-9F5B-DDBE4CE06AF1",
-      "id" : "43EC2855-868A-5808-882D-8F10BC88E53F",
-      "label" : "founded [T01]",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "DFD5D540-DD22-51BE-ABA3-F91238B20771"
-    },
-    {
-      "arrow" : "forward",
-      "color" : "violet",
-      "from" : "5FB7D14B-B9D9-52D0-9051-0AB39D6B1BB9",
-      "id" : "698FB103-E802-5EFF-81F2-C014E1A9479E",
-      "label" : "led [R01, R04]",
-      "sag" : 0,
-      "style" : "solid",
-      "thickness" : 2,
-      "to" : "90D185F7-C5DA-5C5D-8811-4EFB57C2D104"
+      "from" : "E579604B-E58C-42E5-A8DF-0829DB99A2B1",
+      "id" : "CA85C220-8756-58FE-90EE-FFBCF579F336",
+      "label" : "unsourced",
+      "sag" : 0.35,
+      "style" : "dashed",
+      "thickness" : 1.5,
+      "to" : "80882E27-3E4E-46CF-B12F-283011D931AE"
     }
   ],
-  "theme" : "noir",
-  "title" : "The Epstein Files — Case, Records & Chabad Context",
+  "theme" : "cork",
+  "title" : "The Epstein Files",
   "viewport" : {
-    "x" : 2625,
-    "y" : 2050,
-    "zoom" : 0.13
+    "x" : -340,
+    "y" : -720,
+    "zoom" : 0.36
   }
 }

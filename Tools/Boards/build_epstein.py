@@ -14,7 +14,7 @@ import uuid
 
 
 ROOT = Path(__file__).resolve().parents[2]
-STAMP = "2026-11-06T18:49:38Z"
+STAMP = "2026-11-06T20:29:53Z"
 NS = uuid.UUID("2888A465-BE75-4346-A49C-294C3A3CB2C6")
 IDS = {
     "title": "BF8090FD-F8E0-4F76-826E-8B381FD1904D",
@@ -96,248 +96,239 @@ def uid(name):
 
 
 def build(board):
-    original_ids = {c["id"] for c in board["cards"]}
-    cards = {c["id"]: c for c in board["cards"]}
-    strings = []
+    """Compose a connected investigation board, with the original images as anchors."""
+    import copy
+    import random
+    import textwrap
 
-    def put(name, x, y, w, h, kind, payload, tint="graphite", locked=False):
-        cid = uid(name)
-        c = cards.get(cid, {"id": cid, "createdAt": STAMP})
-        for key in ("text", "image", "web"):
+    previous = {c["id"]: c for c in board["cards"]}
+    cards, strings, named = [], [], {}
+    rng = random.Random(72)
+
+    def put(name, x, y, w, h, kind, payload, tint=None, rotation=None):
+        c = copy.deepcopy(previous.get(uid(name), {"id": uid(name), "createdAt": STAMP}))
+        for key in ("text", "image", "web", "tint"):
             c.pop(key, None)
         c.update(type=kind, frame={"x": x, "y": y, "width": w, "height": h},
-                 rotation=0, locked=locked, tint=tint, modifiedAt=STAMP)
+                 rotation=rotation if rotation is not None else round(rng.uniform(-1.6, 1.6), 1),
+                 locked=False, modifiedAt=STAMP, z=len(cards) + 1)
         c[kind] = payload
-        cards[cid] = c
+        if tint:
+            c["tint"] = tint
+        cards.append(c)
+        named[name] = c
         return name
 
-    def note(name, x, y, content, tint="graphite", w=400, style="note"):
-        # Leave room for platform font differences and wrapped bold headings.
-        char_width, line_height = (18, 34) if style == "headline" else (8.8, 22)
-        per_line = max(1, int((w - 40) / char_width))
-        lines = sum(max(1, math.ceil(len(p.replace("**", "")) * 1.08 / per_line))
-                    for p in content.split("\n"))
-        height = 64 + lines * line_height
-        return put(name, x, y, w, height, "text",
-                   {"content": content, "style": style, "alignment": "leading", "autoHeight": True},
-                   tint, style == "headline")
+    def note(name, x, y, content, tint=None, w=310, style="note", size=17):
+        # Word wrapping, not a fixed row height: each slip is sized to its contents.
+        columns = max(8, int((w - 40) / (size * 0.56)))
+        lines = sum(max(1, len(textwrap.wrap(line.replace("**", ""), columns))) for line in content.split("\n"))
+        h = math.ceil(64 + lines * size * 1.4)
+        return put(name, x, y, w, h, "text", {
+            "content": content, "style": style, "alignment": "leading", "autoHeight": True,
+            "fontSize": size,
+        }, tint, 0 if style == "headline" else None)
 
-    def picture(name, x, y, w=350):
-        c = cards[uid(name)]
-        payload = c["image"].copy()
-        asset = board["assets"][payload["asset"]]
-        h = math.ceil((w - 24) * asset["pixelHeight"] / asset["pixelWidth"] + 76)
+    def heading(name, x, y, content, w=650):
+        note(name, x, y, content, w=w, style="headline", size=30)
+        named[name]["locked"] = True
+
+    def picture(name, x, y, w=270):
+        payload = copy.deepcopy(previous[uid(name)]["image"])
+        a = board["assets"][payload["asset"]]
+        h = math.ceil((w - 24) * a["pixelHeight"] / a["pixelWidth"] + 70)
         return put(name, x, y, w, h, "image", payload)
 
-    def source(name, x, y, ref, tint="azure"):
+    def source(ref, x, y, w=310):
         site, title, url, summary = SOURCES[ref]
-        return put(name, x, y, 400, 290, "web", {"url": url, "snapshot": {
+        return put("source_" + ref, x, y, w, 225, "web", {"url": url, "snapshot": {
             "fetchedAt": STAMP, "variant": "compact", "siteName": site,
             "title": f"[{ref}] {title}", "description": summary,
-        }}, tint)
+        }})
 
     def existing_web(name, x, y):
-        c = cards[uid(name)]
-        c.update(frame={"x": x, "y": y, "width": 400, "height": 390}, rotation=0, modifiedAt=STAMP)
+        payload = copy.deepcopy(previous[uid(name)]["web"])
+        put(name, x, y, 310, 290, "web", payload)
 
-    def connect(a, b, label="source", color="azure", style="solid", legacy_id=None):
-        strings.append({"id": legacy_id or uid("string:" + a + ":" + b),
-                        "from": uid(a), "to": uid(b), "color": color,
-                        "style": style, "arrow": "forward", "label": label,
-                        "thickness": 2, "sag": 0})
+    def link(a, b, label=None, color="red", style="solid", weight=2.2, arrow="none", sag=0.35):
+        edge = {"id": uid("thread:" + a + ":" + b), "from": uid(a), "to": uid(b),
+                "color": color, "style": style, "arrow": arrow, "thickness": weight, "sag": sag}
+        if label:
+            edge["label"] = label
+        strings.append(edge)
 
-    def pair(name, x, y, content, ref, tint="teal"):
-        note(name, x, y, content + f"\nSource: [{ref}] →", tint)
-        source(name + "_source", x + 650, y, ref)
-        connect(name, name + "_source")
+    def cites(name, ref):
+        link(name, "source_" + ref, color="graphite", weight=1.2, sag=0.15)
 
-    # A four-column reading order keeps each claim beside the record supporting it.
-    note("title", 0, -650, "THE EPSTEIN FILES", "red", 1300, "headline")
-    note("scope", 0, -490,
-         "**A sourced case board**\nCourt milestones · released records · financial relationships · Schneerson and Chabad context.\n"
-         "Reviewed 7 Nov 2026 (Asia/Kolkata). A curated overview; the full release has not been reviewed. Existing photos retained.", w=1050)
-    note("legend", 1400, -650,
-         "**READ THE STATUS FIRST**\nTEAL — documented outcome / official finding\nAMBER — allegation or attributed account\n"
-         "VIOLET — religious / historical context\nGRAPHITE — open question / reading guide\n"
-         "Blue arrows lead to sources. Dashed arrows mark unverified claims. A name in a file does not by itself establish wrongdoing.", w=1050)
-    note("provenance", 2800, -650,
-         "**FOLLOW THE SOURCE**\nSource IDs match the linked web cards. Card descriptions are curated summaries. "
-         "Court allegations, findings, institutional histories and first-person statements are labeled separately.\n"
-         "The religious-history section supplies context; the cited material does not establish participation by Schneerson or Chabad in Epstein’s crimes.", w=1050)
-    note("navigation", 4200, -650,
-         "**EXPLORE THE BOARD**\n1. Case timeline\n2. The released files\n3. Money and institutions\n4. The rabbi and Chabad\n"
-         "Open a web card for its source. Select connected cards and use Trace (⌘T). Refresh All Previews (⇧⌘R) can fetch page imagery.", w=1050)
+    # Title and one compact key, as on The Albania Files. The canvas opens on the
+    # people and their connections; the complete case is available with Zoom to Fit.
+    heading("title", -560, -1810, "THE EPSTEIN FILES", 950)
+    named["title"]["text"]["fontSize"] = 44
+    named["title"]["frame"]["height"] = 120
+    note("scope", -550, -1640,
+         "**THE CASE · THE MONEY · THE RECORDS**\nJeffrey Epstein, Ghislaine Maxwell, Leslie Wexner, and the institutional leads. "
+         "Schneerson / Chabad: a separate context cluster.\nSources reviewed 7 Nov 2026. A curated case overview, not a full review of the releases.", w=640, size=18)
+    note("legend", 160, -1620,
+         "THREAD KEY\nRed — financial relationships\nBlue — case / court history\nPurple — religious history\nThin gray — sources\nDashed — unresolved lead\n"
+         "A listed contact is not proof of a crime.", w=300, style="typewriter", size=15)
 
-    # 1. Criminal case, with charges distinguished from adjudicated outcomes.
-    note("case_heading", 0, -160, "01 / THE CASE", "red", 1050, "headline")
-    picture("epstein", 0, 0)
-    note("case_overview", 650, 0,
-         "**JEFFREY EPSTEIN**\n2008: pleaded guilty to Florida state offenses.\n2019: federally charged; died before trial.\n"
-         "The 2019 prosecution ended without a trial verdict. Maxwell’s later conviction is a separate adjudication.\n"
-         "Sources: [E01], [E02], [E03], [E05] below.", "teal")
-    connect("epstein", "case_overview", "case summary")
-    pair("florida", 0, 580,
-         "**2005–2008 / FLORIDA**\nPalm Beach police began investigating in 2005. A federal non-prosecution agreement was signed on "
-         "24 Sep 2007. On 30 Jun 2008, Epstein pleaded guilty to felony solicitation of prostitution and procurement of minors "
-         "to engage in prostitution, the offenses’ statutory labels. He received an 18-month jail sentence.", "E01")
-    pair("charges", 0, 1120,
-         "**8 JUL 2019 / FEDERAL CHARGES**\nSDNY unsealed charges of sex trafficking of minors and conspiracy. "
-         "Prosecutors alleged abuse and paid recruitment of girls in New York and Florida during 2002–2005.\n"
-         "Status: indictment allegations, never tried against Epstein.", "E02", "amber")
-    pair("dismissal", 0, 1640,
-         "**29 AUG 2019 / CASE DISMISSED**\nThe court formally dismissed United States v. Epstein following his death. "
-         "The dismissal followed an August hearing at which victims could speak. It was not an acquittal or a determination that the allegations were false.", "E03")
-    pair("opr", 0, 2140,
-         "**12 NOV 2020 / PROSECUTOR REVIEW**\nOPR found that Alexander Acosta exercised poor judgment in the non-prosecution deal "
-         "and handling victim notification. It did not find professional misconduct by DOJ attorneys. "
-         "The review criticized how victims were treated.", "E04")
-    pair("maxwell", 0, 2640,
-         "**2021–2022 / MAXWELL CONVICTED**\nA jury found Ghislaine Maxwell guilty on 29 Dec 2021. "
-         "On 28 Jun 2022 she was sentenced to 20 years for her role in recruiting, grooming and facilitating abuse of minors with Epstein.\n"
-         "Status: jury verdict and sentence; not merely a contact or association.", "E05")
-    pair("death_review", 0, 3160,
-         "**JUN 2023 / CUSTODY REVIEW**\nThe Inspector General documented serious prison staffing, supervision and other failures. "
-         "Its report records the medical examiner’s suicide finding for Epstein’s 10 Aug 2019 death and the FBI’s finding of no criminality in how he died.\n"
-         "Institutional failures and the cause-of-death findings are distinct issues.", "E06")
+    # The central hub uses the real subject cards; there is no duplicate map.
+    picture("epstein", -390, -850, 330)
+    note("case_overview", -450, -420,
+         "**JEFFREY EPSTEIN**\n2008: Florida guilty plea.\n2019: federal trafficking charges; died before trial.\n"
+         "Follow the blue threads to the court record and the red thread to his financial authority.\n[E01–E03, W01]", "red", w=340, size=18)
+    note("maxwell", 230, -510,
+         "**GHISLAINE MAXWELL**\nJury verdict: **29 Dec 2021**.\nSentence: **20 years**, 28 Jun 2022.\n"
+         "Convicted for her role in recruiting, grooming and facilitating the abuse of minors with Epstein. [E05]", "azure", w=330, size=18)
+    source("E05", 650, -210)
+    link("maxwell", "epstein", "convicted scheme · E05", "azure", weight=3)
+    link("epstein", "case_overview", color="azure", weight=1.5)
+    cites("maxwell", "E05")
 
-    # 2. What was released and how to evaluate it.
-    note("files_heading", 1400, -160, "02 / THE FILES", "azure", 1050, "headline")
-    pair("library", 1400, 0,
-         "**START WITH THE OFFICIAL LIBRARY**\nThe DOJ portal links to DOJ and House disclosures. Its displayed update is 11 Sep 2026. "
-         "It cautions that handwriting and other formats can make search unreliable.\n"
-         "A missing search result is not proof that a document or name is absent.", "F01")
-    pair("first_release", 1400, 580,
-         "**27 FEB 2025 / FIRST PHASE**\nDOJ released an evidence list, flight logs and redacted contact-related lists. "
-         "DOJ said much of this material had previously leaked.\n"
-         "Reading rule: a contact entry records a listed contact; a flight entry records reported travel. Neither alone proves participation in a crime.", "F02")
-    pair("release_2026", 1400, 1120,
-         "**30 JAN 2026 / EXPANDED RELEASE**\nDOJ announced more than 3 million additional pages, bringing its stated total to nearly "
-         "3.5 million. The release draws on several investigations and cases.\n"
-         "DOJ cautions that responsive public submissions may contain false material. Publication is not verification of every assertion.", "F03")
-    note("record_types", 1400, 1640,
-         "**WHAT KIND OF RECORD IS IT?**\nJudgment → adjudicated outcome.\nIndictment or complaint → allegations.\n"
-         "Deposition → a witness’s testimony.\nEmail → a communication requiring context.\nTip → information submitted, possibly unverified.\n"
-         "Contact or flight log → a limited record of contact or travel.\nBoard method: establish provenance before drawing a conclusion.")
-    note("record_check", 2050, 1640,
-         "**FOR EACH CLAIM, CAPTURE**\nDocument ID and URL\nPage number and relevant passage\nAuthor, date and recipient\n"
-         "Firsthand knowledge or hearsay?\nCorroboration and any denial\nLater court outcome or correction\n"
-         "Avoid copying private victim identifiers into research notes.")
-    connect("record_types", "record_check", "evaluate")
-    note("open_files", 1400, 2240,
-         "**NEXT DOCUMENT WORK**\n1. Trace a specific assertion to its original page.\n2. Compare the release copy with the court exhibit.\n"
-         "3. Read the surrounding exchange.\n4. Record contradictions and gaps.\n5. Update the status only when the evidence warrants it.\n"
-         "This board does not claim a full review of millions of pages.")
-    note("reading_findings", 2050, 2240,
-         "**CURRENT BOUNDARY**\nThe case timeline rests on the linked official records. The Wexner section includes his own account and reporting. "
-         "The Rockefeller invitation detail remains an open lead. Schneerson and Chabad have a separate historical context section.\n"
-         "No connection is evidence of criminal conduct without a source supporting that particular claim.")
-    connect("open_files", "reading_findings", "scope")
+    # Upper left: an institutional lead, not a claimed criminal organization.
+    heading("institutions_heading", -2300, -1770, "ACCESS & INSTITUTIONS", 870)
+    picture("rockefeller", -1960, -1390, 250)
+    picture("commission", -1250, -1500, 270)
+    note("commission_summary", -1590, -1080,
+         "**TRILATERAL COMMISSION**\nFounded by David Rockefeller in **1973**. A forum for policymakers, business, media and academics "
+         "across North America, Europe and Asia, according to its own history. [T01]", w=310)
+    source("T01", -2330, -920)
+    existing_web("commission_wiki", -2380, -1530)
+    note("invitation_lead", -1100, -980,
+         "**WHO INVITED EPSTEIN?**\nThe original ‘Rockefeller invited him at 30’ claim remains unverified here. "
+         "A dated invitation or reliable membership record is needed.\nKeep this as an open lead, not an established relationship.", "amber", w=300)
+    link("rockefeller", "commission", "founded · 1973", "teal")
+    link("commission", "commission_summary", color="teal")
+    link("commission", "commission_wiki", color="graphite", weight=1.2)
+    cites("commission_summary", "T01")
+    link("invitation_lead", "commission", color="amber", style="dashed", weight=1.5)
+    link("invitation_lead", "epstein", "invitation unverified", "amber", "dashed", 1.8)
 
-    # 3. Financial relationships and the original institutional leads.
-    note("money_heading", 2800, -160, "03 / MONEY & INSTITUTIONS", "amber", 1050, "headline")
-    picture("wexner", 2800, 0)
-    note("wexner_summary", 3450, 0,
-         "**LESLIE WEXNER**\nEpstein managed Wexner’s personal finances and held power of attorney, according to Wexner’s 2019 letter. "
-         "Wexner says he was deceived.\nThe authority and relationship are relevant financial history; assess specific conduct from the records.\nSource: [W01] below.", "amber")
-    connect("wexner", "wexner_summary", "financial history")
-    pair("power_of_attorney", 2800, 580,
-         "**WHAT THE AUTHORITY COVERED**\nWexner said Epstein had broad authority over his personal finances. "
-         "The letter does not support the original note’s claim of power over ‘life and death.’\n"
-         "Wexner also described an early-1990s foundation trusteeship and said Epstein had no executive responsibilities there. "
-         "These are Wexner’s statements.", "W01", "amber")
-    pair("wexner_denial", 2800, 1120,
-         "**WEXNER’S RESPONSE**\nAP reports that Wexner denied knowing about Epstein’s crimes or participating in abuse. "
-         "It dates the power of attorney to 1991.\n"
-         "Record the denial alongside the financial connection. A denial is an attributed statement, not an independent finding.", "W02", "amber")
-    picture("victorias_secret", 2800, 1640, 260)
-    note("retail_history", 3450, 1640,
-         "**VICTORIA’S SECRET / CORPORATE HISTORY**\nThe original ‘owns’ link oversimplified the history. "
-         "Victoria’s Secret separated from L Brands in August 2021 as an independent publicly traded company.\n"
-         "The filing says the former parent retained no ownership interest.\nSource: [W03] below.", "teal")
-    connect("victorias_secret", "retail_history", "2021 separation")
-    source("retail_source", 2800, 2130, "W03")
-    connect("retail_history", "retail_source", "filing")
-    picture("rockefeller", 2800, 2570)
-    picture("commission", 3450, 2570)
-    connect("rockefeller", "commission", "founded in 1973", "teal",
-            legacy_id="DDC158B1-5C49-4F7C-8E96-191F43EC9DD7")
-    pair("commission_summary", 2800, 3110,
-         "**THE TRILATERAL COMMISSION**\nFounded by David Rockefeller in 1973. The organization describes itself as a forum for "
-         "policymakers, business leaders, media and academics across North America, Europe and Asia.\n"
-         "Its institutional history supports the founding relationship above, not a criminal inference about members.", "T01")
-    note("invitation_lead", 2800, 3650,
-         "**OPEN LEAD / THE INVITATION**\nThe original board said Rockefeller invited Epstein at age 30. "
-         "That age, invitation and inviter are not established by the sources cited here.\n"
-         "Next: obtain a dated membership roster and the original invitation or a reliable account. Keep Epstein’s own recollections attributed.", "graphite")
-    existing_web("commission_wiki", 3450, 3650)
-    connect("invitation_lead", "commission_wiki", "background only", "graphite", "dashed")
+    # Left flank: real financial authority, the response, and corporate history.
+    heading("money_heading", -2330, -390, "THE MONEY & THE AUTHORITY", 960)
+    picture("wexner", -1050, -100, 280)
+    note("power_of_attorney", -1600, -50,
+         "**POWER OF ATTORNEY**\nWexner acknowledged giving Epstein broad authority over his personal finances. "
+         "He also described an early-1990s foundation trusteeship without executive responsibilities.\n"
+         "His letter does not establish authority over ‘life and death.’ [W01]", "red", w=330)
+    source("W01", -2170, 20)
+    note("wexner_denial", -1750, 530,
+         "**WEXNER’S ACCOUNT**\nHe says he was deceived, and denies knowing about or participating in the abuse. "
+         "AP dates the financial power of attorney to **1991**.\nAn attributed response, not an independent finding. [W02]", "amber", w=320)
+    source("W02", -2250, 610)
+    picture("victorias_secret", -1030, 680, 220)
+    note("retail_history", -1470, 1060,
+         "**VICTORIA’S SECRET**\nThe ‘owns’ shorthand is outdated. The business separated from L Brands in **August 2021** "
+         "as an independent public company. The former parent retained no ownership interest. [W03]", w=320)
+    source("W03", -2070, 1110)
+    link("wexner", "epstein", "financial authority · W01", "red", weight=3.2, arrow="forward", sag=0.6)
+    link("wexner", "power_of_attorney", color="red")
+    cites("power_of_attorney", "W01")
+    link("wexner", "wexner_denial", "his response", "amber", weight=1.8)
+    cites("wexner_denial", "W02")
+    link("victorias_secret", "retail_history", "2021 separation", "teal")
+    link("wexner", "retail_history", "retail context", "graphite", "dotted", 1.4)
+    cites("retail_history", "W03")
 
-    # 4. Resolve the user's rabbi reference from the board; avoid invented links.
-    note("rabbi_heading", 4200, -160, "04 / THE RABBI & CHABAD", "violet", 1050, "headline")
-    picture("schneerson", 4200, 0, 300)
-    note("schneerson_bio", 4850, 0,
-         "**MENACHEM MENDEL SCHNEERSON**\n1902–1994. Known as the Lubavitcher Rebbe; seventh leader of Chabad-Lubavitch. "
-         "Led the movement from 1951 until his death in 1994.\n"
-         "This identifies the rabbi already pictured on the board.\nSources: [R01], [R04] below.", "violet")
-    connect("schneerson", "schneerson_bio", "biography", "violet",
-            legacy_id="0F437CC9-AFBF-4AB0-9A8C-623C4FFEC2FE")
-    source("rabbi_primary", 4200, 580, "R01", "violet")
-    source("rabbi_independent", 4850, 580, "R04", "violet")
-    connect("rabbi_primary", "rabbi_independent", "compare accounts", "violet")
-    pair("chabad_history", 4200, 1120,
-         "**CHABAD-LUBAVITCH**\nA Hasidic Jewish movement founded by Rabbi Shneur Zalman of Liadi in the late 18th century. "
-         "Chabad’s institutional history emphasizes religious learning, education and social services.\n"
-         "The name is an acronym for wisdom, understanding and knowledge. This is the organization’s account of its philosophy.", "R02", "violet")
-    pair("messiah", 4200, 1640,
-         "**THE MESSIAH CLAIM / CORRECTION**\nSome followers identified Schneerson as the Messiah. Enzo Pace’s academic study "
-         "says Schneerson did not proclaim himself the Messiah and examines the persistence of this belief after his death.\n"
-         "The original ‘claimed to be a Messiah’ note conflated a leader’s declaration with followers’ beliefs.", "R03", "violet")
-    picture("chabad_photo", 4200, 2190, 400)
-    existing_web("chabad_wiki", 4850, 2190)
-    connect("chabad_photo", "chabad_wiki", "background", "violet",
-            legacy_id="B76506CE-011F-4CFD-A6A2-EDAE99A90A10")
-    note("terms_heading", 4200, 2700, "TERMS & OPEN QUESTIONS", "violet", 1050, "headline")
-    note("occult", 4200, 2860,
-         "**RELIGIOUS CONTEXT**\nChabad’s account discusses Jewish mysticism alongside study and religious practice. "
-         "Its stated intellectual framework is described in [R02].\n"
-         "The original occult heading was not a source establishing a criminal relationship. Keep descriptions of beliefs distinct from evidence about conduct.", "violet")
-    note("terms", 4850, 2860,
-         "**ORIGINAL RESEARCH KEYWORDS**\nAstrology · alchemy · sacred geometry · reincarnation · possession.\n"
-         "Retained as questions from the initial board. No cited source here establishes these as Epstein’s interests or as a description of Chabad’s practices. "
-         "Each would need its own specific source.")
-    connect("occult", "terms", "unverified leads", "graphite", "dashed",
-            legacy_id="2E1F3E74-FD15-47B3-917F-2C4114489997")
-    note("religion_boundary", 4200, 3440,
-         "**WHAT IS THE ACTUAL CONNECTION?**\nThe sources cited in this section establish religious history and debates about belief. "
-         "They do not establish involvement by Schneerson or Chabad in Epstein’s crimes.\n"
-         "A proposed link needs a named person, dated act and traceable document. This remains a research boundary, not a finding from an exhaustive search.", "graphite", 1050)
+    # Lower center: branching court history, with short notes and nearby exhibits.
+    heading("case_heading", -10, 100, "THE CASE & ITS AFTERMATH", 1000)
+    note("florida", -630, 600,
+         "**2005 → 2008 / FLORIDA**\nPolice investigation began in 2005. A federal non-prosecution agreement followed on **24 Sep 2007**. "
+         "On **30 Jun 2008**, Epstein pleaded guilty to felony solicitation of prostitution and procurement of minors to engage in prostitution; "
+         "the court imposed **18 months**. [E01]", "azure", w=340)
+    source("E01", -1020, 1510)
+    note("charges", -80, 690,
+         "**8 JUL 2019 / FEDERAL CHARGES**\nSDNY alleged sex trafficking of minors and conspiracy, involving paid recruitment "
+         "and abuse in New York and Florida in 2002–2005.\n**Allegations; Epstein was not tried.** [E02]", "amber", w=310)
+    source("E02", 330, 560)
+    note("dismissal", 510, 1030,
+         "**29 AUG 2019 / DISMISSAL**\nThe federal case was dismissed following Epstein’s death. Victims spoke at an August hearing.\n"
+         "This was not an acquittal or a finding that the allegations were false. [E03]", "azure", w=310)
+    source("E03", 870, 1420)
+    note("opr", -620, 1600,
+         "**2020 / THE DEAL REVIEWED**\nDOJ’s OPR found poor judgment by Alexander Acosta over the deal and victim notification, "
+         "and criticized the treatment of victims. It did **not** find professional misconduct by DOJ attorneys. [E04]", "azure", w=330)
+    source("E04", -110, 1770)
+    note("death_review", 360, 1650,
+         "**2023 / CUSTODY FAILURES**\nThe Inspector General documented serious supervision and prison failures. "
+         "Its report records the medical examiner’s suicide finding for **10 Aug 2019**, and the FBI’s finding of no criminality in how Epstein died. [E06]", "azure", w=340)
+    source("E06", 850, 1950)
+    link("case_overview", "florida", "guilty plea", "azure", weight=2.6)
+    link("case_overview", "charges", "federal charges", "azure", weight=2.6)
+    link("florida", "charges", "later prosecution", "azure", weight=1.8)
+    link("charges", "dismissal", "case closed after death", "azure", arrow="forward", weight=1.8)
+    link("opr", "florida", "reviewed the deal", "azure", weight=1.8)
+    link("dismissal", "death_review", "custody review", "azure", weight=1.8)
+    for name, ref in [("florida", "E01"), ("charges", "E02"), ("dismissal", "E03"), ("opr", "E04"), ("death_review", "E06")]:
+        cites(name, ref)
 
-    # A compact relationship map provides actual person-to-person paths without
-    # routing long strings through the source-reading columns above.
-    note("relationships_heading", 0, 4300, "DOCUMENTED RELATIONSHIPS / SOURCE KEY ABOVE", "azure", 2450, "headline")
-    note("map_maxwell", 0, 4480,
-         "**GHISLAINE MAXWELL**\nConvicted for her role in the abuse scheme with Epstein.\nSource: [E05]", "teal")
-    note("map_epstein", 650, 4480,
-         "**JEFFREY EPSTEIN**\nThe criminal case and financial relationships have different evidentiary bases.\nSources: [E01–E05], [W01]", "red")
-    note("map_wexner", 1300, 4480,
-         "**LESLIE WEXNER**\nAcknowledged giving Epstein authority over personal finances. Denies knowledge of abuse.\nSources: [W01], [W02]", "amber")
-    connect("map_maxwell", "map_epstein", "convicted role [E05]", "teal")
-    connect("map_wexner", "map_epstein", "financial authority [W01]", "amber")
-    note("map_rockefeller", 2800, 4480, "**DAVID ROCKEFELLER**\nFounder of the Trilateral Commission.\nSource: [T01]", "teal")
-    note("map_commission", 3450, 4480, "**TRILATERAL COMMISSION**\nInstitutional history. The precise Epstein invitation remains unverified here.\nSource: [T01] / open lead above.")
-    connect("map_rockefeller", "map_commission", "founded [T01]", "teal")
-    note("map_schneerson", 4200, 4480, "**MENACHEM M. SCHNEERSON**\nSeventh rebbe of Chabad-Lubavitch.\nSources: [R01], [R04]", "violet")
-    note("map_chabad", 4850, 4480, "**CHABAD-LUBAVITCH**\nReligious movement and institutions; historical context.\nSource: [R02]", "violet")
-    connect("map_schneerson", "map_chabad", "led [R01, R04]", "violet")
+    # Upper right: the released records branch out from their official library.
+    heading("files_heading", 780, -1810, "FOLLOW THE FILES", 750)
+    note("library", 770, -1350,
+         "**THE OFFICIAL LIBRARY**\nDOJ and House disclosures, with the portal showing an update of **11 Sep 2026**. "
+         "Handwriting and other formats can defeat electronic search. A missing result is not proof of absence. [F01]", "teal", w=310)
+    source("F01", 1240, -1120)
+    note("first_release", 1790, -1570,
+         "**27 FEB 2025 / FIRST PHASE**\nEvidence list, flight logs and redacted lists. DOJ said much had previously leaked.\n"
+         "A contact entry or flight log alone does not establish participation in a crime. [F02]", w=310)
+    source("F02", 2160, -1210)
+    note("release_2026", 1700, -960,
+         "**30 JAN 2026 / EXPANDED RELEASE**\nDOJ announced over 3 million additional pages: nearly **3.5 million** in total. "
+         "Multiple cases and investigations contributed. DOJ cautions that public submissions can contain false material. [F03]", "teal", w=330)
+    source("F03", 1210, -730)
+    note("record_types", 2140, -680,
+         "READ THE RECORD\nJudgment: court outcome.\nIndictment: allegation.\nTestimony: a witness’s account.\nTip: may be unverified.\n"
+         "For a claim, keep the document ID, page and context.", w=285, style="typewriter", size=15)
+    cites("library", "F01")
+    cites("first_release", "F02")
+    cites("release_2026", "F03")
+    link("library", "first_release", "2025 release", "teal", weight=1.6)
+    link("first_release", "release_2026", "2026 expansion", "teal", weight=1.8)
+    link("release_2026", "record_types", color="graphite", style="dotted", weight=1.3)
+    link("library", "epstein", "investigation records", "teal", weight=2)
+    link("source_E05", "library", "Maxwell case records", "teal", weight=1.6)
 
-    # The original assets and card identities survive, while unsupported edges are
-    # replaced with explicit source relationships or labeled research questions.
-    assert original_ids <= cards.keys(), "An existing card was lost"
-    for z, card in enumerate(cards.values(), 1):
-        card["z"] = z
-    board.update(title="The Epstein Files — Case, Records & Chabad Context", modifiedAt=STAMP,
-                 viewport={"x": 2625, "y": 2050, "zoom": 0.13},
-                 cards=list(cards.values()), strings=strings)
+    # Separate context island: connections describe the actual religious history.
+    heading("terms_heading", 1450, -70, "SCHNEERSON & CHABAD", 920)
+    note("religion_boundary", 1450, 80,
+         "HISTORICAL CONTEXT\nThese sources do not establish involvement by Schneerson or Chabad in Epstein’s crimes.", w=860, style="typewriter", size=15)
+    picture("schneerson", 1760, 390, 250)
+    note("schneerson_bio", 1310, 390,
+         "**MENACHEM M. SCHNEERSON**\n**1902–1994** · The Lubavitcher Rebbe.\nSeventh leader of Chabad-Lubavitch; led the movement "
+         "from **1951 to 1994**. [R01, R04]", "violet", w=300, size=18)
+    source("R01", 2190, 320)
+    source("R04", 1230, 900)
+    note("messiah", 2160, 800,
+         "**THE MESSIAH BELIEF**\nSome followers identified Schneerson as the Messiah. Enzo Pace’s study says he did not "
+         "proclaim himself the Messiah and examines the belief’s persistence after his death.\nFollowers’ belief ≠ a self-declaration. [R03]", "violet", w=330)
+    source("R03", 2590, 1060)
+    picture("chabad_photo", 1700, 1150, 360)
+    note("chabad_history", 1320, 1430,
+         "**CHABAD-LUBAVITCH**\nA Hasidic movement founded by Shneur Zalman of Liadi in the late 18th century. "
+         "Its institutional account describes religious learning, education and social services. [R02]", "violet", w=310)
+    source("R02", 1660, 1750)
+    existing_web("chabad_wiki", 2200, 1380)
+    note("occult", 2180, 1860,
+         "**WHAT THE TEACHING SAYS**\nChabad describes ‘wisdom, understanding and knowledge’ as its intellectual framework and "
+         "discusses Jewish mysticism. This supplies religious context, not evidence of criminal conduct. [R02]", "violet", w=320)
+    note("terms", 2670, 1550,
+         "**UNSOURCED KEYWORDS**\nAstrology, alchemy, sacred geometry, reincarnation and possession were on the initial board. "
+         "The cited sources do not establish these as Epstein’s interests or Chabad practices. Each needs its own source.", "amber", w=300)
+    link("schneerson", "schneerson_bio", color="violet", weight=1.6)
+    cites("schneerson", "R01")
+    cites("schneerson_bio", "R04")
+    link("schneerson", "chabad_photo", "led the movement", "violet", weight=2.6)
+    link("messiah", "schneerson", "some followers’ belief", "violet", weight=1.8)
+    cites("messiah", "R03")
+    link("chabad_photo", "chabad_history", color="violet", weight=1.8)
+    link("chabad_photo", "chabad_wiki", color="graphite", weight=1.2)
+    cites("chabad_history", "R02")
+    cites("occult", "R02")
+    link("terms", "occult", "unsourced", "amber", "dashed", 1.5)
+
+    assert set(IDS.values()) <= {c["id"] for c in cards}, "An original card was lost"
+    board.update(title="The Epstein Files", modifiedAt=STAMP, theme="cork",
+                 viewport={"x": -340, "y": -720, "zoom": 0.36}, cards=cards, strings=strings)
     return board
 
 

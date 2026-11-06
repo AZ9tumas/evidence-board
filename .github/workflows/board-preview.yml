@@ -1,0 +1,54 @@
+name: Board preview
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["claude/**"]
+    paths:
+      - "boards/Jeffrey Epstein.evboard"
+      - ".github/workflows/board-preview.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - name: Build native app
+        run: |
+          xcodebuild build -project EvidenceBoard.xcodeproj -scheme EvidenceBoard \
+            -configuration Debug -destination 'platform=macOS' -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO -quiet
+      - name: Capture the board and close-ups
+        run: |
+          mkdir -p previews
+          app="$PWD/build/Build/Products/Debug/EvidenceBoard.app"
+          capture() {
+            name="$1"
+            jq --argjson x "$2" --argjson y "$3" --argjson zoom "$4" \
+              '.viewport = {x: $x, y: $y, zoom: $zoom}' \
+              "boards/Jeffrey Epstein.evboard" > "/tmp/$name.evboard"
+            open -n --env EB_SNAPSHOT_SCENARIO=none -a "$app" \
+              "/tmp/$name.evboard" --args -ApplePersistenceIgnoreState YES
+            sleep 9
+            pgrep -x EvidenceBoard >/dev/null
+            screencapture -x "previews/$name.png"
+            pkill -x EvidenceBoard || true
+            sleep 1
+          }
+          capture overview 250 200 0.14
+          capture people -430 -490 0.52
+          capture court -30 1190 0.45
+          capture chabad 2050 1080 0.42
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epstein-board-native-previews
+          path: previews/*.png
+          if-no-files-found: error
+          retention-days: 14
